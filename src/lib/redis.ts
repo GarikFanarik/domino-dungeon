@@ -29,11 +29,11 @@ class MemoryStore {
 
 let redisClient: Redis | MemoryStore;
 
-if (process.env.USE_MEMORY_STORE === 'true') {
+if (process.env.USE_MEMORY_STORE === 'true' || !process.env.REDIS_URL) {
   console.log('Using in-memory store (no Redis)');
   redisClient = new MemoryStore();
 } else {
-  const redisUrl = process.env.REDIS_URL ?? 'redis://localhost:6379';
+  const redisUrl = process.env.REDIS_URL;
   const client = new Redis(redisUrl, {
     lazyConnect: true,
     retryStrategy: (times) => Math.min(times * 50, 2000),

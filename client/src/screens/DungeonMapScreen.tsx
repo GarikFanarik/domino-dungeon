@@ -4,7 +4,12 @@ import type { Screen } from '../context/GameContext';
 import './DungeonMapScreen.css';
 
 const NODE_ICONS: Record<string, string> = {
-  combat: '⚔️', elite: '👹', boss: '💀', shop: '🏪', rest: '⛺', event: '❓',
+  combat: '/assets/map/nodes/combat.png',
+  elite:  '/assets/map/nodes/elite.png',
+  boss:   '/assets/map/nodes/boss.png',
+  shop:   '/assets/map/nodes/shop.png',
+  rest:   '/assets/map/nodes/rest.png',
+  event:  '/assets/map/nodes/event.png',
 };
 
 const NODE_LABELS: Record<string, string> = {
@@ -14,6 +19,12 @@ const NODE_LABELS: Record<string, string> = {
 const NODE_TO_SCREEN: Record<string, Screen> = {
   combat: 'combat', elite: 'combat', boss: 'combat',
   shop: 'shop', rest: 'rest', event: 'event',
+};
+
+const ACT_BACKGROUNDS: Record<number, string> = {
+  1: '/assets/map/background/act1.jpg',
+  2: '/assets/map/background/act2.jpg',
+  3: '/assets/map/background/act3.jpg',
 };
 
 interface MapNode {
@@ -33,7 +44,6 @@ interface PlayerState {
 
 interface Props { runId: string; }
 
-/** Maps node id → {x, y} pixel centre inside the .map-area div */
 function useNodePositions(nodes: MapNode[], containerRef: React.RefObject<HTMLDivElement | null>) {
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
 
@@ -70,6 +80,7 @@ export function DungeonMapScreen({ runId }: Props) {
   const { navigate } = useGame();
   const [nodes, setNodes] = useState<MapNode[]>([]);
   const [actNumber, setActNumber] = useState(1);
+  const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const positions = useNodePositions(nodes, containerRef);
@@ -80,6 +91,7 @@ export function DungeonMapScreen({ runId }: Props) {
       .then((data) => {
         setNodes(data.nodes || []);
         setActNumber(data.actNumber || 1);
+        setCurrentNodeId(data.currentNodeId ?? null);
       })
       .catch(() => {});
 
@@ -99,7 +111,17 @@ export function DungeonMapScreen({ runId }: Props) {
 
   const rows = Array.from(new Set(nodes.map((n) => n.row))).sort((a, b) => a - b);
 
-  // Build connection lines
+  if (!runId) {
+    return (
+      <div className="map-screen">
+        <div className="map-bg" />
+        <div className="map-content" style={{ alignItems: 'center', justifyContent: 'center', color: '#e8d8b0' }}>
+          <p>Error: no run ID. Please return to the menu and start a new run.</p>
+        </div>
+      </div>
+    );
+  }
+
   const lines: Array<{ x1: number; y1: number; x2: number; y2: number; key: string }> = [];
   nodes.forEach((node) => {
     node.connections.forEach((targetId) => {
@@ -111,17 +133,26 @@ export function DungeonMapScreen({ runId }: Props) {
     });
   });
 
-  function nodeStateClass(node: MapNode): string {
-    if (node.completed) return 'map-node--completed';
-    if (node.available) return 'map-node--available';
-    return 'map-node--unavailable';
+  function nodeClasses(node: MapNode): string {
+    const state = node.completed
+      ? 'map-node--completed'
+      : node.available
+        ? 'map-node--available'
+        : 'map-node--unavailable';
+    const current = node.id === currentNodeId ? ' map-node--current' : '';
+    return `map-node ${state} map-node-type--${node.type}${current}`;
   }
+
+  const bgUrl = ACT_BACKGROUNDS[actNumber] ?? ACT_BACKGROUNDS[1];
 
   return (
     <div className="map-screen">
-      <div className="map-bg" />
+      <div
+        className="map-bg"
+        data-act={actNumber}
+        style={{ backgroundImage: `url('${bgUrl}')` }}
+      />
       <div className="map-content">
-        {/* Top bar */}
         <div className="map-topbar">
           <h2 className="map-title">Act {actNumber} — The Dungeon</h2>
           {playerState && (
@@ -136,9 +167,7 @@ export function DungeonMapScreen({ runId }: Props) {
           )}
         </div>
 
-        {/* Map area */}
         <div className="map-area" ref={containerRef}>
-          {/* SVG connection lines — rendered behind nodes */}
           <svg className="map-svg" aria-hidden="true">
             {lines.map((ln) => (
               <line
@@ -163,13 +192,22 @@ export function DungeonMapScreen({ runId }: Props) {
                       key={node.id}
                       data-testid="map-node"
                       data-node-id={node.id}
-                      className={`map-node ${nodeStateClass(node)} map-node-type--${node.type}`}
+                      className={nodeClasses(node)}
                       onClick={() => handleNodeClick(node)}
                       disabled={!node.available}
-                      title={node.type}
+                      title={NODE_LABELS[node.type] ?? node.type}
                     >
-                      {NODE_ICONS[node.type] ?? '?'}
+                      {NODE_ICONS[node.type] && (
+                        <img
+                          src={NODE_ICONS[node.type]}
+                          alt={node.type}
+                          className="map-node-icon"
+                        />
+                      )}
                       <span className="map-node-label">{NODE_LABELS[node.type] ?? node.type}</span>
+                      {node.id === currentNodeId && (
+                        <span className="map-node-current-marker" aria-label="current position" />
+                      )}
                     </button>
                   ))}
               </div>

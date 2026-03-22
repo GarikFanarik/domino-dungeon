@@ -8,6 +8,7 @@ export function MenuScreen() {
   const { auth } = useDiscordSdk();
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Check for active run
@@ -21,6 +22,7 @@ export function MenuScreen() {
 
   async function handleStartRun() {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/run/start', {
         method: 'POST',
@@ -28,8 +30,14 @@ export function MenuScreen() {
         body: JSON.stringify({ discordUserId: auth?.userId || '' }),
       });
       const data = await res.json();
+      if (!res.ok || !data.runId) {
+        setError(data.error || 'Failed to start run');
+        return;
+      }
       setRunId(data.runId);
       navigate('dungeon-map');
+    } catch {
+      setError('Network error — please try again');
     } finally {
       setLoading(false);
     }
@@ -50,6 +58,7 @@ export function MenuScreen() {
         <p className="menu-subtitle">Dark Fantasy Roguelike</p>
         {auth && <p className="menu-welcome">Welcome, {auth.username}</p>}
 
+        {error && <p style={{ color: '#ff8888', fontSize: '0.8rem' }}>{error}</p>}
         <div className="menu-buttons">
           {activeRunId && (
             <button className="btn-menu btn-menu--resume" onClick={handleResumeRun}>
