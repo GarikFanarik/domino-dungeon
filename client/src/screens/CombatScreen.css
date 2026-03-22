@@ -146,13 +146,13 @@
   flex: 1;
   min-height: 260px;
   gap: 8px;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .sprite-container {
   display: flex;
   justify-content: center;
-  align-items: flex-end;
+  align-items: center;
   height: 100%;
 }
 
