@@ -428,6 +428,7 @@ export function CombatScreen({ runId }: Props) {
                 <DominoStone
                   key={stone.id}
                   stone={stone}
+                  horizontal
                   onClick={() => handleStoneClick(i)}
                   disabled={!isPlayerTurn || (!swapMode && !playable)}
                   selected={swapMode}
@@ -444,7 +445,7 @@ export function CombatScreen({ runId }: Props) {
                 {combat.bag.length === 0
                   ? <span className="combat-chain-empty">Bag is empty</span>
                   : combat.bag.map((stone, i) => (
-                      <DominoStone key={`bag-${stone.id}-${i}`} stone={stone} disabled />
+                      <DominoStone key={`bag-${stone.id}-${i}`} stone={stone} horizontal disabled />
                     ))
                 }
               </div>
