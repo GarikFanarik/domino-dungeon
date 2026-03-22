@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { GameProvider, useGame } from './context/GameContext';
 import { LoadingScreen } from './screens/LoadingScreen';
 import { MenuScreen } from './screens/MenuScreen';
@@ -9,6 +10,8 @@ import { EventScreen } from './screens/EventScreen';
 import { RelicSelectionScreen } from './screens/RelicSelectionScreen';
 import { RunSummaryScreen } from './screens/RunSummaryScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
+import { useViewportScale } from './hooks/useViewportScale';
+import './App.css';
 
 function AppRouter() {
   const { screen, runId } = useGame();
@@ -27,10 +30,29 @@ function AppRouter() {
   }
 }
 
+const DESIGN_W = 1920;
+const DESIGN_H = 1080;
+
 export default function App() {
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const scale = useViewportScale();
+  const offsetX = (window.innerWidth - DESIGN_W * scale) / 2;
+  const offsetY = (window.innerHeight - DESIGN_H * scale) / 2;
+
   return (
     <GameProvider>
-      <AppRouter />
+      <div
+        ref={canvasRef}
+        className="game-canvas"
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          left: `${offsetX}px`,
+          top: `${offsetY}px`,
+        }}
+      >
+        <AppRouter />
+      </div>
     </GameProvider>
   );
 }

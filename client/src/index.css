@@ -7,11 +7,19 @@ body,
   height: 100%;
   overflow: hidden;
   background: #000;
-  font-family: 'Segoe UI', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, p {
   margin: 0;
+}
+
+.game-canvas {
+  position: absolute;
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  will-change: transform;
+  background: #0c0a08;
 }

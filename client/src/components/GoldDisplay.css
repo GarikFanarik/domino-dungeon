@@ -1,9 +1,9 @@
 .gold-display {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 8px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 28px;
   color: var(--gold);
 }
 

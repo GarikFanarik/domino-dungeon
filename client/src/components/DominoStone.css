@@ -1,4 +1,3 @@
-/* Screen-reader only label */
 .domino-sr-label {
   position: absolute;
   width: 1px; height: 1px;
@@ -10,10 +9,10 @@
 .domino-tile {
   display: flex;
   flex-direction: column;
-  width: 54px;
+  width: 108px;
   background: linear-gradient(145deg, #c8aa7e 0%, #a08055 30%, #6e4e2a 60%, #9a7848 85%, #c2a070 100%);
-  border-radius: 10px;
-  padding: 4px;
+  border-radius: 16px;
+  padding: 8px;
   gap: 2px;
   box-shadow:
     inset 0 1px 0 rgba(255, 220, 140, 0.45),
@@ -48,7 +47,6 @@
   cursor: not-allowed;
 }
 
-/* Element border tints */
 .domino-tile--fire    { box-shadow: inset 0 1px 0 rgba(255,220,140,0.45), 0 6px 18px rgba(0,0,0,0.85), 0 0 12px rgba(239,68,68,0.4); }
 .domino-tile--ice     { box-shadow: inset 0 1px 0 rgba(255,220,140,0.45), 0 6px 18px rgba(0,0,0,0.85), 0 0 12px rgba(56,189,248,0.4); }
 .domino-tile--lightning { box-shadow: inset 0 1px 0 rgba(255,220,140,0.45), 0 6px 18px rgba(0,0,0,0.85), 0 0 12px rgba(250,204,21,0.5); }
@@ -63,7 +61,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  padding: 6px;
+  padding: 12px;
   gap: 2px;
   box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.95), inset 0 0 2px rgba(0, 0, 0, 0.7);
   position: relative;
@@ -85,13 +83,12 @@
   visibility: hidden;
 }
 
-/* Element icon badge */
 .domino-element-badge {
   position: absolute;
-  bottom: -6px;
-  right: -6px;
-  width: 20px;
-  height: 20px;
+  bottom: -10px;
+  right: -10px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1px solid rgba(0,0,0,0.5);
   object-fit: contain;
@@ -100,9 +97,8 @@
   box-shadow: 0 2px 6px rgba(0,0,0,0.8);
 }
 
-/* Placed tile in chain (smaller, no hover) */
 .domino-tile--placed {
-  width: 40px;
+  width: 80px;
   cursor: default;
   transform: none !important;
 }
@@ -114,16 +110,15 @@
     0 6px 18px rgba(0, 0, 0, 0.85);
 }
 
-/* Horizontal orientation (chain display) */
 .domino-tile--horizontal {
   flex-direction: row;
   width: auto;
-  height: 40px;
+  height: 80px;
 }
 
 .domino-tile--horizontal.domino-tile--placed {
   width: auto;
-  height: 36px;
+  height: 72px;
 }
 
 .domino-tile--horizontal .domino-half {

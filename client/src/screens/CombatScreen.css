@@ -1,4 +1,3 @@
-/* ── Full-screen overlay ─────────────────────────────────────────────── */
 .combat-screen {
   position: absolute;
   inset: 0;
@@ -25,18 +24,17 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 12px 16px 8px;
-  gap: 8px;
+  padding: 24px 32px 16px;
+  gap: 16px;
 }
 
-/* ── Phase banner ────────────────────────────────────────────────────── */
 .combat-phase {
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  padding: 3px 14px;
+  padding: 8px 28px;
   border-radius: 3px;
   align-self: center;
   border: 1px solid;
@@ -58,7 +56,6 @@
   50%      { opacity: 0.65; }
 }
 
-/* ── Top row: enemy info | player info ───────────────────────────────── */
 .combat-hud {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -69,12 +66,12 @@
   background: rgba(8, 6, 4, 0.72);
   border: 1px solid rgba(120, 90, 50, 0.45);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 20px 24px;
   backdrop-filter: blur(4px);
 }
 
 .hud-name {
-  font-size: 0.85rem;
+  font-size: 30px;
   font-weight: 700;
   color: #e8d8b0;
   letter-spacing: 0.05em;
@@ -82,11 +79,10 @@
   text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
 
-/* HP bar */
 .hud-hp-track {
-  height: 12px;
+  height: 24px;
   background: rgba(10,8,5,0.9);
-  border-radius: 3px;
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(80,55,25,0.5);
   box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
@@ -97,15 +93,14 @@
   background: linear-gradient(to right, #aa0000, #ee3333);
   box-shadow: 0 0 8px rgba(220,0,0,0.5);
   transition: width 0.5s ease;
-  border-radius: 3px;
+  border-radius: 12px;
 }
 .hud-hp-label {
-  font-size: 0.68rem;
+  font-size: 20px;
   color: #a08060;
   letter-spacing: 0.04em;
 }
 
-/* Status effects */
 .hud-status {
   display: flex;
   gap: 5px;
@@ -120,13 +115,13 @@
   border: 1px solid rgba(120,90,50,0.35);
   border-radius: 3px;
   padding: 1px 5px;
-  font-size: 0.65rem;
+  font-size: 18px;
   font-weight: 700;
   color: #ddd;
 }
 .status-badge img {
-  width: 12px;
-  height: 12px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 .status-badge--burn   { border-color: rgba(239,68,68,0.5);   color: #ff8888; }
@@ -135,18 +130,16 @@
 .status-badge--stun   { border-color: rgba(250,204,21,0.5);  color: #ffdd66; }
 .status-badge--poison { border-color: rgba(74,222,128,0.5);  color: #88ffaa; }
 
-/* Player stats row */
 .hud-stats {
   display: flex;
   gap: 8px;
   margin-top: 5px;
-  font-size: 0.68rem;
+  font-size: 20px;
   color: #a08060;
 }
 .hud-stat { display: flex; align-items: center; gap: 3px; }
 .hud-stat-val { color: #e8d8b0; font-weight: 700; }
 
-/* ── Battlefield ─────────────────────────────────────────────────────── */
 .combat-battlefield {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -203,7 +196,6 @@
   100% { filter: drop-shadow(0 8px 20px rgba(0,0,0,0.9)) brightness(1); }
 }
 
-/* ── Chain ───────────────────────────────────────────────────────────── */
 .combat-chain-wrap {
   background: rgba(6, 5, 3, 0.7);
   border: 1px solid rgba(120, 90, 50, 0.35);
@@ -212,7 +204,7 @@
   backdrop-filter: blur(3px);
 }
 .combat-chain-label {
-  font-size: 0.62rem;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -224,7 +216,7 @@
 }
 
 .chain-damage-preview {
-  font-size: 0.72rem;
+  font-size: 22px;
   font-weight: 700;
   color: #ff9944;
   letter-spacing: 0.06em;
@@ -233,13 +225,12 @@
 }
 .combat-chain-tiles {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   flex-wrap: wrap;
   align-items: center;
-  min-height: 50px;
+  min-height: 80px;
 }
 
-/* chain stones are clickable to unplay */
 .combat-chain-tiles .domino-tile:not(.domino-tile--disabled) {
   cursor: pointer;
   transition: opacity 0.15s, filter 0.15s;
@@ -249,7 +240,7 @@
   opacity: 0.85;
 }
 .combat-chain-empty {
-  font-size: 0.75rem;
+  font-size: 24px;
   color: #4a3a25;
   font-style: italic;
 }
@@ -261,16 +252,15 @@
   flex-shrink: 0;
 }
 
-/* ── Hand ────────────────────────────────────────────────────────────── */
 .combat-hand-wrap {
   background: rgba(6, 5, 3, 0.75);
   border: 1px solid rgba(120, 90, 50, 0.4);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 16px 20px;
   backdrop-filter: blur(3px);
 }
 .combat-hand-label {
-  font-size: 0.62rem;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -290,11 +280,11 @@
   background: rgba(20, 14, 6, 0.8);
   border: 1px solid rgba(120, 90, 50, 0.5);
   color: #c8a060;
-  font-size: 0.6rem;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  padding: 3px 8px;
+  padding: 8px 16px;
   border-radius: 3px;
   cursor: pointer;
   font-family: inherit;
@@ -319,7 +309,6 @@
   justify-content: center;
 }
 
-/* ── Actions bar ─────────────────────────────────────────────────────── */
 .combat-actions {
   display: flex;
   align-items: center;
@@ -327,14 +316,15 @@
   padding: 4px 0 2px;
 }
 .combat-message {
-  font-size: 0.78rem;
+  font-size: 26px;
   color: #ff8888;
   font-style: italic;
   text-shadow: 0 0 8px rgba(255,0,0,0.4);
   flex: 1;
+  padding: 12px 24px;
 }
 .combat-turn-info {
-  font-size: 0.7rem;
+  font-size: 22px;
   color: #5a4a30;
   letter-spacing: 0.08em;
 }
@@ -343,11 +333,11 @@
   background: linear-gradient(145deg, #3a1010 0%, #5c1c1c 50%, #3a1010 100%);
   border: 1px solid #7a3030;
   color: #ffcc88;
-  font-size: 0.9rem;
+  font-size: 34px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 10px 28px;
+  padding: 20px 56px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
@@ -370,7 +360,6 @@
   cursor: not-allowed;
 }
 
-/* ── Bag viewer ──────────────────────────────────────────────────────── */
 .bag-viewer {
   margin-top: 8px;
   padding: 6px 8px;
@@ -380,7 +369,7 @@
 }
 
 .bag-viewer-label {
-  font-size: 0.58rem;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -398,7 +387,6 @@
   padding-right: 2px;
 }
 
-/* ── Loading ─────────────────────────────────────────────────────────── */
 .combat-loading {
   position: absolute;
   inset: 0;
@@ -407,7 +395,7 @@
   justify-content: center;
   background: rgba(6, 4, 2, 0.95);
   color: #a08060;
-  font-size: 1rem;
+  font-size: 38px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   z-index: 20;

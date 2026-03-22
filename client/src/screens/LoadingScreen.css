@@ -3,17 +3,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  gap: 2rem;
+  height: 100%;
+  gap: 60px;
   background: var(--bg-primary);
-  padding: 2rem;
+  padding: 60px;
 }
 
-/* Title */
 .loading-title {
-  font-size: 1.6rem;
+  font-size: 60px;
   font-weight: 900;
-  letter-spacing: 0.2em;
+  letter-spacing: 8px;
   color: #e8d8b0;
   text-shadow:
     0 0 20px rgba(200, 160, 40, 0.6),
@@ -28,19 +27,18 @@
   50%       { text-shadow: 0 0 30px rgba(220, 180, 60, 0.9), 0 0 60px rgba(200, 140, 0, 0.5); }
 }
 
-/* Domino tile row */
 .loading-tiles {
   display: flex;
-  gap: 0.5rem;
+  gap: 16px;
   align-items: center;
 }
 
 .loading-tile {
-  width: 44px;
-  height: 44px;
+  width: 88px;
+  height: 88px;
   background: linear-gradient(145deg, #3a2a14, #241a0c);
   border: 2px solid rgba(180, 130, 40, 0.6);
-  border-radius: 6px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,7 +58,7 @@
 }
 
 .loading-tile-pips {
-  font-size: 0.7rem;
+  font-size: 22px;
   font-weight: 700;
   color: #e8d8b0;
   letter-spacing: 0.05em;
@@ -74,10 +72,9 @@
   transform: none;
 }
 
-/* Message */
 .loading-message {
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 30px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   animation: message-fade 1.5s ease-in-out infinite;
@@ -88,20 +85,19 @@
   50%       { opacity: 1; }
 }
 
-/* Error state */
 .loading-screen--error .loading-title {
   text-shadow: 0 0 20px rgba(200, 60, 60, 0.6);
 }
 
 .loading-error {
   color: var(--fire);
-  font-size: 0.9rem;
+  font-size: 34px;
   text-align: center;
 }
 
 .loading-retry {
   margin-top: 0.5rem;
-  padding: 0.6rem 2rem;
-  font-size: 0.95rem;
+  padding: 16px 48px;
+  font-size: 36px;
   letter-spacing: 0.08em;
 }
