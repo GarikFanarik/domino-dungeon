@@ -1,0 +1,107 @@
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 2rem;
+  background: var(--bg-primary);
+  padding: 2rem;
+}
+
+/* Title */
+.loading-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: #e8d8b0;
+  text-shadow:
+    0 0 20px rgba(200, 160, 40, 0.6),
+    0 0 40px rgba(200, 140, 0, 0.3);
+  text-transform: uppercase;
+  margin: 0;
+  animation: title-glow 3s ease-in-out infinite;
+}
+
+@keyframes title-glow {
+  0%, 100% { text-shadow: 0 0 20px rgba(200, 160, 40, 0.6), 0 0 40px rgba(200, 140, 0, 0.3); }
+  50%       { text-shadow: 0 0 30px rgba(220, 180, 60, 0.9), 0 0 60px rgba(200, 140, 0, 0.5); }
+}
+
+/* Domino tile row */
+.loading-tiles {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.loading-tile {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(145deg, #3a2a14, #241a0c);
+  border: 2px solid rgba(180, 130, 40, 0.6);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: tile-drop-in 0.4s ease-out forwards;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 200, 80, 0.1);
+}
+
+@keyframes tile-drop-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.loading-tile-pips {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #e8d8b0;
+  letter-spacing: 0.05em;
+}
+
+.loading-tile--facedown {
+  background: linear-gradient(145deg, #1a1a1a, #111);
+  border-color: rgba(80, 80, 80, 0.4);
+  opacity: 0.4;
+  animation: none;
+  transform: none;
+}
+
+/* Message */
+.loading-message {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  animation: message-fade 1.5s ease-in-out infinite;
+}
+
+@keyframes message-fade {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+/* Error state */
+.loading-screen--error .loading-title {
+  text-shadow: 0 0 20px rgba(200, 60, 60, 0.6);
+}
+
+.loading-error {
+  color: var(--fire);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.loading-retry {
+  margin-top: 0.5rem;
+  padding: 0.6rem 2rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+}

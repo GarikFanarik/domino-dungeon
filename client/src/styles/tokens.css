@@ -108,8 +108,12 @@ h1, h2 { margin-bottom: 0.75rem; }
   height: 100%;
   background: var(--hp-bar);
   border-radius: 6px;
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, background 0.3s ease;
 }
+
+.hp-bar-fill--high { background: #4ade80; }
+.hp-bar-fill--mid  { background: #facc15; }
+.hp-bar-fill--low  { background: #ef4444; }
 
 /* Cards */
 .card {

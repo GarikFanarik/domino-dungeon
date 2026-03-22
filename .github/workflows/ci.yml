@@ -56,15 +56,27 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/domino_test
 
-      - name: Run server/game tests
-        run: npm test
+      - name: Run server/game tests with coverage
+        run: npm test -- --coverage --coverageDirectory=coverage/server
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/domino_test
           REDIS_URL: redis://localhost:6379
           NODE_ENV: test
 
-      - name: Run client tests
-        run: npm test --prefix client
+      - name: Run client tests with coverage
+        run: npm test --prefix client -- --coverage --coverageDirectory=../coverage/client
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+
+      - name: Build server (TypeScript)
+        run: npx tsc --noEmit
+        env:
+          NODE_ENV: production
 
       - name: Build client
         run: npm run build --prefix client

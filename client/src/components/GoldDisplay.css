@@ -1,0 +1,27 @@
+.gold-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--gold);
+}
+
+.gold-icon {
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.gold-amount {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes gold-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.gold-display--pulse {
+  animation: gold-pulse 0.4s ease-out;
+}

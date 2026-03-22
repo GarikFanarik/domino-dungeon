@@ -1,0 +1,44 @@
+.relic-icon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  background: var(--bg-surface);
+  min-width: 4rem;
+  text-align: center;
+  cursor: default;
+}
+
+.relic-icon__symbol {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.relic-icon__name {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.relic-icon__rarity {
+  font-size: 0.6rem;
+  text-transform: capitalize;
+  letter-spacing: 0.03em;
+}
+
+/* Rarity colour variants */
+.relic-icon--common   { border-color: var(--neutral); }
+.relic-icon--common   .relic-icon__rarity { color: var(--neutral); }
+
+.relic-icon--rare     { border-color: var(--armor); }
+.relic-icon--rare     .relic-icon__rarity { color: var(--armor); }
+
+.relic-icon--epic     { border-color: var(--earth); }
+.relic-icon--epic     .relic-icon__rarity { color: var(--earth); }
+
+.relic-icon--legendary { border-color: var(--gold); }
+.relic-icon--legendary .relic-icon__rarity { color: var(--gold); }
