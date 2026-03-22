@@ -74,6 +74,12 @@
   color: #ffd066;
 }
 
+.map-stat-element-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
 .map-area {
   flex: 1;
   position: relative;

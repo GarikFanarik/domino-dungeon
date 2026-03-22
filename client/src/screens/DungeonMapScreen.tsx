@@ -3,6 +3,14 @@ import { useGame } from '../context/GameContext';
 import type { Screen } from '../context/GameContext';
 import './DungeonMapScreen.css';
 
+const ELEMENT_ICONS: Record<string, string> = {
+  fire:      '/assets/elements/fire/flamer.png',
+  ice:       '/assets/elements/ice/snowflake-2.png',
+  lightning: '/assets/elements/lightning/focused-lightning.png',
+  poison:    '/assets/elements/poison/skull-with-syringe.png',
+  earth:     '/assets/elements/earth/rock.png',
+};
+
 const NODE_ICONS: Record<string, string> = {
   combat: '/assets/map/nodes/combat.png',
   elite:  '/assets/map/nodes/elite.png',
@@ -176,11 +184,14 @@ export function DungeonMapScreen({ runId }: Props) {
               </span>
               {elementCounts && (
                 <>
-                  {elementCounts.fire > 0 && <span className="map-stat">🔥<span className="map-stat-val">{elementCounts.fire}</span></span>}
-                  {elementCounts.ice > 0 && <span className="map-stat">❄️<span className="map-stat-val">{elementCounts.ice}</span></span>}
-                  {elementCounts.lightning > 0 && <span className="map-stat">⚡<span className="map-stat-val">{elementCounts.lightning}</span></span>}
-                  {elementCounts.poison > 0 && <span className="map-stat">☠️<span className="map-stat-val">{elementCounts.poison}</span></span>}
-                  {elementCounts.earth > 0 && <span className="map-stat">🪨<span className="map-stat-val">{elementCounts.earth}</span></span>}
+                  {(Object.keys(ELEMENT_ICONS) as Array<keyof typeof elementCounts>).map((el) =>
+                    elementCounts[el] > 0 ? (
+                      <span key={el} className="map-stat map-stat--element">
+                        <img src={ELEMENT_ICONS[el as string]} alt={el as string} className="map-stat-element-icon" />
+                        <span className="map-stat-val">{elementCounts[el]}</span>
+                      </span>
+                    ) : null
+                  )}
                 </>
               )}
             </div>
