@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { useDiscordSdk, type DiscordAuth } from '../hooks/useDiscordSdk';
 
 export type Screen =
   | 'loading'
@@ -17,6 +18,9 @@ interface GameContextValue {
   navigate: (screen: Screen) => void;
   runId: string | null;
   setRunId: (id: string | null) => void;
+  auth: DiscordAuth | null;
+  discordReady: boolean;
+  discordError: string | null;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -24,9 +28,10 @@ const GameContext = createContext<GameContextValue | null>(null);
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [screen, setScreen] = useState<Screen>('loading');
   const [runId, setRunId] = useState<string | null>(null);
+  const { ready: discordReady, auth, error: discordError } = useDiscordSdk();
 
   return (
-    <GameContext.Provider value={{ screen, navigate: setScreen, runId, setRunId }}>
+    <GameContext.Provider value={{ screen, navigate: setScreen, runId, setRunId, auth, discordReady, discordError }}>
       {children}
     </GameContext.Provider>
   );

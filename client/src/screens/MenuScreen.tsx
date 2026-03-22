@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
-import { useDiscordSdk } from '../hooks/useDiscordSdk';
 import './MenuScreen.css';
 
 export function MenuScreen() {
-  const { navigate, setRunId } = useGame();
-  const { auth } = useDiscordSdk();
+  const { navigate, setRunId, auth } = useGame();
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
