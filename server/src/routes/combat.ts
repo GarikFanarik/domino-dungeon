@@ -349,11 +349,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     session.turnNumber += 1;
     session.swapsUsed = 0;
 
-    try {
-      await saveCombatSession(session);
-    } catch {
-      // non-fatal in tests
-    }
+    let goldEarned = 0;
 
     // Sync player state back to run
     try {
@@ -361,19 +357,43 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
       if (runState) {
         const node = runState.map.find(n => n.id === runState.currentNodeId);
         if (node) node.completed = true;
+
+        // Award gold based on node type
+        const nodeType = node?.type;
+        if (nodeType === 'boss') goldEarned = 40 + Math.floor(Math.random() * 11); // 40-50g
+        else if (nodeType === 'elite') goldEarned = 20 + Math.floor(Math.random() * 6); // 20-25g
+        else goldEarned = 10 + Math.floor(Math.random() * 6); // 10-15g
+
+        // TravelerBoots relic: +5g for elite/boss
+        const relics = session.relics ?? [];
+        if (relics.includes('travelers-boots') && (nodeType === 'elite' || nodeType === 'boss')) {
+          goldEarned += 5;
+        }
+
+        const currentGold = session.playerGold ?? 0;
+        session.playerGold = currentGold + goldEarned;
+        playerState.gold = session.playerGold;
+
         runState.playerState.hp.current = session.playerHp ?? runState.playerState.hp.current;
         runState.playerState.armor = session.playerArmor ?? runState.playerState.armor;
-        runState.playerState.gold = session.playerGold ?? runState.playerState.gold;
+        runState.playerState.gold = session.playerGold;
         await saveRunState(session.runId, runState);
       }
     } catch {
       // non-fatal
     }
 
+    try {
+      await saveCombatSession(session);
+    } catch {
+      // non-fatal in tests
+    }
+
     const response: EndTurnResponse = {
       playerState,
       enemy,
       combatResult: 'player-won',
+      goldEarned,
     };
     res.json(response);
     return;

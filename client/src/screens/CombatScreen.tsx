@@ -230,7 +230,8 @@ export function CombatScreen({ runId }: Props) {
       const data = await res.json();
 
       if (data.combatResult === 'player-won') {
-        navigate('relic-selection');
+        if (data.goldEarned > 0) setMessage(`Victory! +${data.goldEarned}g`);
+        setTimeout(() => navigate('relic-selection'), data.goldEarned > 0 ? 1200 : 0);
       } else if (data.combatResult === 'player-died') {
         navigate('run-summary');
       } else {

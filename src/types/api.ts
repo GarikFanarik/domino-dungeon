@@ -55,6 +55,7 @@ export interface EndTurnResponse {
   combatResult: 'ongoing' | 'player-won' | 'player-died';
   enemyAttack?: { damage: number; effects: string[] };
   hand?: Stone[];
+  goldEarned?: number;
 }
 
 export interface MapNode {
