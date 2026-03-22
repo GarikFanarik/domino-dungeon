@@ -9,6 +9,7 @@ interface ShopItem {
   description: string;
   cost: number;
   sold: boolean;
+  element: string | null;
 }
 
 interface ShopState {
@@ -72,6 +73,11 @@ export function ShopScreen({ runId }: Props) {
             <div key={item.id} className={`shop-item-card${item.sold ? ' shop-item-card--sold' : ''}`}>
               <div className={`shop-item-name${item.sold ? ' shop-item-name--sold' : ''}`}>
                 {item.name}
+                {item.type === 'stone' && item.element && (
+                  <span className={`shop-element-badge shop-element-badge--${item.element.toLowerCase()}`}>
+                    {item.element}
+                  </span>
+                )}
               </div>
               <div className="shop-item-desc">{item.description}</div>
               <div className="shop-item-footer">

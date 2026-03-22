@@ -192,6 +192,26 @@
   background: rgba(30, 20, 8, 0.75);
 }
 
+.shop-element-badge {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 10px;
+  border-radius: 3px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid currentColor;
+}
+
+.shop-element-badge--fire { color: #ff6b35; }
+.shop-element-badge--ice { color: #64d8ff; }
+.shop-element-badge--lightning { color: #ffd700; }
+.shop-element-badge--poison { color: #7cfc00; }
+.shop-element-badge--earth { color: #c8a96e; }
+
 .shop-loading {
   position: absolute;
   inset: 0;

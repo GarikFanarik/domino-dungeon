@@ -31,6 +31,7 @@ type RunState = {
   playerState: ReturnType<typeof defaultPlayerState>;
   map: DungeonNode[];
   currentNodeId: string | null;
+  stones?: GameStone[];
 };
 
 async function getRunState(runId: string): Promise<RunState | null> {

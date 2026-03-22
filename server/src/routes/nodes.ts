@@ -7,6 +7,9 @@ import { generateRelicOffer, pickRelic } from '../../../src/dungeon/relic-offer'
 import { startRun } from '../../../src/dungeon/run';
 import { defaultPlayerState } from '../../../src/game/models/player-state';
 import type { DungeonNode } from '../../../src/dungeon/node-types';
+import { Bag } from '../../../src/game/bag';
+import { createElementalStone } from '../../../src/game/models/stone';
+import type { Stone } from '../../../src/game/models/stone';
 
 const router = Router();
 
@@ -22,6 +25,7 @@ type RunState = {
   map: DungeonNode[];
   currentNodeId: string | null;
   shopSoldIds?: string[];
+  stones?: Stone[];
 };
 
 async function getRunState(runId: string): Promise<RunState | null> {
@@ -41,9 +45,9 @@ async function saveRunState(runId: string, state: RunState): Promise<void> {
 
 // ── Shop ──────────────────────────────────────────────────────────────────────
 
-function nameFor(type: string): string {
+function nameFor(type: string, element?: string): string {
   switch (type) {
-    case 'stone': return 'Elemental Stone';
+    case 'stone': return element ? `${element.charAt(0).toUpperCase() + element.slice(1)} Stone` : 'Elemental Stone';
     case 'relic': return 'Mystery Relic';
     case 'potion': return 'Health Potion';
     case 'removal': return 'Stone Removal';
@@ -51,9 +55,9 @@ function nameFor(type: string): string {
   }
 }
 
-function descFor(type: string): string {
+function descFor(type: string, element?: string): string {
   switch (type) {
-    case 'stone': return 'Add a stone to your bag';
+    case 'stone': return element ? `Add a ${element} elemental stone to your bag` : 'Add a stone to your bag';
     case 'relic': return 'A powerful artifact';
     case 'potion': return 'Restore 30 HP';
     case 'removal': return 'Remove a stone from your bag';
@@ -74,14 +78,18 @@ router.get('/:runId/shop', async (req: Request, res: Response) => {
   const shopSoldIds = state.shopSoldIds || [];
 
   res.json({
-    items: items.map(item => ({
-      id: item.id,
-      type: item.type,
-      name: nameFor(item.type),
-      description: descFor(item.type),
-      cost: item.price,
-      sold: shopSoldIds.includes(item.id),
-    })),
+    items: items.map(item => {
+      const element = (item.payload as any)?.element ?? null;
+      return {
+        id: item.id,
+        type: item.type,
+        name: nameFor(item.type, element ?? undefined),
+        description: descFor(item.type, element ?? undefined),
+        cost: item.price,
+        sold: shopSoldIds.includes(item.id),
+        element,
+      };
+    }),
     playerGold: state.run.gold ?? state.playerState?.gold ?? 0,
   });
 });
@@ -110,6 +118,18 @@ router.post('/:runId/shop/buy', async (req: Request, res: Response) => {
   if (!result.success) {
     res.status(400).json({ error: result.reason });
     return;
+  }
+
+  if (result.item && result.item.type === 'stone') {
+    const element = (result.item.payload as any)?.element;
+    if (element) {
+      const newStone = createElementalStone(element);
+      if (!state.stones) {
+        const defaultBag = new Bag();
+        state.stones = [...defaultBag.stones];
+      }
+      state.stones.push(newStone);
+    }
   }
 
   state.shopSoldIds = [...shopSoldIds, itemId];

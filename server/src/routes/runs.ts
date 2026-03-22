@@ -11,6 +11,7 @@ import { NodeType, type DungeonNode } from '../../../src/dungeon/node-types';
 import { RelicType, applyCrackedShield } from '../../../src/game/relics/common';
 import { applyBloodPact } from '../../../src/game/relics/legendary';
 import { applyPoisonTome } from '../../../src/game/relics/epic';
+import type { Stone } from '../../../src/game/models/stone';
 
 const router = Router();
 
@@ -79,11 +80,16 @@ router.post('/start', async (req: Request, res: Response) => {
   const firstNode = map.find((n) => n.row === 0) ?? map[0];
   const currentNodeId = firstNode?.id ?? null;
 
+  const defaultBag = new Bag();
+  defaultBag.shuffle();
+  const initialStones = [...defaultBag.stones];
+
   const runState = {
     run,
     playerState,
     map,
     currentNodeId,
+    stones: initialStones,
   };
 
   await redis.set(runKey(run.id), JSON.stringify(runState), 'EX', RUN_TTL);
@@ -258,6 +264,7 @@ router.post('/:runId/travel/:nodeId', async (req: Request, res: Response) => {
     playerState: ReturnType<typeof defaultPlayerState>;
     map: DungeonNode[];
     currentNodeId: string | null;
+    stones?: Stone[];
   };
 
   const node = state.map.find((n) => n.id === nodeId);
@@ -276,7 +283,8 @@ router.post('/:runId/travel/:nodeId', async (req: Request, res: Response) => {
     const enemyName = pickEnemyName(node.type, nodeId, state.run.currentAct);
     const enemyHp = pickEnemyHp(node.type, state.run.currentAct);
 
-    const bag = new Bag();
+    const persistedStones = state.stones ? [...state.stones] : (() => { const b = new Bag(); b.shuffle(); return [...b.stones]; })();
+    const bag = new Bag(persistedStones);
     bag.shuffle();
     const hand = bag.draw(7);
 

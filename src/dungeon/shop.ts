@@ -2,6 +2,7 @@ import seedrandom from 'seedrandom';
 import { Run } from './run';
 import { spendGold } from './gold';
 import { ShopItem } from './node-types';
+import { ElementType } from '../game/models/stone';
 
 export interface ShopState {
   items: ShopItem[];
@@ -17,11 +18,13 @@ export interface BuyResult {
 export function generateShopInventory(act: number, seed: string): ShopItem[] {
   const rng = seedrandom(seed);
   const items: ShopItem[] = [];
+  const elements = [ElementType.Fire, ElementType.Ice, ElementType.Lightning, ElementType.Poison, ElementType.Earth];
 
-  // 3 stones (50-80g)
+  // 3 stones (60-90g)
   for (let i = 0; i < 3; i++) {
-    const price = Math.floor(rng() * 31) + 50;
-    items.push({ id: `shop-stone-${act}-${i}-${seed}`, type: 'stone', price, payload: null });
+    const price = Math.floor(rng() * 31) + 60;
+    const element = elements[Math.floor(rng() * elements.length)];
+    items.push({ id: `shop-stone-${act}-${i}-${seed}`, type: 'stone', price, payload: { element } });
   }
 
   // 1 relic (100-150g)
