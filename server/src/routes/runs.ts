@@ -8,6 +8,9 @@ import { Bag } from '../../../src/game/bag';
 import { createCombatSession, CombatSession } from '../../../src/session/combat-session';
 import type { StartRunResponse, RunStateResponse, MapNode } from '../../../src/types/api';
 import { NodeType, type DungeonNode } from '../../../src/dungeon/node-types';
+import { RelicType, applyCrackedShield } from '../../../src/game/relics/common';
+import { applyBloodPact } from '../../../src/game/relics/legendary';
+import { applyPoisonTome } from '../../../src/game/relics/epic';
 
 const router = Router();
 
@@ -277,23 +280,46 @@ router.post('/:runId/travel/:nodeId', async (req: Request, res: Response) => {
     bag.shuffle();
     const hand = bag.draw(7);
 
+    const relics: string[] = state.run.relics ?? [];
+    const enemyStatus = { burn: 0, slow: 0, frozen: false, stunned: false, poison: 0 };
+    let playerArmor = state.playerState.armor;
+    let playerHp = state.playerState.hp.current;
+    let swapsPerTurn = 1;
+
+    // Apply on-combat-start relic effects
+    if (relics.includes(RelicType.CrackedShield)) {
+      applyCrackedShield(state.playerState, 20);
+      playerArmor = state.playerState.armor;
+    }
+    if (relics.includes(RelicType.BloodPact)) {
+      const hpObj = { current: playerHp, max: state.playerState.hp.max };
+      const swapsObj = { perTurn: swapsPerTurn };
+      applyBloodPact(hpObj, swapsObj);
+      playerHp = hpObj.current;
+      swapsPerTurn = swapsObj.perTurn;
+    }
+    if (relics.includes(RelicType.PoisonTome)) {
+      applyPoisonTome({ status: enemyStatus } as any);
+    }
+
     const session: CombatSession = {
       userId: runId,
       runId,
       enemyId: enemyName,
       enemyHp,
       enemyMaxHp: enemyHp,
-      enemyStatus: { burn: 0, slow: 0, frozen: false, stunned: false, poison: 0 },
+      enemyStatus,
       hand,
       bag: bag.stones,
       chain: { stones: [], leftOpen: null, rightOpen: null },
       turnNumber: 1,
       swapsUsed: 0,
-      swapsPerTurn: 1,
-      playerHp: state.playerState.hp.current,
+      swapsPerTurn,
+      playerHp,
       playerMaxHp: state.playerState.hp.max,
-      playerArmor: state.playerState.armor,
+      playerArmor,
       playerGold: state.playerState.gold,
+      relics,
     };
 
     try {

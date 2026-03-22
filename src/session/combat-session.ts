@@ -40,6 +40,7 @@ export interface CombatSession {
   playerMaxHp?: number;
   playerArmor?: number;
   playerGold?: number;
+  relics?: string[];
 }
 
 const SESSION_TTL = 86400; // 24 hours in seconds
