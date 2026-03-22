@@ -18,6 +18,7 @@ router.post('/token', async (req, res) => {
         client_secret: process.env.DISCORD_CLIENT_SECRET || '',
         grant_type: 'authorization_code',
         code,
+        redirect_uri: 'https://discord.com/api/oauth2/authorize',
       }),
     });
 
