@@ -50,6 +50,12 @@ interface CombatState {
   bag: Stone[];
 }
 
+interface StoneReward {
+  element: string;
+  leftPip: number;
+  rightPip: number;
+}
+
 interface Props { runId: string; }
 
 const ELEMENT_ICONS: Record<string, string> = {
@@ -114,6 +120,7 @@ export function CombatScreen({ runId }: Props) {
   const [playerHit, setPlayerHit] = useState(false);
   const [swapMode, setSwapMode] = useState(false);
   const [showBag, setShowBag] = useState(false);
+  const [stoneRewards, setStoneRewards] = useState<StoneReward[]>([]);
 
   useEffect(() => {
     fetch(`/api/run/${runId}/combat`)
@@ -231,7 +238,11 @@ export function CombatScreen({ runId }: Props) {
 
       if (data.combatResult === 'player-won') {
         if (data.goldEarned > 0) setMessage(`Victory! +${data.goldEarned}g`);
-        setTimeout(() => navigate('relic-selection'), data.goldEarned > 0 ? 1200 : 0);
+        if (data.stoneRewards && data.stoneRewards.length > 0) {
+          setStoneRewards(data.stoneRewards);
+        } else {
+          setTimeout(() => navigate('relic-selection'), data.goldEarned > 0 ? 1200 : 0);
+        }
       } else if (data.combatResult === 'player-died') {
         navigate('run-summary');
       } else {
@@ -257,6 +268,24 @@ export function CombatScreen({ runId }: Props) {
     }
   }
 
+  async function handleClaimStone(reward: StoneReward) {
+    await fetch(`/api/run/${runId}/combat/claim-stone`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ element: reward.element }),
+    });
+    setStoneRewards([]);
+    navigate('relic-selection');
+  }
+
+  const STONE_REWARD_COLORS: Record<string, string> = {
+    fire: 'rgba(255, 80, 20, 0.85)',
+    ice: 'rgba(50, 180, 255, 0.85)',
+    lightning: 'rgba(255, 200, 0, 0.85)',
+    poison: 'rgba(80, 200, 50, 0.85)',
+    earth: 'rgba(160, 120, 60, 0.85)',
+  };
+
   if (!combat) return <div className="combat-loading">Entering the dungeon…</div>;
 
   const isPlayerTurn = combat.phase === 'player-turn';
@@ -267,6 +296,23 @@ export function CombatScreen({ runId }: Props) {
 
   return (
     <div className="combat-screen">
+      {stoneRewards.length > 0 && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+          <h2 style={{ color: '#e8d8b0', marginBottom: '1.5rem', fontSize: '1.5rem' }}>Choose a Stone Reward</h2>
+          <div style={{ display: 'flex', gap: '1.5rem' }}>
+            {stoneRewards.map((reward, i) => (
+              <button
+                key={i}
+                onClick={() => handleClaimStone(reward)}
+                style={{ background: STONE_REWARD_COLORS[reward.element] ?? 'rgba(100,100,100,0.85)', border: '2px solid rgba(255,255,255,0.4)', borderRadius: '12px', padding: '1.5rem 2rem', cursor: 'pointer', color: '#fff', fontWeight: 'bold', fontSize: '1.1rem', minWidth: '120px', textAlign: 'center' }}
+              >
+                <div style={{ textTransform: 'capitalize', marginBottom: '0.5rem' }}>{reward.element}</div>
+                <div style={{ fontSize: '1.3rem' }}>{reward.leftPip} | {reward.rightPip}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="combat-bg" />
 
       <div className="combat-content">

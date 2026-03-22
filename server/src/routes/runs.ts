@@ -146,7 +146,18 @@ router.get('/:runId', async (req: Request, res: Response) => {
     playerState: ReturnType<typeof defaultPlayerState>;
     map: DungeonNode[];
     currentNodeId: string | null;
+    stones?: Stone[];
   };
+
+  const elementCounts = { fire: 0, ice: 0, lightning: 0, poison: 0, earth: 0, neutral: 0 };
+  if (state.stones) {
+    for (const s of state.stones) {
+      const el = s.element as string | null;
+      if (el && el in elementCounts) (elementCounts as any)[el]++;
+      else elementCounts.neutral++;
+    }
+  }
+  const totalStones = state.stones ? state.stones.length : 0;
 
   const response: RunStateResponse = {
     runId: state.run.id,
@@ -154,6 +165,8 @@ router.get('/:runId', async (req: Request, res: Response) => {
     currentNodeId: state.currentNodeId ?? '',
     status: state.run.status,
     actNumber: state.run.currentAct,
+    elementCounts,
+    totalStones,
   };
 
   res.json(response);

@@ -41,6 +41,7 @@ export interface CombatSession {
   playerArmor?: number;
   playerGold?: number;
   relics?: string[];
+  pendingStoneRewards?: Array<{ element: string; leftPip: number; rightPip: number }>;
 }
 
 const SESSION_TTL = 86400; // 24 hours in seconds

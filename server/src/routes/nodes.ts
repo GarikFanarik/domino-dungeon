@@ -230,11 +230,20 @@ router.post('/:runId/event/resolve', async (req: Request, res: Response) => {
   const event = getRandomEvent(state.run.currentAct, state.run.seed);
   const result = resolveEventChoice(state.run, event, choiceIndex);
 
+  if (result.stoneReward) {
+    const newStone = createElementalStone(result.stoneReward.element as any);
+    if (!state.stones) {
+      const defaultBag = new Bag();
+      state.stones = [...defaultBag.stones];
+    }
+    state.stones.push(newStone);
+  }
+
   // Mark node complete
   const eventNode = state.map.find(n => n.id === state.currentNodeId);
   if (eventNode) eventNode.completed = true;
   await saveRunState(runId, state);
-  res.json({ message: result.description, goldChanged: result.goldChanged, hpChanged: result.hpChanged });
+  res.json({ message: result.description, goldChanged: result.goldChanged, hpChanged: result.hpChanged, stoneReward: result.stoneReward ?? null });
 });
 
 // ── Relic Offer ───────────────────────────────────────────────────────────────

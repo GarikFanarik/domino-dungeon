@@ -42,6 +42,15 @@ interface PlayerState {
   gold: number;
 }
 
+interface ElementCounts {
+  fire: number;
+  ice: number;
+  lightning: number;
+  poison: number;
+  earth: number;
+  neutral: number;
+}
+
 interface Props { runId: string; }
 
 function useNodePositions(nodes: MapNode[], containerRef: React.RefObject<HTMLDivElement | null>) {
@@ -82,6 +91,7 @@ export function DungeonMapScreen({ runId }: Props) {
   const [actNumber, setActNumber] = useState(1);
   const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
+  const [elementCounts, setElementCounts] = useState<ElementCounts | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const positions = useNodePositions(nodes, containerRef);
 
@@ -99,6 +109,7 @@ export function DungeonMapScreen({ runId }: Props) {
       .then((r) => r.json())
       .then((data) => {
         if (data.playerState) setPlayerState(data.playerState);
+        if (data.elementCounts) setElementCounts(data.elementCounts);
       })
       .catch(() => {});
   }, [runId]);
@@ -163,6 +174,15 @@ export function DungeonMapScreen({ runId }: Props) {
               <span className="map-stat map-stat--gold">
                 💰 <span className="map-stat-val">{playerState.gold}g</span>
               </span>
+              {elementCounts && (
+                <>
+                  {elementCounts.fire > 0 && <span className="map-stat">🔥<span className="map-stat-val">{elementCounts.fire}</span></span>}
+                  {elementCounts.ice > 0 && <span className="map-stat">❄️<span className="map-stat-val">{elementCounts.ice}</span></span>}
+                  {elementCounts.lightning > 0 && <span className="map-stat">⚡<span className="map-stat-val">{elementCounts.lightning}</span></span>}
+                  {elementCounts.poison > 0 && <span className="map-stat">☠️<span className="map-stat-val">{elementCounts.poison}</span></span>}
+                  {elementCounts.earth > 0 && <span className="map-stat">🪨<span className="map-stat-val">{elementCounts.earth}</span></span>}
+                </>
+              )}
             </div>
           )}
         </div>

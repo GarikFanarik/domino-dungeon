@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { Router, Request, Response } from 'express';
 import { getCombatSession, saveCombatSession, CombatSession } from '../../../src/session/combat-session';
 import redis from '../../../src/lib/redis';
@@ -11,6 +12,7 @@ import { calculateDamage, applyArmor } from '../../../src/game/damage';
 import { EnemyAI, EnemyType } from '../../../src/game/ai/enemy-ai';
 import { dealDamage, isDead } from '../../../src/game/hp';
 import type { Stone as GameStone } from '../../../src/game/models/stone';
+import { createElementalStone } from '../../../src/game/models/stone';
 import type { PlacedStone as GamePlacedStone } from '../../../src/game/chain';
 import type { CombatStateResponse, PlayStoneResponse, EndTurnResponse, UnplayStoneResponse } from '../../../src/types/api';
 
@@ -350,6 +352,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     session.swapsUsed = 0;
 
     let goldEarned = 0;
+    let stoneRewards: Array<{ element: string; leftPip: number; rightPip: number }> | null = null;
 
     // Sync player state back to run
     try {
@@ -378,6 +381,31 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
         runState.playerState.armor = session.playerArmor ?? runState.playerState.armor;
         runState.playerState.gold = session.playerGold;
         await saveRunState(session.runId, runState);
+
+        // Generate stone reward options for elite/boss
+        if (nodeType === 'elite' || nodeType === 'boss') {
+          const allElements = ['fire', 'ice', 'lightning', 'poison', 'earth'];
+          const seedStr = session.runId + session.turnNumber;
+          let seedHash = 0;
+          for (let i = 0; i < seedStr.length; i++) {
+            seedHash = (Math.imul(31, seedHash) + seedStr.charCodeAt(i)) | 0;
+          }
+          seedHash = Math.abs(seedHash);
+          const options: Array<{ element: string; leftPip: number; rightPip: number }> = [];
+          const used = new Set<number>();
+          for (let i = 0; i < 3; i++) {
+            let idx = (seedHash + i * 7) % allElements.length;
+            while (used.has(idx)) idx = (idx + 1) % allElements.length;
+            used.add(idx);
+            options.push({
+              element: allElements[idx],
+              leftPip: 1 + Math.floor(Math.random() * 6),
+              rightPip: 1 + Math.floor(Math.random() * 6),
+            });
+          }
+          stoneRewards = options;
+          session.pendingStoneRewards = options;
+        }
       }
     } catch {
       // non-fatal
@@ -394,6 +422,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
       enemy,
       combatResult: 'player-won',
       goldEarned,
+      stoneRewards: stoneRewards ?? undefined,
     };
     res.json(response);
     return;
@@ -489,6 +518,71 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
   };
 
   res.json(response);
+});
+
+// POST /:runId/combat/claim-stone — claim one of the pending stone reward options
+router.post('/:runId/combat/claim-stone', async (req: Request, res: Response) => {
+  const runId = req.params['runId'] as string;
+  const { element } = req.body as { element?: string };
+
+  if (!element) {
+    res.status(400).json({ error: 'element is required' });
+    return;
+  }
+
+  let session: CombatSession | null = null;
+  try {
+    session = await getCombatSession(runId);
+  } catch {
+    session = null;
+  }
+
+  if (session === null) {
+    res.status(404).json({ error: 'Combat session not found' });
+    return;
+  }
+
+  if (!session.pendingStoneRewards || session.pendingStoneRewards.length === 0) {
+    res.status(400).json({ error: 'No stone reward available' });
+    return;
+  }
+
+  const match = session.pendingStoneRewards.find(r => r.element === element);
+  if (!match) {
+    res.status(400).json({ error: 'Chosen element is not in the pending rewards' });
+    return;
+  }
+
+  const stone: GameStone = {
+    id: randomUUID(),
+    leftPip: match.leftPip,
+    rightPip: match.rightPip,
+    element: match.element as any,
+  };
+
+  try {
+    const runState = await getRunState(runId);
+    if (runState) {
+      if (!runState.stones) {
+        const defaultBag = new Bag();
+        runState.stones = [...defaultBag.stones];
+      }
+      runState.stones.push(stone);
+      await saveRunState(runId, runState);
+    }
+  } catch {
+    // non-fatal
+  }
+
+  session.pendingStoneRewards = [];
+
+  try {
+    await saveCombatSession(session);
+  } catch {
+    // non-fatal
+  }
+
+  res.json({ success: true, stone });
 });
 
 export default router;

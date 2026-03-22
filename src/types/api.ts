@@ -18,6 +18,8 @@ export interface RunStateResponse {
   currentNodeId: string;
   status: RunStatus;
   actNumber: number;
+  elementCounts?: { fire: number; ice: number; lightning: number; poison: number; earth: number; neutral: number };
+  totalStones?: number;
 }
 
 export interface CombatStateResponse {
@@ -56,6 +58,7 @@ export interface EndTurnResponse {
   enemyAttack?: { damage: number; effects: string[] };
   hand?: Stone[];
   goldEarned?: number;
+  stoneRewards?: Array<{ element: string; leftPip: number; rightPip: number }>;
 }
 
 export interface MapNode {
