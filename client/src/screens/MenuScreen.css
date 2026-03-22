@@ -1,0 +1,141 @@
+/* ── Full-screen overlay ─────────────────────────────────────────────── */
+.menu-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.menu-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/combat/background/arena-act1.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.55);
+  z-index: 0;
+}
+
+.menu-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 48px;
+  background: rgba(8, 6, 4, 0.72);
+  border: 1px solid rgba(120, 90, 50, 0.45);
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  min-width: 320px;
+}
+
+.menu-title {
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #e8d8b0;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 20px rgba(232, 200, 100, 0.6),
+    0 0 40px rgba(180, 140, 50, 0.35),
+    0 2px 8px rgba(0, 0, 0, 0.9);
+  margin: 0;
+  line-height: 1;
+}
+
+.menu-subtitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6a5535;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+
+.menu-welcome {
+  font-size: 0.78rem;
+  color: #a08060;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.btn-menu {
+  background: linear-gradient(145deg, #3a1010 0%, #5c1c1c 50%, #3a1010 100%);
+  border: 1px solid #7a3030;
+  color: #ffcc88;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 200, 120, 0.15),
+    0 4px 14px rgba(0, 0, 0, 0.7);
+  font-family: inherit;
+  width: 100%;
+}
+
+.btn-menu:hover:not(:disabled) {
+  background: linear-gradient(145deg, #5c1c1c 0%, #7a2424 50%, #5c1c1c 100%);
+  border-color: #aa4040;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 200, 120, 0.2),
+    0 4px 24px rgba(180, 0, 0, 0.35),
+    0 0 20px rgba(180, 0, 0, 0.2);
+  color: #ffe0aa;
+}
+
+.btn-menu:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-menu--resume {
+  background: linear-gradient(145deg, #0e2a1a 0%, #1a4a2a 50%, #0e2a1a 100%);
+  border-color: #2a7a40;
+  color: #88ffaa;
+}
+
+.btn-menu--resume:hover:not(:disabled) {
+  background: linear-gradient(145deg, #1a4a2a 0%, #2a6a3a 50%, #1a4a2a 100%);
+  border-color: #40aa60;
+  color: #aaffcc;
+  box-shadow:
+    inset 0 1px 0 rgba(100, 255, 150, 0.15),
+    0 4px 24px rgba(0, 160, 80, 0.3),
+    0 0 20px rgba(0, 140, 70, 0.2);
+}
+
+.btn-menu--leaderboard {
+  background: linear-gradient(145deg, #1a1430 0%, #2a1e50 50%, #1a1430 100%);
+  border-color: #4a3a80;
+  color: #ccaaff;
+}
+
+.btn-menu--leaderboard:hover:not(:disabled) {
+  background: linear-gradient(145deg, #2a1e50 0%, #3a2870 50%, #2a1e50 100%);
+  border-color: #7a5acc;
+  color: #ddbbff;
+  box-shadow:
+    inset 0 1px 0 rgba(180, 140, 255, 0.15),
+    0 4px 24px rgba(100, 60, 200, 0.3),
+    0 0 20px rgba(80, 40, 180, 0.2);
+}

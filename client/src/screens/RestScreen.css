@@ -1,0 +1,145 @@
+/* ── Full-screen overlay ─────────────────────────────────────────────── */
+.rest-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.rest-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/combat/background/arena-act1.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.55);
+  z-index: 0;
+}
+
+/* Warm orange campfire tint overlay */
+.rest-tint {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 70%, rgba(200, 80, 10, 0.22) 0%, rgba(120, 40, 0, 0.14) 50%, transparent 80%);
+  z-index: 0;
+}
+
+.rest-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 36px 44px;
+  background: rgba(8, 6, 4, 0.72);
+  border: 1px solid rgba(120, 90, 50, 0.45);
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  min-width: 340px;
+}
+
+.rest-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #e8d8b0;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 16px rgba(232, 160, 60, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.9);
+  margin: 0;
+}
+
+.rest-subtitle {
+  font-size: 0.78rem;
+  color: #6a5535;
+  letter-spacing: 0.1em;
+  margin: 0;
+}
+
+.rest-choices {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+/* ── Choice cards ────────────────────────────────────────────────────── */
+.rest-choice-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 16px;
+  background: rgba(4, 3, 2, 0.6);
+  border: 1px solid rgba(120, 90, 50, 0.35);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.rest-choice-card:hover:not(:disabled) {
+  border-color: rgba(200, 150, 60, 0.7);
+  background: rgba(40, 25, 6, 0.75);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(200, 100, 20, 0.2);
+}
+
+.rest-choice-card:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.rest-choice-icon {
+  font-size: 2rem;
+}
+
+.rest-choice-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #e8d8b0;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rest-choice-hint {
+  font-size: 0.72rem;
+  color: #a08060;
+  letter-spacing: 0.04em;
+}
+
+/* ── Result view ─────────────────────────────────────────────────────── */
+.rest-result {
+  font-size: 1rem;
+  color: #e8d8b0;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.btn-rest-continue {
+  background: linear-gradient(145deg, #3a1010 0%, #5c1c1c 50%, #3a1010 100%);
+  border: 1px solid #7a3030;
+  color: #ffcc88;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 10px 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-rest-continue:hover {
+  background: linear-gradient(145deg, #5c1c1c 0%, #7a2424 50%, #5c1c1c 100%);
+  border-color: #aa4040;
+  color: #ffe0aa;
+}

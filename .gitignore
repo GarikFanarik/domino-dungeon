@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+client/.env
+*.js.map
+coverage/
+.claude/
+discord-last-processed.txt

@@ -1,0 +1,239 @@
+/* ── Full-screen overlay ─────────────────────────────────────────────── */
+.map-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.map-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/combat/background/arena-act1.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.55);
+  z-index: 0;
+}
+
+.map-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 12px 16px;
+  gap: 10px;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────── */
+.map-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(8, 6, 4, 0.72);
+  border: 1px solid rgba(120, 90, 50, 0.45);
+  border-radius: 6px;
+  padding: 8px 14px;
+  backdrop-filter: blur(4px);
+}
+
+.map-title {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #e8d8b0;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(200, 160, 40, 0.4);
+  margin: 0;
+}
+
+.map-player-stats {
+  display: flex;
+  gap: 14px;
+  font-size: 0.72rem;
+}
+
+.map-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #a08060;
+}
+
+.map-stat-val {
+  color: #e8d8b0;
+  font-weight: 700;
+}
+
+.map-stat--hp .map-stat-val {
+  color: #ff8888;
+}
+
+.map-stat--gold .map-stat-val {
+  color: #ffd066;
+}
+
+/* ── Map area ────────────────────────────────────────────────────────── */
+.map-area {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.map-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.map-rows {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: stretch;
+  padding: 8px 0;
+}
+
+.map-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+/* ── Node buttons ────────────────────────────────────────────────────── */
+.map-node {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  line-height: 1;
+  border: 2px solid;
+  background: rgba(8, 6, 4, 0.8);
+  cursor: default;
+  transition: all 0.2s;
+  position: relative;
+  font-family: inherit;
+  gap: 1px;
+}
+
+.map-node-label {
+  font-size: 0.45rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* Available */
+.map-node--available {
+  border-color: rgba(220, 170, 40, 0.85);
+  box-shadow:
+    0 0 12px rgba(220, 170, 40, 0.45),
+    0 0 24px rgba(200, 140, 0, 0.2);
+  cursor: pointer;
+  animation: node-pulse 2s ease-in-out infinite;
+}
+
+.map-node--available .map-node-label {
+  color: #ffd066;
+}
+
+.map-node--available:hover {
+  border-color: rgba(255, 200, 60, 1);
+  box-shadow:
+    0 0 18px rgba(255, 190, 40, 0.65),
+    0 0 36px rgba(200, 140, 0, 0.3);
+  transform: scale(1.1);
+  background: rgba(40, 28, 4, 0.9);
+}
+
+/* Completed */
+.map-node--completed {
+  border-color: rgba(80, 60, 30, 0.4);
+  opacity: 0.3;
+}
+
+.map-node--completed .map-node-label {
+  color: #4a3820;
+}
+
+/* Unavailable */
+.map-node--unavailable {
+  border-color: rgba(60, 45, 25, 0.4);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.map-node--unavailable .map-node-label {
+  color: #4a3820;
+}
+
+@keyframes node-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(220, 170, 40, 0.45), 0 0 24px rgba(200, 140, 0, 0.2); }
+  50%       { box-shadow: 0 0 20px rgba(220, 170, 40, 0.65), 0 0 36px rgba(200, 140, 0, 0.35); }
+}
+
+/* Node type colors when available */
+.map-node--available.map-node-type--boss {
+  border-color: rgba(220, 60, 60, 0.9);
+  box-shadow: 0 0 16px rgba(220, 60, 60, 0.5), 0 0 32px rgba(180, 20, 20, 0.25);
+  animation: node-pulse-red 2s ease-in-out infinite;
+}
+.map-node--available.map-node-type--boss .map-node-label { color: #ff8888; }
+
+.map-node--available.map-node-type--elite {
+  border-color: rgba(200, 80, 220, 0.85);
+  box-shadow: 0 0 14px rgba(200, 80, 220, 0.45), 0 0 28px rgba(160, 40, 180, 0.2);
+  animation: node-pulse-purple 2s ease-in-out infinite;
+}
+.map-node--available.map-node-type--elite .map-node-label { color: #dd99ff; }
+
+.map-node--available.map-node-type--shop {
+  border-color: rgba(100, 200, 100, 0.85);
+  box-shadow: 0 0 12px rgba(80, 180, 80, 0.4), 0 0 24px rgba(40, 140, 40, 0.2);
+}
+.map-node--available.map-node-type--shop .map-node-label { color: #88ff99; }
+
+.map-node--available.map-node-type--rest {
+  border-color: rgba(200, 140, 60, 0.85);
+  box-shadow: 0 0 12px rgba(200, 120, 40, 0.4), 0 0 24px rgba(160, 80, 0, 0.2);
+}
+.map-node--available.map-node-type--rest .map-node-label { color: #ffcc77; }
+
+@keyframes node-pulse-red {
+  0%, 100% { box-shadow: 0 0 16px rgba(220, 60, 60, 0.5), 0 0 32px rgba(180, 20, 20, 0.25); }
+  50%       { box-shadow: 0 0 26px rgba(220, 60, 60, 0.7), 0 0 48px rgba(180, 20, 20, 0.4); }
+}
+
+@keyframes node-pulse-purple {
+  0%, 100% { box-shadow: 0 0 14px rgba(200, 80, 220, 0.45), 0 0 28px rgba(160, 40, 180, 0.2); }
+  50%       { box-shadow: 0 0 22px rgba(200, 80, 220, 0.65), 0 0 42px rgba(160, 40, 180, 0.35); }
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────── */
+.map-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 4, 2, 0.95);
+  color: #a08060;
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  z-index: 20;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}

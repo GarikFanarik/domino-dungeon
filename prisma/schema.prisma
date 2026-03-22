@@ -1,0 +1,98 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RunStatus {
+  ACTIVE
+  WON
+  LOST
+}
+
+model User {
+  id        String   @id @default(cuid())
+  discordId String   @unique
+  username  String
+  createdAt DateTime @default(now())
+  runs             Run[]
+  leaderboardEntries LeaderboardEntry[]
+}
+
+model Run {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  seed          String
+  currentAct    Int         @default(1)
+  currentNodeId String?
+  status        RunStatus   @default(ACTIVE)
+  gold          Int         @default(0)
+  hp            Int         @default(80)
+  maxHp         Int         @default(80)
+  createdAt     DateTime    @default(now())
+  completedAt   DateTime?
+  relics        RunRelic[]
+  bag           RunBag?
+  nodes         DungeonNode[]
+  combatLogs    CombatLog[]
+
+  @@index([userId, status])
+}
+
+model RunRelic {
+  id         String   @id @default(cuid())
+  runId      String
+  run        Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  relicId    String
+  acquiredAt DateTime @default(now())
+}
+
+model RunBag {
+  id     String @id @default(cuid())
+  runId  String @unique
+  run    Run    @relation(fields: [runId], references: [id], onDelete: Cascade)
+  stones Json
+}
+
+model DungeonNode {
+  id        String  @id @default(cuid())
+  runId     String
+  run       Run     @relation(fields: [runId], references: [id], onDelete: Cascade)
+  act       Int
+  row       Int
+  col       Int
+  type      String
+  completed Boolean @default(false)
+  data      Json
+
+  @@index([runId])
+}
+
+model CombatLog {
+  id          String   @id @default(cuid())
+  runId       String
+  run         Run      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  nodeId      String
+  turnsPlayed Int
+  damageDealt Int
+  damageTaken Int
+  createdAt   DateTime @default(now())
+}
+
+model LeaderboardEntry {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  score           Int
+  actsCompleted   Int
+  relicsCount     Int
+  enemiesDefeated Int
+  goldRemaining   Int
+  completedAt     DateTime
+
+  @@index([score(sort: Desc)])
+}

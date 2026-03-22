@@ -1,0 +1,175 @@
+/* ── Full-screen overlay ─────────────────────────────────────────────── */
+.summary-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.summary-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/combat/background/arena-act1.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.55);
+  z-index: 0;
+}
+
+.summary-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 36px 44px;
+  background: rgba(8, 6, 4, 0.72);
+  border: 1px solid rgba(120, 90, 50, 0.45);
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  min-width: 360px;
+}
+
+.summary-heading {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1;
+}
+
+.summary-heading--won {
+  color: #ffd066;
+  text-shadow:
+    0 0 20px rgba(255, 200, 40, 0.6),
+    0 0 40px rgba(200, 150, 0, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.summary-heading--died {
+  color: #ff5555;
+  text-shadow:
+    0 0 20px rgba(255, 60, 60, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.9);
+}
+
+.summary-cause {
+  font-size: 0.82rem;
+  color: #a08060;
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Stats grid ──────────────────────────────────────────────────────── */
+.summary-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(4, 3, 2, 0.5);
+  border: 1px solid rgba(100, 75, 35, 0.35);
+  border-radius: 5px;
+}
+
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-stat-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6a5535;
+}
+
+.summary-stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e8d8b0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.summary-stat--score .summary-stat-label {
+  color: #a08060;
+}
+
+.summary-stat--score .summary-stat-value {
+  font-size: 1.3rem;
+  color: #ffd066;
+  text-shadow: 0 0 10px rgba(255, 200, 40, 0.4);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+.summary-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-summary {
+  background: linear-gradient(145deg, #3a1010 0%, #5c1c1c 50%, #3a1010 100%);
+  border: 1px solid #7a3030;
+  color: #ffcc88;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 10px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 200, 120, 0.15),
+    0 4px 14px rgba(0, 0, 0, 0.7);
+}
+
+.btn-summary:hover {
+  background: linear-gradient(145deg, #5c1c1c 0%, #7a2424 50%, #5c1c1c 100%);
+  border-color: #aa4040;
+  color: #ffe0aa;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 200, 120, 0.2),
+    0 4px 24px rgba(180, 0, 0, 0.3);
+}
+
+.btn-summary--leaderboard {
+  background: linear-gradient(145deg, #1a1430 0%, #2a1e50 50%, #1a1430 100%);
+  border-color: #4a3a80;
+  color: #ccaaff;
+}
+
+.btn-summary--leaderboard:hover {
+  background: linear-gradient(145deg, #2a1e50 0%, #3a2870 50%, #2a1e50 100%);
+  border-color: #7a5acc;
+  color: #ddbbff;
+  box-shadow:
+    inset 0 1px 0 rgba(180, 140, 255, 0.15),
+    0 4px 24px rgba(100, 60, 200, 0.25);
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────── */
+.summary-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 4, 2, 0.95);
+  color: #a08060;
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  z-index: 20;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}

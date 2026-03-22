@@ -1,0 +1,53 @@
+{
+  "name": "domino-dungeon",
+  "version": "1.0.0",
+  "description": "A Discord-based dungeon crawler RPG using domino stones as the combat mechanic",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "nodemon --watch src --watch server/src --ext ts --exec ts-node server/src/index.ts",
+    "dev:client": "npm run dev --prefix client",
+    "build": "tsc && npm run build --prefix client && prisma generate",
+    "start": "NODE_ENV=production node dist/server/src/index.js",
+    "start:win": "set NODE_ENV=production && node dist/server/src/index.js",
+    "tunnel": "cloudflared tunnel --url http://localhost:3000",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:studio": "prisma studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/supertest": "^7.2.0",
+    "@types/ws": "^8.18.1",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "ioredis": "^5.4.1",
+    "seedrandom": "^3.0.5",
+    "supertest": "^7.2.2",
+    "ws": "^8.19.0"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.7.9",
+    "@types/seedrandom": "^3.0.8",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.7",
+    "prisma": "^5.22.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}
