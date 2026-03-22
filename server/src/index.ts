@@ -17,7 +17,7 @@ setupWebSocket(server);
 // Middleware
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || origin === 'https://discord.com' || /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
+    if (!origin || origin === 'https://discord.com' || /^https?:\/\/localhost(:\d+)?$/.test(origin) || /^https:\/\/[^.]+\.discordsays\.com$/.test(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
