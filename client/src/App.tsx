@@ -45,8 +45,7 @@ export default function App() {
         ref={canvasRef}
         className="game-canvas"
         style={{
-          transform: `scale(${scale})`,
-          transformOrigin: 'top left',
+          zoom: scale,
           left: `${offsetX}px`,
           top: `${offsetY}px`,
         }}

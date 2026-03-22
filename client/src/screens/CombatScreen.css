@@ -24,8 +24,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 24px 32px 16px;
-  gap: 16px;
+  padding: 16px 32px 12px;
+  gap: 10px;
 }
 
 .combat-phase {
@@ -66,7 +66,7 @@
   background: rgba(8, 6, 4, 0.72);
   border: 1px solid rgba(120, 90, 50, 0.45);
   border-radius: 6px;
-  padding: 20px 24px;
+  padding: 12px 24px;
   backdrop-filter: blur(4px);
 }
 
@@ -144,10 +144,9 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   flex: 1;
-  min-height: 0;
+  min-height: 260px;
   gap: 8px;
   align-items: flex-end;
-  padding-bottom: 4px;
 }
 
 .sprite-container {
@@ -256,7 +255,7 @@
   background: rgba(6, 5, 3, 0.75);
   border: 1px solid rgba(120, 90, 50, 0.4);
   border-radius: 6px;
-  padding: 16px 20px;
+  padding: 10px 20px;
   backdrop-filter: blur(3px);
 }
 .combat-hand-label {
