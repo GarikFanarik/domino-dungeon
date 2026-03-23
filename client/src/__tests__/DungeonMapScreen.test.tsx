@@ -45,9 +45,12 @@ describe('DungeonMapScreen', () => {
     expect(nodes[2]).toBeDisabled();
   });
 
-  it('shows act number', async () => {
+  it('shows act number via background attribute', async () => {
     renderMap();
-    await waitFor(() => expect(screen.getByText(/act 1/i)).toBeInTheDocument());
+    await waitFor(() => {
+      const bg = document.querySelector('.map-bg') as HTMLElement;
+      expect(bg).toHaveAttribute('data-act', '1');
+    });
   });
 
   it('renders node icons as images', async () => {

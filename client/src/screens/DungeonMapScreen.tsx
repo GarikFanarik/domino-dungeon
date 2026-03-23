@@ -177,31 +177,24 @@ export function DungeonMapScreen({ runId }: Props) {
         style={{ backgroundImage: `url('${bgUrl}')` }}
       />
       <div className="map-content">
-        <div className="map-topbar">
-          <h2 className="map-title">Act {actNumber} — The Dungeon</h2>
-          {playerState && (
-            <div className="map-player-stats">
-              <span className="map-stat map-stat--hp">
-                ❤️ <span className="map-stat-val">{playerState.hp.current}/{playerState.hp.max}</span>
-              </span>
-              <span className="map-stat map-stat--gold">
-                💰 <span className="map-stat-val">{playerState.gold}g</span>
-              </span>
-              {elementCounts && (
-                <>
-                  {(Object.keys(ELEMENT_ICONS) as Array<keyof typeof elementCounts>).map((el) =>
-                    elementCounts[el] > 0 ? (
-                      <span key={el} className="map-stat map-stat--element">
-                        <img src={ELEMENT_ICONS[el as string]} alt={el as string} className="map-stat-element-icon" />
-                        <span className="map-stat-val">{elementCounts[el]}</span>
-                      </span>
-                    ) : null
-                  )}
-                </>
-              )}
-            </div>
-          )}
-        </div>
+        {playerState && (
+          <div className="map-hud">
+            <span className="map-hud-stat map-hud-stat--hp">
+              ❤️ <span className="map-hud-val">{playerState.hp.current}/{playerState.hp.max}</span>
+            </span>
+            <span className="map-hud-stat map-hud-stat--gold">
+              💰 <span className="map-hud-val">{playerState.gold}g</span>
+            </span>
+            {elementCounts && (Object.keys(ELEMENT_ICONS) as Array<keyof typeof elementCounts>).map((el) =>
+              elementCounts[el] > 0 ? (
+                <span key={el} className="map-hud-stat map-hud-stat--element">
+                  <img src={ELEMENT_ICONS[el as string]} alt={el as string} className="map-hud-element-icon" />
+                  <span className="map-hud-val">{elementCounts[el]}</span>
+                </span>
+              ) : null
+            )}
+          </div>
+        )}
 
         <div className="map-area" ref={containerRef}>
           <svg className="map-svg" aria-hidden="true">

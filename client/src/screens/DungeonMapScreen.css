@@ -23,60 +23,44 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 24px 32px;
-  gap: 20px;
 }
 
-.map-topbar {
+/* Floating HUD — HP, gold, element counts */
+.map-hud {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(8, 6, 4, 0.72);
-  border: 1px solid rgba(120, 90, 50, 0.45);
-  border-radius: 6px;
-  padding: 20px 28px;
-  backdrop-filter: blur(4px);
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
 }
 
-.map-title {
-  font-size: 36px;
-  font-weight: 900;
-  color: #e8d8b0;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(200, 160, 40, 0.4);
-  margin: 0;
-}
-
-.map-player-stats {
-  display: flex;
-  gap: 28px;
-  font-size: 22px;
-}
-
-.map-stat {
+.map-hud-stat {
   display: flex;
   align-items: center;
   gap: 8px;
+  background: rgba(8, 6, 4, 0.72);
+  border: 1px solid rgba(120, 90, 50, 0.45);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 22px;
+  backdrop-filter: blur(4px);
   color: #a08060;
 }
 
-.map-stat-val {
-  color: #e8d8b0;
+.map-hud-val {
   font-weight: 700;
+  color: #e8d8b0;
 }
 
-.map-stat--hp .map-stat-val {
-  color: #ff8888;
-}
+.map-hud-stat--hp .map-hud-val { color: #ff8888; }
+.map-hud-stat--gold .map-hud-val { color: #ffd066; }
 
-.map-stat--gold .map-stat-val {
-  color: #ffd066;
-}
-
-.map-stat-element-icon {
-  width: 28px;
-  height: 28px;
+.map-hud-element-icon {
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 

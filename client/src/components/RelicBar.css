@@ -3,15 +3,50 @@
   top: 1rem;
   right: 1rem;
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  flex-direction: column;
   gap: 0.4rem;
-  max-width: 280px;
   z-index: 50;
   pointer-events: none;
 }
 
-.relic-bar .relic-icon {
+.relic-bar__slot {
+  position: relative;
   pointer-events: auto;
+}
+
+/* Custom tooltip — appears to the left of each icon */
+.relic-bar__tooltip {
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 190px;
+  background: rgba(8, 6, 4, 0.92);
+  border: 1px solid rgba(120, 90, 50, 0.6);
+  border-radius: 6px;
+  padding: 10px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 60;
+}
+
+.relic-bar__slot:hover .relic-bar__tooltip {
+  opacity: 1;
+}
+
+.relic-bar__tooltip-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e8d8b0;
+  letter-spacing: 0.04em;
+}
+
+.relic-bar__tooltip-desc {
+  font-size: 11px;
+  color: #a08060;
+  line-height: 1.45;
 }

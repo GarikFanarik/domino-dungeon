@@ -24,11 +24,16 @@ export function RelicBar() {
         const def = RELIC_DEFINITIONS[id];
         if (!def) return null;
         return (
-          <RelicIcon
-            key={id}
-            relic={def}
-            glowing={triggeredRelics.includes(id)}
-          />
+          <div key={id} className="relic-bar__slot">
+            <RelicIcon
+              relic={def}
+              glowing={triggeredRelics.includes(id)}
+            />
+            <div className="relic-bar__tooltip">
+              <strong className="relic-bar__tooltip-name">{def.name}</strong>
+              <span className="relic-bar__tooltip-desc">{def.description}</span>
+            </div>
+          </div>
         );
       })}
     </div>
