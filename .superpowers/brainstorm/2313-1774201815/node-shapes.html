@@ -1,0 +1,137 @@
+<h2>Node Shape & Style</h2>
+<p class="subtitle">How should the individual room nodes look on the map?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0a08;padding:24px;height:220px;display:flex;align-items:center;justify-content:center;gap:20px;">
+      <!-- Round nodes, current style but bigger/better -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(220,170,40,0.5);">
+          <img src="/assets/map/nodes/combat.png" style="width:32px;height:32px;object-fit:contain;" onerror="this.style.display='none'" />
+          <span style="font-size:9px;color:#ffd066;letter-spacing:1px;text-transform:uppercase;">Fight</span>
+        </div>
+        <span style="font-size:10px;color:#a08060;">Available</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#1a1208;border:2px solid rgba(200,80,220,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(200,80,220,0.45);">
+          <img src="/assets/map/nodes/elite.png" style="width:32px;height:32px;object-fit:contain;" onerror="this.style.display='none'" />
+          <span style="font-size:9px;color:#dd99ff;letter-spacing:1px;text-transform:uppercase;">Elite</span>
+        </div>
+        <span style="font-size:10px;color:#a08060;">Available</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#1a0808;border:2px solid rgba(60,45,25,0.4);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.4;">
+          <img src="/assets/map/nodes/shop.png" style="width:32px;height:32px;object-fit:contain;filter:grayscale(1);" onerror="this.style.display='none'" />
+          <span style="font-size:9px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;">Shop</span>
+        </div>
+        <span style="font-size:10px;color:#4a3820;">Locked</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#1a0808;border:2px solid rgba(60,45,25,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.25;">
+          <img src="/assets/map/nodes/rest.png" style="width:32px;height:32px;object-fit:contain;filter:grayscale(1);" onerror="this.style.display='none'" />
+          <span style="font-size:9px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;">Rest</span>
+        </div>
+        <span style="font-size:10px;color:#4a3820;">Done</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Circles (refined current)</h3>
+      <p>Same circular shape but properly sized, icon centred, label below. Clean and timeless. Nodes feel like location pins on a map.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0a08;padding:24px;height:220px;display:flex;align-items:center;justify-content:center;gap:20px;">
+      <!-- Hexagonal nodes -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:68px;height:60px;position:relative;display:flex;align-items:center;justify-content:center;">
+          <svg width="68" height="60" style="position:absolute;"><polygon points="34,2 64,18 64,42 34,58 4,42 4,18" fill="#1a1208" stroke="rgba(220,170,40,0.9)" stroke-width="2"/><polygon points="34,2 64,18 64,42 34,58 4,42 4,18" fill="rgba(220,170,40,0.05)"/></svg>
+          <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <img src="/assets/map/nodes/combat.png" style="width:26px;height:26px;object-fit:contain;" onerror="this.style.fontSize='18px'" />
+            <span style="font-size:8px;color:#ffd066;letter-spacing:1px;text-transform:uppercase;">Fight</span>
+          </div>
+        </div>
+        <span style="font-size:10px;color:#a08060;">Available</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:68px;height:60px;position:relative;display:flex;align-items:center;justify-content:center;">
+          <svg width="68" height="60" style="position:absolute;"><polygon points="34,2 64,18 64,42 34,58 4,42 4,18" fill="#1a1208" stroke="rgba(200,80,220,0.85)" stroke-width="2"/></svg>
+          <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <img src="/assets/map/nodes/elite.png" style="width:26px;height:26px;object-fit:contain;" onerror="this.style.fontSize='18px'" />
+            <span style="font-size:8px;color:#dd99ff;letter-spacing:1px;text-transform:uppercase;">Elite</span>
+          </div>
+        </div>
+        <span style="font-size:10px;color:#a08060;">Available</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:68px;height:60px;position:relative;display:flex;align-items:center;justify-content:center;opacity:0.35;">
+          <svg width="68" height="60" style="position:absolute;"><polygon points="34,2 64,18 64,42 34,58 4,42 4,18" fill="#1a1208" stroke="rgba(60,45,25,0.5)" stroke-width="2"/></svg>
+          <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <img src="/assets/map/nodes/shop.png" style="width:26px;height:26px;object-fit:contain;filter:grayscale(1);" onerror="this.style.fontSize='18px'" />
+            <span style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;">Shop</span>
+          </div>
+        </div>
+        <span style="font-size:10px;color:#4a3820;">Locked</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:68px;height:60px;position:relative;display:flex;align-items:center;justify-content:center;opacity:0.2;">
+          <svg width="68" height="60" style="position:absolute;"><polygon points="34,2 64,18 64,42 34,58 4,42 4,18" fill="#1a1208" stroke="rgba(60,45,25,0.4)" stroke-width="2"/></svg>
+          <div style="position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <img src="/assets/map/nodes/rest.png" style="width:26px;height:26px;object-fit:contain;filter:grayscale(1);" onerror="this.style.fontSize='18px'" />
+            <span style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;">Rest</span>
+          </div>
+        </div>
+        <span style="font-size:10px;color:#4a3820;">Done</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Hexagons</h3>
+      <p>Six-sided tiles feel more like a dungeon/board game. Tessellate naturally and look distinctive. Slightly more complex to render.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0a08;padding:24px;height:220px;display:flex;align-items:center;justify-content:center;gap:20px;">
+      <!-- Square/badge nodes with coloured top strip -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:64px;height:72px;border-radius:6px;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(220,170,40,0.3);overflow:hidden;position:relative;">
+          <div style="position:absolute;top:0;left:0;right:0;height:4px;background:rgba(220,170,40,0.9);"></div>
+          <img src="/assets/map/nodes/combat.png" style="width:28px;height:28px;object-fit:contain;margin-top:4px;" onerror="this.style.display='none'" />
+          <span style="font-size:9px;color:#ffd066;letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Fight</span>
+        </div>
+        <span style="font-size:10px;color:#a08060;">Available</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:64px;height:72px;border-radius:6px;background:#1a1208;border:2px solid rgba(200,80,220,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(200,80,220,0.3);overflow:hidden;position:relative;">
+          <div style="position:absolute;top:0;left:0;right:0;height:4px;background:rgba(200,80,220,0.85);"></div>
+          <img src="/assets/map/nodes/elite.png" style="width:28px;height:28px;object-fit:contain;margin-top:4px;" onerror="this.style.display='none'" />
+          <span style="font-size:9px;color:#dd99ff;letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Elite</span>
+        </div>
+        <span style="font-size:10px;color:#a08060;">Available</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:64px;height:72px;border-radius:6px;background:#1a1208;border:2px solid rgba(60,45,25,0.4);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.4;overflow:hidden;position:relative;">
+          <div style="position:absolute;top:0;left:0;right:0;height:4px;background:rgba(100,200,100,0.6);"></div>
+          <img src="/assets/map/nodes/shop.png" style="width:28px;height:28px;object-fit:contain;filter:grayscale(1);margin-top:4px;" onerror="this.style.display='none'" />
+          <span style="font-size:9px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Shop</span>
+        </div>
+        <span style="font-size:10px;color:#4a3820;">Locked</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div style="width:64px;height:72px;border-radius:6px;background:#1a1208;border:2px solid rgba(60,45,25,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0.2;overflow:hidden;position:relative;">
+          <div style="position:absolute;top:0;left:0;right:0;height:4px;background:rgba(200,140,60,0.4);"></div>
+          <img src="/assets/map/nodes/rest.png" style="width:28px;height:28px;object-fit:contain;filter:grayscale(1);margin-top:4px;" onerror="this.style.display='none'" />
+          <span style="font-size:9px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:2px;">Rest</span>
+        </div>
+        <span style="font-size:10px;color:#4a3820;">Done</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Rectangular Cards</h3>
+      <p>Taller cards with a colour-coded stripe at the top per node type. More info density, easier to read labels. Feels like dungeon room cards.</p>
+    </div>
+  </div>
+
+</div>
+<p class="subtitle" style="margin-top:16px;">My recommendation is <strong>A</strong> — circles are already in the codebase, universally readable, and look great with the glowing border effects.</p>

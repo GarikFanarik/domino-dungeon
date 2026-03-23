@@ -1,0 +1,190 @@
+<h2>Map Direction</h2>
+<p class="subtitle">Where does the player start — bottom or top?</p>
+
+<div class="split">
+
+  <div class="mockup" data-choice="a" onclick="toggleSelect(this)" style="cursor:pointer;">
+    <div class="mockup-header">A — Bottom to Top (climb toward boss)</div>
+    <div class="mockup-body" style="background:#0c0a08;padding:12px 20px;height:320px;position:relative;overflow:hidden;">
+      <svg width="100%" height="100%" style="position:absolute;inset:0;pointer-events:none;">
+        <line x1="50%" y1="82%" x2="25%" y2="66%" stroke="rgba(120,90,40,0.55)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="50%" y1="82%" x2="75%" y2="66%" stroke="rgba(120,90,40,0.55)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="25%" y1="66%" x2="12%" y2="50%" stroke="rgba(120,90,40,0.45)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="25%" y1="66%" x2="38%" y2="50%" stroke="rgba(120,90,40,0.45)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="75%" y1="66%" x2="62%" y2="50%" stroke="rgba(120,90,40,0.45)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="75%" y1="66%" x2="88%" y2="50%" stroke="rgba(120,90,40,0.45)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="12%" y1="50%" x2="25%" y2="34%" stroke="rgba(120,90,40,0.3)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="38%" y1="50%" x2="50%" y2="34%" stroke="rgba(120,90,40,0.3)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="62%" y1="50%" x2="50%" y2="34%" stroke="rgba(120,90,40,0.3)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="88%" y1="50%" x2="75%" y2="34%" stroke="rgba(120,90,40,0.3)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="25%" y1="34%" x2="50%" y2="18%" stroke="rgba(180,60,60,0.5)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="75%" y1="34%" x2="50%" y2="18%" stroke="rgba(180,60,60,0.5)" stroke-width="1.5" stroke-dasharray="5 3"/>
+      </svg>
+
+      <!-- BOSS at top -->
+      <div style="position:absolute;top:5%;left:50%;transform:translateX(-50%);text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:#1a0808;border:2px solid rgba(220,60,60,0.5);display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(220,60,60,0.3);margin:0 auto;">
+          <img src="/assets/map/nodes/boss.png" style="width:30px;height:30px;object-fit:contain;filter:grayscale(1);opacity:0.5;" onerror="this.replaceWith('💀')"/>
+        </div>
+        <div style="font-size:9px;color:#884444;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Boss</div>
+      </div>
+
+      <!-- Row 2 -->
+      <div style="position:absolute;top:26%;left:25%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);display:flex;align-items:center;justify-content:center;opacity:0.3;margin:0 auto;">
+          <img src="/assets/map/nodes/elite.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Elite</div>
+      </div>
+      <div style="position:absolute;top:26%;left:75%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);display:flex;align-items:center;justify-content:center;opacity:0.3;margin:0 auto;">
+          <img src="/assets/map/nodes/rest.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Rest</div>
+      </div>
+
+      <!-- Row 3 (middle) -->
+      <div style="position:absolute;top:42%;left:12%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);display:flex;align-items:center;justify-content:center;opacity:0.35;margin:0 auto;">
+          <img src="/assets/map/nodes/combat.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Fight</div>
+      </div>
+      <div style="position:absolute;top:42%;left:38%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);display:flex;align-items:center;justify-content:center;opacity:0.35;margin:0 auto;">
+          <img src="/assets/map/nodes/shop.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Shop</div>
+      </div>
+      <div style="position:absolute;top:42%;left:62%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);display:flex;align-items:center;justify-content:center;opacity:0.35;margin:0 auto;">
+          <img src="/assets/map/nodes/event.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Event</div>
+      </div>
+      <div style="position:absolute;top:42%;left:88%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);display:flex;align-items:center;justify-content:center;opacity:0.35;margin:0 auto;">
+          <img src="/assets/map/nodes/combat.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Fight</div>
+      </div>
+
+      <!-- Row 4 — available -->
+      <div style="position:absolute;top:58%;left:25%;transform:translateX(-50%);text-align:center;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(220,170,40,0.5);margin:0 auto;">
+          <img src="/assets/map/nodes/combat.png" style="width:26px;height:26px;object-fit:contain;"/>
+        </div>
+        <div style="font-size:8px;color:#ffd066;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Fight</div>
+      </div>
+      <div style="position:absolute;top:58%;left:75%;transform:translateX(-50%);text-align:center;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(220,170,40,0.5);margin:0 auto;">
+          <img src="/assets/map/nodes/shop.png" style="width:26px;height:26px;object-fit:contain;"/>
+        </div>
+        <div style="font-size:8px;color:#ffd066;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Shop</div>
+      </div>
+
+      <!-- START at bottom — current position -->
+      <div style="position:absolute;bottom:4%;left:50%;transform:translateX(-50%);text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:#1a1208;border:3px solid rgba(255,220,80,1);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(255,200,40,0.3),0 0 20px rgba(255,200,40,0.6);margin:0 auto;">
+          <img src="/assets/map/nodes/combat.png" style="width:28px;height:28px;object-fit:contain;"/>
+        </div>
+        <div style="font-size:9px;color:#ffd060;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">◀ YOU ARE HERE</div>
+      </div>
+
+      <div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:rgba(200,160,40,0.4);font-size:10px;writing-mode:vertical-rl;letter-spacing:2px;">▲ PROGRESS ▲</div>
+    </div>
+  </div>
+
+  <div class="mockup" data-choice="b" onclick="toggleSelect(this)" style="cursor:pointer;">
+    <div class="mockup-header">B — Top to Bottom (current direction)</div>
+    <div class="mockup-body" style="background:#0c0a08;padding:12px 20px;height:320px;position:relative;overflow:hidden;">
+      <svg width="100%" height="100%" style="position:absolute;inset:0;pointer-events:none;">
+        <line x1="50%" y1="18%" x2="25%" y2="34%" stroke="rgba(120,90,40,0.55)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="50%" y1="18%" x2="75%" y2="34%" stroke="rgba(120,90,40,0.55)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="25%" y1="34%" x2="12%" y2="50%" stroke="rgba(120,90,40,0.45)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="25%" y1="34%" x2="38%" y2="50%" stroke="rgba(120,90,40,0.45)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="75%" y1="34%" x2="62%" y2="50%" stroke="rgba(120,90,40,0.45)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="75%" y1="34%" x2="88%" y2="50%" stroke="rgba(120,90,40,0.45)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="12%" y1="50%" x2="25%" y2="66%" stroke="rgba(120,90,40,0.35)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="38%" y1="50%" x2="50%" y2="66%" stroke="rgba(120,90,40,0.35)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="62%" y1="50%" x2="50%" y2="66%" stroke="rgba(120,90,40,0.35)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="88%" y1="50%" x2="75%" y2="66%" stroke="rgba(120,90,40,0.35)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="25%" y1="66%" x2="50%" y2="82%" stroke="rgba(180,60,60,0.4)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <line x1="75%" y1="66%" x2="50%" y2="82%" stroke="rgba(180,60,60,0.4)" stroke-width="1.5" stroke-dasharray="5 3"/>
+      </svg>
+
+      <!-- START at top — current position marker -->
+      <div style="position:absolute;top:4%;left:50%;transform:translateX(-50%);text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:#1a1208;border:3px solid rgba(255,220,80,1);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(255,200,40,0.3),0 0 20px rgba(255,200,40,0.6);margin:0 auto;">
+          <img src="/assets/map/nodes/combat.png" style="width:28px;height:28px;object-fit:contain;"/>
+        </div>
+        <div style="font-size:9px;color:#ffd060;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">◀ YOU ARE HERE</div>
+      </div>
+
+      <!-- Row 2 — available -->
+      <div style="position:absolute;top:24%;left:25%;transform:translateX(-50%);text-align:center;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(220,170,40,0.5);margin:0 auto;">
+          <img src="/assets/map/nodes/combat.png" style="width:26px;height:26px;object-fit:contain;"/>
+        </div>
+        <div style="font-size:8px;color:#ffd066;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Fight</div>
+      </div>
+      <div style="position:absolute;top:24%;left:75%;transform:translateX(-50%);text-align:center;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(220,170,40,0.5);margin:0 auto;">
+          <img src="/assets/map/nodes/shop.png" style="width:26px;height:26px;object-fit:contain;"/>
+        </div>
+        <div style="font-size:8px;color:#ffd066;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Shop</div>
+      </div>
+
+      <!-- Middle rows locked -->
+      <div style="position:absolute;top:42%;left:12%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);display:flex;align-items:center;justify-content:center;opacity:0.35;margin:0 auto;">
+          <img src="/assets/map/nodes/combat.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Fight</div>
+      </div>
+      <div style="position:absolute;top:42%;left:38%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);display:flex;align-items:center;justify-content:center;opacity:0.35;margin:0 auto;">
+          <img src="/assets/map/nodes/event.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Event</div>
+      </div>
+      <div style="position:absolute;top:42%;left:62%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);display:flex;align-items:center;justify-content:center;opacity:0.35;margin:0 auto;">
+          <img src="/assets/map/nodes/elite.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Elite</div>
+      </div>
+      <div style="position:absolute;top:42%;left:88%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);display:flex;align-items:center;justify-content:center;opacity:0.35;margin:0 auto;">
+          <img src="/assets/map/nodes/rest.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Rest</div>
+      </div>
+
+      <div style="position:absolute;top:60%;left:25%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);display:flex;align-items:center;justify-content:center;opacity:0.3;margin:0 auto;">
+          <img src="/assets/map/nodes/elite.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Elite</div>
+      </div>
+      <div style="position:absolute;top:60%;left:75%;transform:translateX(-50%);text-align:center;">
+        <div style="width:44px;height:44px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);display:flex;align-items:center;justify-content:center;opacity:0.3;margin:0 auto;">
+          <img src="/assets/map/nodes/rest.png" style="width:24px;height:24px;object-fit:contain;filter:grayscale(1);"/>
+        </div>
+        <div style="font-size:8px;color:#4a3820;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Rest</div>
+      </div>
+
+      <!-- BOSS at bottom -->
+      <div style="position:absolute;bottom:4%;left:50%;transform:translateX(-50%);text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:#1a0808;border:2px solid rgba(220,60,60,0.5);display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(220,60,60,0.3);margin:0 auto;opacity:0.5;">
+          <img src="/assets/map/nodes/boss.png" style="width:30px;height:30px;object-fit:contain;filter:grayscale(1);opacity:0.6;"/>
+        </div>
+        <div style="font-size:9px;color:#884444;letter-spacing:1px;text-transform:uppercase;margin-top:3px;">Boss</div>
+      </div>
+
+      <div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:rgba(200,160,40,0.4);font-size:10px;writing-mode:vertical-rl;letter-spacing:2px;">▼ PROGRESS ▼</div>
+    </div>
+  </div>
+
+</div>
+<p class="subtitle" style="margin-top:16px;">My recommendation is <strong>A (bottom to top)</strong> — your character is climbing the dungeon, so progress naturally reads upward. More satisfying to watch the boss icon loom above.</p>

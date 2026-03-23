@@ -1,0 +1,127 @@
+<h2>Dungeon Map Layout — Which approach?</h2>
+<p class="subtitle">The current map positions each row independently, so connection lines look random. Here are 3 fixes.</p>
+
+<div class="cards">
+
+  <!-- Option A: Fixed column grid -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0a08;padding:16px;height:260px;position:relative;overflow:hidden;">
+      <svg width="100%" height="100%" style="position:absolute;inset:0;">
+        <!-- Connection lines -->
+        <line x1="50%" y1="88%" x2="25%" y2="70%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="88%" x2="50%" y2="70%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="88%" x2="75%" y2="70%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="25%" y1="70%" x2="12%" y2="52%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="25%" y1="70%" x2="37%" y2="52%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="70%" x2="37%" y2="52%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="75%" y1="70%" x2="62%" y2="52%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="75%" y1="70%" x2="88%" y2="52%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="12%" y1="52%" x2="25%" y2="34%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="37%" y1="52%" x2="25%" y2="34%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="62%" y1="52%" x2="75%" y2="34%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="88%" y1="52%" x2="75%" y2="34%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="25%" y1="34%" x2="50%" y2="16%" stroke="rgba(180,60,60,0.7)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="75%" y1="34%" x2="50%" y2="16%" stroke="rgba(180,60,60,0.7)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+      <!-- Row 5 (bottom) — START, single combat node -->
+      <div style="position:absolute;bottom:4%;left:50%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;font-size:10px;color:#ffd066;box-shadow:0 0 10px rgba(220,170,40,0.5);">⚔</div>
+      <!-- Row 4 -->
+      <div style="position:absolute;bottom:22%;left:25%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.5);display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a3820;opacity:0.5;">⚔</div>
+      <div style="position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.5);display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a3820;opacity:0.5;">🏪</div>
+      <div style="position:absolute;bottom:22%;left:75%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.5);display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a3820;opacity:0.5;">⚔</div>
+      <!-- Row 3 -->
+      <div style="position:absolute;bottom:40%;left:12%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.4);display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a3820;opacity:0.4;">⚔</div>
+      <div style="position:absolute;bottom:40%;left:37%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.4);display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a3820;opacity:0.4;">🔥</div>
+      <div style="position:absolute;bottom:40%;left:62%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.4);display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a3820;opacity:0.4;">⚔</div>
+      <div style="position:absolute;bottom:40%;left:88%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.4);display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a3820;opacity:0.4;">🛌</div>
+      <!-- Row 2 -->
+      <div style="position:absolute;bottom:58%;left:25%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a3820;opacity:0.3;">🔥</div>
+      <div style="position:absolute;bottom:58%;left:75%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:#4a3820;opacity:0.3;">⚔</div>
+      <!-- Row 1 (top) — BOSS -->
+      <div style="position:absolute;top:4%;left:50%;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:#1a0808;border:2px solid rgba(220,60,60,0.4);display:flex;align-items:center;justify-content:center;font-size:12px;color:#ff6666;opacity:0.35;">💀</div>
+      <!-- Direction arrow -->
+      <div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);color:rgba(200,160,40,0.5);font-size:11px;writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:2px;">▲ PROGRESS ▲</div>
+    </div>
+    <div class="card-body">
+      <h3>A — Fixed Column Grid</h3>
+      <p>All rows share the same column positions. Connections are always clean diagonals. Bottom = start, top = boss. <strong>Like Slay the Spire.</strong></p>
+    </div>
+  </div>
+
+  <!-- Option B: Path Lanes -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0a08;padding:16px;height:260px;position:relative;overflow:hidden;">
+      <svg width="100%" height="100%" style="position:absolute;inset:0;">
+        <!-- Lane tracks (vertical roads) -->
+        <line x1="25%" y1="10%" x2="25%" y2="90%" stroke="rgba(80,60,30,0.25)" stroke-width="8"/>
+        <line x1="50%" y1="10%" x2="50%" y2="90%" stroke="rgba(80,60,30,0.25)" stroke-width="8"/>
+        <line x1="75%" y1="10%" x2="75%" y2="90%" stroke="rgba(80,60,30,0.25)" stroke-width="8"/>
+        <!-- Bridges between lanes -->
+        <line x1="25%" y1="55%" x2="50%" y2="45%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="45%" x2="75%" y2="35%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="25%" y1="72%" x2="50%" y2="72%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+      <!-- Lane 1 nodes -->
+      <div style="position:absolute;bottom:8%;left:25%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;font-size:11px;color:#ffd066;box-shadow:0 0 10px rgba(220,170,40,0.5);">⚔</div>
+      <div style="position:absolute;bottom:38%;left:25%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.4);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0.4;">🛌</div>
+      <div style="position:absolute;bottom:65%;left:25%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0.3;">⚔</div>
+      <!-- Lane 2 nodes -->
+      <div style="position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0.5;">🏪</div>
+      <div style="position:absolute;bottom:35%;left:50%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.4);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0.4;">⚔</div>
+      <div style="position:absolute;bottom:60%;left:50%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0.3;">🔥</div>
+      <!-- Lane 3 nodes -->
+      <div style="position:absolute;bottom:8%;left:75%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0.5;">⚔</div>
+      <div style="position:absolute;bottom:30%;left:75%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.4);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0.4;">🔥</div>
+      <div style="position:absolute;bottom:55%;left:75%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0.3;">⚔</div>
+      <!-- Boss at top -->
+      <div style="position:absolute;top:5%;left:50%;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:#1a0808;border:2px solid rgba(220,60,60,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;color:#ff6666;opacity:0.35;">💀</div>
+    </div>
+    <div class="card-body">
+      <h3>B — Path Lanes</h3>
+      <p>3-4 visible vertical "roads" run bottom to top. Nodes sit on lanes, with cross-lane bridges. Clear paths, strong visual lanes. More linear feel.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Proportional coordinate placement -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0a08;padding:16px;height:260px;position:relative;overflow:hidden;">
+      <svg width="100%" height="100%" style="position:absolute;inset:0;">
+        <!-- Lines use proper proportional coords so they always land on nodes -->
+        <line x1="50%" y1="88%" x2="20%" y2="72%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="88%" x2="60%" y2="72%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="20%" y1="72%" x2="35%" y2="56%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="60%" y1="72%" x2="35%" y2="56%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="60%" y1="72%" x2="80%" y2="56%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="35%" y1="56%" x2="20%" y2="40%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="35%" y1="56%" x2="55%" y2="40%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="80%" y1="56%" x2="55%" y2="40%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="80%" y1="56%" x2="85%" y2="40%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="20%" y1="40%" x2="40%" y2="24%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="55%" y1="40%" x2="40%" y2="24%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="85%" y1="40%" x2="70%" y2="24%" stroke="rgba(120,90,40,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="40%" y1="24%" x2="50%" y2="10%" stroke="rgba(180,60,60,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="70%" y1="24%" x2="50%" y2="10%" stroke="rgba(180,60,60,0.6)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+      <!-- Nodes placed by proportion: x = col/(cols+1), y from bottom -->
+      <!-- Current node (bottom) -->
+      <div style="position:absolute;bottom:6%;left:50%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;font-size:11px;color:#ffd066;box-shadow:0 0 10px rgba(220,170,40,0.5);">⚔</div>
+      <div style="position:absolute;bottom:20%;left:20%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.5);opacity:0.5;display:flex;align-items:center;justify-content:center;font-size:10px;">⚔</div>
+      <div style="position:absolute;bottom:20%;left:60%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.5);opacity:0.5;display:flex;align-items:center;justify-content:center;font-size:10px;">🏪</div>
+      <div style="position:absolute;bottom:38%;left:35%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.4);opacity:0.4;display:flex;align-items:center;justify-content:center;font-size:10px;">🔥</div>
+      <div style="position:absolute;bottom:38%;left:80%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.4);opacity:0.4;display:flex;align-items:center;justify-content:center;font-size:10px;">🛌</div>
+      <div style="position:absolute;bottom:55%;left:20%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);opacity:0.3;display:flex;align-items:center;justify-content:center;font-size:10px;">⚔</div>
+      <div style="position:absolute;bottom:55%;left:55%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);opacity:0.3;display:flex;align-items:center;justify-content:center;font-size:10px;">⚔</div>
+      <div style="position:absolute;bottom:55%;left:85%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);opacity:0.3;display:flex;align-items:center;justify-content:center;font-size:10px;">⚔</div>
+      <div style="position:absolute;bottom:72%;left:40%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.25);opacity:0.25;display:flex;align-items:center;justify-content:center;font-size:10px;">🔥</div>
+      <div style="position:absolute;bottom:72%;left:70%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.25);opacity:0.25;display:flex;align-items:center;justify-content:center;font-size:10px;">⚔</div>
+      <div style="position:absolute;top:5%;left:50%;transform:translateX(-50%);width:38px;height:38px;border-radius:50%;background:#1a0808;border:2px solid rgba(220,60,60,0.4);display:flex;align-items:center;justify-content:center;font-size:13px;color:#ff6666;opacity:0.4;">💀</div>
+      <div style="position:absolute;left:4px;top:50%;transform:translateY(-50%);color:rgba(200,160,40,0.5);font-size:11px;writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:2px;">▲ PROGRESS ▲</div>
+    </div>
+    <div class="card-body">
+      <h3>C — Proportional Coordinates</h3>
+      <p>Each node gets an absolute (x%, y%) based on its column slot and row. No DOM measurement needed — lines always connect to nodes precisely. Keeps the organic feel but fixes the broken lines.</p>
+    </div>
+  </div>
+
+</div>
+<p class="subtitle" style="margin-top:16px;">Click to select. My recommendation is <strong>A</strong> — column grid gives the clearest navigation and is closest to established dungeon-crawler conventions.</p>

@@ -1,0 +1,192 @@
+<h2>How wide should the map be?</h2>
+<p class="subtitle">Fixed column count — nodes snap to these slots. Fewer = more forced branching. More = wider paths, more choice.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0a08;padding:16px 8px;height:200px;position:relative;overflow:hidden;">
+      <svg width="100%" height="100%" style="position:absolute;inset:0;pointer-events:none;">
+        <line x1="25%" y1="82%" x2="15%" y2="64%" stroke="rgba(120,90,40,0.5)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="25%" y1="82%" x2="35%" y2="64%" stroke="rgba(120,90,40,0.5)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="75%" y1="82%" x2="65%" y2="64%" stroke="rgba(120,90,40,0.5)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="75%" y1="82%" x2="85%" y2="64%" stroke="rgba(120,90,40,0.5)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="15%" y1="64%" x2="25%" y2="46%" stroke="rgba(120,90,40,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="35%" y1="64%" x2="50%" y2="46%" stroke="rgba(120,90,40,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="65%" y1="64%" x2="50%" y2="46%" stroke="rgba(120,90,40,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="85%" y1="64%" x2="75%" y2="46%" stroke="rgba(120,90,40,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="25%" y1="46%" x2="50%" y2="28%" stroke="rgba(120,90,40,0.3)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="75%" y1="46%" x2="50%" y2="28%" stroke="rgba(120,90,40,0.3)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="28%" x2="50%" y2="12%" stroke="rgba(180,60,60,0.5)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+      <!-- 4 cols: 15%, 38%, 62%, 85% -->
+      <!-- Boss -->
+      <div style="position:absolute;top:5%;left:50%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:#1a0808;border:2px solid rgba(220,60,60,0.5);display:flex;align-items:center;justify-content:center;opacity:0.6;">
+        <img src="/assets/map/nodes/boss.png" style="width:20px;height:20px;object-fit:contain;"/>
+      </div>
+      <!-- Row 2 -->
+      <div style="position:absolute;top:22%;left:50%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);opacity:0.3;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/rest.png" style="width:18px;height:18px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <!-- Row 3 -->
+      <div style="position:absolute;top:40%;left:25%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);opacity:0.35;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/combat.png" style="width:18px;height:18px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <div style="position:absolute;top:40%;left:75%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);opacity:0.35;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/event.png" style="width:18px;height:18px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <!-- Row 4 available -->
+      <div style="position:absolute;top:58%;left:15%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/combat.png" style="width:18px;height:18px;object-fit:contain;"/>
+      </div>
+      <div style="position:absolute;top:58%;left:38%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/shop.png" style="width:18px;height:18px;object-fit:contain;"/>
+      </div>
+      <div style="position:absolute;top:58%;left:62%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/elite.png" style="width:18px;height:18px;object-fit:contain;"/>
+      </div>
+      <div style="position:absolute;top:58%;left:85%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/rest.png" style="width:18px;height:18px;object-fit:contain;"/>
+      </div>
+      <!-- Start -->
+      <div style="position:absolute;bottom:4%;left:25%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:#1a1208;border:3px solid rgba(255,220,80,1);display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(255,200,40,0.6);">
+        <img src="/assets/map/nodes/combat.png" style="width:20px;height:20px;object-fit:contain;"/>
+      </div>
+      <div style="position:absolute;bottom:4%;left:75%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(220,170,40,0.4);">
+        <img src="/assets/map/nodes/combat.png" style="width:20px;height:20px;object-fit:contain;"/>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — 4 Columns</h3>
+      <p>Tight. Paths converge quickly, fewer choices per row. More intense — every decision matters more.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0a08;padding:16px 8px;height:200px;position:relative;overflow:hidden;">
+      <svg width="100%" height="100%" style="position:absolute;inset:0;pointer-events:none;">
+        <line x1="50%" y1="83%" x2="17%" y2="65%" stroke="rgba(120,90,40,0.5)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="83%" x2="50%" y2="65%" stroke="rgba(120,90,40,0.5)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="83%" x2="83%" y2="65%" stroke="rgba(120,90,40,0.5)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="17%" y1="65%" x2="10%" y2="47%" stroke="rgba(120,90,40,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="17%" y1="65%" x2="30%" y2="47%" stroke="rgba(120,90,40,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="65%" x2="30%" y2="47%" stroke="rgba(120,90,40,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="65%" x2="70%" y2="47%" stroke="rgba(120,90,40,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="83%" y1="65%" x2="70%" y2="47%" stroke="rgba(120,90,40,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="83%" y1="65%" x2="90%" y2="47%" stroke="rgba(120,90,40,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="10%" y1="47%" x2="30%" y2="29%" stroke="rgba(120,90,40,0.3)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="70%" y1="47%" x2="50%" y2="29%" stroke="rgba(120,90,40,0.3)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="90%" y1="47%" x2="70%" y2="29%" stroke="rgba(120,90,40,0.3)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="30%" y1="29%" x2="50%" y2="12%" stroke="rgba(180,60,60,0.5)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        <line x1="70%" y1="29%" x2="50%" y2="12%" stroke="rgba(180,60,60,0.5)" stroke-width="1.5" stroke-dasharray="4 3"/>
+      </svg>
+      <!-- Boss -->
+      <div style="position:absolute;top:4%;left:50%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:#1a0808;border:2px solid rgba(220,60,60,0.5);display:flex;align-items:center;justify-content:center;opacity:0.6;">
+        <img src="/assets/map/nodes/boss.png" style="width:20px;height:20px;object-fit:contain;"/>
+      </div>
+      <!-- Row 2 -->
+      <div style="position:absolute;top:22%;left:30%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);opacity:0.3;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/event.png" style="width:16px;height:16px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <div style="position:absolute;top:22%;left:70%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);opacity:0.3;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/rest.png" style="width:16px;height:16px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <!-- Row 3 -->
+      <div style="position:absolute;top:40%;left:10%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);opacity:0.35;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/combat.png" style="width:16px;height:16px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <div style="position:absolute;top:40%;left:30%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);opacity:0.35;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/shop.png" style="width:16px;height:16px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <div style="position:absolute;top:40%;left:70%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);opacity:0.35;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/elite.png" style="width:16px;height:16px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <div style="position:absolute;top:40%;left:90%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);opacity:0.35;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/combat.png" style="width:16px;height:16px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <!-- Row 4 available -->
+      <div style="position:absolute;top:58%;left:17%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/combat.png" style="width:16px;height:16px;object-fit:contain;"/>
+      </div>
+      <div style="position:absolute;top:58%;left:50%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/event.png" style="width:16px;height:16px;object-fit:contain;"/>
+      </div>
+      <div style="position:absolute;top:58%;left:83%;transform:translateX(-50%);width:32px;height:32px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/rest.png" style="width:16px;height:16px;object-fit:contain;"/>
+      </div>
+      <!-- Start -->
+      <div style="position:absolute;bottom:4%;left:50%;transform:translateX(-50%);width:36px;height:36px;border-radius:50%;background:#1a1208;border:3px solid rgba(255,220,80,1);display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px rgba(255,200,40,0.6);">
+        <img src="/assets/map/nodes/combat.png" style="width:20px;height:20px;object-fit:contain;"/>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — 6 Columns <span style="color:#ffd066;">(recommended)</span></h3>
+      <p>Sweet spot. Enough width for interesting paths without feeling sparse. Matches the current 3–5 node rows comfortably.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0a08;padding:16px 4px;height:200px;position:relative;overflow:hidden;">
+      <svg width="100%" height="100%" style="position:absolute;inset:0;pointer-events:none;">
+        <line x1="50%" y1="84%" x2="13%" y2="66%" stroke="rgba(120,90,40,0.5)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="84%" x2="37%" y2="66%" stroke="rgba(120,90,40,0.5)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="84%" x2="63%" y2="66%" stroke="rgba(120,90,40,0.5)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="84%" x2="87%" y2="66%" stroke="rgba(120,90,40,0.5)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="13%" y1="66%" x2="25%" y2="48%" stroke="rgba(120,90,40,0.4)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="37%" y1="66%" x2="25%" y2="48%" stroke="rgba(120,90,40,0.4)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="37%" y1="66%" x2="50%" y2="48%" stroke="rgba(120,90,40,0.4)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="63%" y1="66%" x2="50%" y2="48%" stroke="rgba(120,90,40,0.4)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="63%" y1="66%" x2="75%" y2="48%" stroke="rgba(120,90,40,0.4)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="87%" y1="66%" x2="75%" y2="48%" stroke="rgba(120,90,40,0.4)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="25%" y1="48%" x2="38%" y2="30%" stroke="rgba(120,90,40,0.3)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="50%" y1="48%" x2="38%" y2="30%" stroke="rgba(120,90,40,0.3)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="75%" y1="48%" x2="63%" y2="30%" stroke="rgba(120,90,40,0.3)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="38%" y1="30%" x2="50%" y2="13%" stroke="rgba(180,60,60,0.5)" stroke-width="1.2" stroke-dasharray="4 3"/>
+        <line x1="63%" y1="30%" x2="50%" y2="13%" stroke="rgba(180,60,60,0.5)" stroke-width="1.2" stroke-dasharray="4 3"/>
+      </svg>
+      <!-- Boss -->
+      <div style="position:absolute;top:5%;left:50%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:#1a0808;border:2px solid rgba(220,60,60,0.5);display:flex;align-items:center;justify-content:center;opacity:0.6;">
+        <img src="/assets/map/nodes/boss.png" style="width:18px;height:18px;object-fit:contain;"/>
+      </div>
+      <!-- Row 2 — 7 cols: 7,21,36,50,64,79,93% -->
+      <div style="position:absolute;top:23%;left:38%;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);opacity:0.3;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/event.png" style="width:14px;height:14px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <div style="position:absolute;top:23%;left:63%;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.3);opacity:0.3;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/rest.png" style="width:14px;height:14px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <!-- Row 3 -->
+      <div style="position:absolute;top:41%;left:25%;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);opacity:0.35;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/combat.png" style="width:14px;height:14px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <div style="position:absolute;top:41%;left:50%;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);opacity:0.35;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/shop.png" style="width:14px;height:14px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <div style="position:absolute;top:41%;left:75%;transform:translateX(-50%);width:28px;height:28px;border-radius:50%;background:#1a1208;border:2px solid rgba(60,45,25,0.35);opacity:0.35;display:flex;align-items:center;justify-content:center;">
+        <img src="/assets/map/nodes/elite.png" style="width:14px;height:14px;object-fit:contain;filter:grayscale(1);"/>
+      </div>
+      <!-- Row 4 available -->
+      <div style="position:absolute;top:59%;left:13%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/combat.png" style="width:14px;height:14px;object-fit:contain;"/>
+      </div>
+      <div style="position:absolute;top:59%;left:37%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/rest.png" style="width:14px;height:14px;object-fit:contain;"/>
+      </div>
+      <div style="position:absolute;top:59%;left:63%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/event.png" style="width:14px;height:14px;object-fit:contain;"/>
+      </div>
+      <div style="position:absolute;top:59%;left:87%;transform:translateX(-50%);width:30px;height:30px;border-radius:50%;background:#1a1208;border:2px solid rgba(220,170,40,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px rgba(220,170,40,0.5);">
+        <img src="/assets/map/nodes/shop.png" style="width:14px;height:14px;object-fit:contain;"/>
+      </div>
+      <!-- Start -->
+      <div style="position:absolute;bottom:4%;left:50%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;background:#1a1208;border:3px solid rgba(255,220,80,1);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(255,200,40,0.6);">
+        <img src="/assets/map/nodes/combat.png" style="width:18px;height:18px;object-fit:contain;"/>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — 8 Columns</h3>
+      <p>Wide, airy. Lots of path variety and choice. Nodes are smaller to fit. Better for players who like planning routes far ahead.</p>
+    </div>
+  </div>
+
+</div>
+<p class="subtitle" style="margin-top:16px;">Recommendation: <strong>B (6 columns)</strong> — best balance of route variety and readability at 1920×1080.</p>

@@ -36,12 +36,16 @@ export function useDiscordSdk() {
           scope: ['identify', 'guilds'],
         } as any);
 
-        const response = await fetch('/api/auth/token', {
+        const tokenResponse = await fetch('/api/auth/token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code }),
         });
-        const { access_token } = await response.json();
+        const tokenData = await tokenResponse.json();
+        if (!tokenResponse.ok || !tokenData.access_token) {
+          throw new Error(tokenData.error || 'Token exchange failed');
+        }
+        const { access_token } = tokenData;
 
         const authResult = await sdk.commands.authenticate({ access_token });
 
