@@ -4,6 +4,8 @@ import { generateShopInventory, buyItem, ShopState } from '../../../src/dungeon/
 import { restHeal } from '../../../src/dungeon/rest-node';
 import { getRandomEvent, resolveEventChoice } from '../../../src/dungeon/events';
 import { generateRelicOffer, pickRelic } from '../../../src/dungeon/relic-offer';
+import { RelicType } from '../../../src/game/relics/common';
+import { applyDominoCrown } from '../../../src/game/relics/legendary';
 import { startRun } from '../../../src/dungeon/run';
 import { defaultPlayerState } from '../../../src/game/models/player-state';
 import type { DungeonNode } from '../../../src/dungeon/node-types';
@@ -278,6 +280,16 @@ router.post('/:runId/relic-offer/pick', async (req: Request, res: Response) => {
   }
 
   pickRelic(state.run, relicId);
+
+  // DominoCrown: remove 5 random stones, add doubles 2|2–6|6
+  if (relicId === RelicType.DominoCrown) {
+    if (!state.stones) {
+      const defaultBag = new Bag();
+      state.stones = [...defaultBag.stones];
+    }
+    state.stones = applyDominoCrown(state.stones);
+  }
+
   const relicNode = state.map.find(n => n.id === state.currentNodeId);
   if (relicNode) relicNode.completed = true;
   await saveRunState(runId, state);

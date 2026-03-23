@@ -2,19 +2,19 @@ import { PlayerStats } from '../models/player-stats';
 import { RelicDefinition, RelicType } from './common';
 
 export const RARE_RELICS: RelicDefinition[] = [
-  { id: RelicType.EmberCore, name: 'Ember Core', rarity: 'rare', description: 'Fire stones deal +1 Burn stack per stone.' },
-  { id: RelicType.FrostbiteRing, name: 'Frostbite Ring', rarity: 'rare', description: 'Ice chains of 2+ also slow enemy by 1 additional stack.' },
-  { id: RelicType.StormAmulet, name: 'Storm Amulet', rarity: 'rare', description: 'Lightning bonus increased to +5 flat damage per stone.' },
-  { id: RelicType.VenomGland, name: 'Venom Gland', rarity: 'rare', description: 'Poison ticks deal +1 additional damage per stack.' },
-  { id: RelicType.IronSkin, name: 'Iron Skin', rarity: 'rare', description: 'Armor cap raised from 20 to 35.' },
+  { id: RelicType.EmberCore,     name: 'Ember Core',      rarity: 'rare', description: 'Burn stacks never decay at end of turn.' },
+  { id: RelicType.FrostbiteRing, name: 'Frostbite Ring',  rarity: 'rare', description: 'Each slow stack reduces enemy damage by 30% instead of 20%.' },
+  { id: RelicType.StormAmulet,   name: 'Storm Amulet',    rarity: 'rare', description: 'Lightning bonus increased to +5 flat damage per stone.' },
+  { id: RelicType.VenomGland,    name: 'Venom Gland',     rarity: 'rare', description: 'Poison stacks never decay between turns.' },
+  { id: RelicType.IronSkin,      name: 'Iron Skin',       rarity: 'rare', description: 'Gain 1 extra armor whenever you gain armor.' },
 ];
 
 export function applyEmberCore(stats: PlayerStats): void {
-  stats.burnStackBonus += 1;
+  stats.burnNoDecay = true;
 }
 
 export function applyFrostbiteRing(stats: PlayerStats): void {
-  stats.slowStackBonus += 1;
+  stats.frostbiteRing = true;
 }
 
 export function applyStormAmulet(stats: PlayerStats): void {
@@ -22,9 +22,9 @@ export function applyStormAmulet(stats: PlayerStats): void {
 }
 
 export function applyVenomGland(stats: PlayerStats): void {
-  stats.poisonDamageBonus += 1;
+  stats.poisonNoDecay = true;
 }
 
 export function applyIronSkin(stats: PlayerStats): void {
-  stats.armorCap = 35;
+  stats.armorGainBonus = 1;
 }

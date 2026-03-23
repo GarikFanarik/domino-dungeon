@@ -1,6 +1,4 @@
 import { PlayerState } from '../models/player-state';
-import { Bag } from '../bag';
-import { Stone, ElementType } from '../models/stone';
 
 export enum RelicType {
   // Common
@@ -9,7 +7,7 @@ export enum RelicType {
   CrackedShield = 'cracked-shield',
   TravelerBoots = 'travelers-boots',
   PebbleCharm = 'pebble-charm',
-  // Rare (placeholders for later)
+  // Rare
   EmberCore = 'ember-core',
   FrostbiteRing = 'frostbite-ring',
   StormAmulet = 'storm-amulet',
@@ -38,42 +36,33 @@ export interface RelicDefinition {
 }
 
 export const COMMON_RELICS: RelicDefinition[] = [
-  { id: RelicType.WornPouch, name: 'Worn Pouch', rarity: 'common', description: 'Bag starts with 2 extra random stones.' },
-  { id: RelicType.LuckyPip, name: 'Lucky Pip', rarity: 'common', description: 'Once per combat: re-roll one stone in hand.' },
-  { id: RelicType.CrackedShield, name: 'Cracked Shield', rarity: 'common', description: 'Start each combat with 5 Armor.' },
-  { id: RelicType.TravelerBoots, name: "Traveler's Boots", rarity: 'common', description: 'Gain 5 bonus gold after every elite/boss fight.' },
-  { id: RelicType.PebbleCharm, name: 'Pebble Charm', rarity: 'common', description: 'Earth element grants +1 extra Armor per stone.' },
+  { id: RelicType.WornPouch,      name: 'Worn Pouch',        rarity: 'common', description: 'Start each combat with 8 stones in hand instead of 7.' },
+  { id: RelicType.LuckyPip,       name: 'Lucky Pip',         rarity: 'common', description: 'Permanently gain +1 swap per turn.' },
+  { id: RelicType.CrackedShield,  name: 'Cracked Shield',    rarity: 'common', description: 'Start each combat with 5 Armor.' },
+  { id: RelicType.TravelerBoots,  name: "Traveler's Boots",  rarity: 'common', description: 'Gain 1 gold per stone in your chain when you win a combat.' },
+  { id: RelicType.PebbleCharm,    name: 'Pebble Charm',      rarity: 'common', description: 'Earth chains of 2+ stones fortify (armor persists between turns).' },
 ];
 
-export function applyWornPouch(bag: Bag): void {
-  const extras = new Bag().draw(2);
-  extras.forEach(s => bag.addStone(s));
+/** Returns the hand size to draw at combat start (base + 1). */
+export function applyWornPouch(baseHandSize: number): number {
+  return baseHandSize + 1;
 }
 
-export interface LuckyPipResult {
-  success: boolean;
-  newStone?: Stone;
-}
-
-export function applyLuckyPip(hand: Stone[], bag: Bag): LuckyPipResult {
-  if (hand.length === 0 || bag.size === 0) return { success: false };
-  // Remove first stone from hand, put back, draw new one
-  const removed = hand.splice(0, 1)[0];
-  bag.addStone(removed);
-  bag.shuffle();
-  const [newStone] = bag.draw(1);
-  hand.unshift(newStone);
-  return { success: true, newStone };
+/** Returns the new swaps-per-turn value (+1). */
+export function applyLuckyPip(swapsPerTurn: number): number {
+  return swapsPerTurn + 1;
 }
 
 export function applyCrackedShield(player: PlayerState, armorCap: number): void {
   player.armor = Math.min(armorCap, player.armor + 5);
 }
 
-export function applyTravelerBoots(currentGold: number): number {
-  return currentGold + 5;
+/** Returns gold earned (1 per stone in winning chain). */
+export function applyTravelerBoots(chainLength: number): number {
+  return chainLength;
 }
 
-export function applyPebbleCharm(earthStoneCount: number): number {
-  return earthStoneCount; // +1 bonus armor per earth stone
+/** Returns true if earth count meets the PebbleCharm fortify threshold (2+). */
+export function applyPebbleCharm(earthCount: number): boolean {
+  return earthCount >= 2;
 }

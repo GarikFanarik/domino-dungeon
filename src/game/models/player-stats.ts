@@ -1,20 +1,19 @@
 export interface PlayerStats {
   swapsPerTurn: number;
-  armorCap: number;
-  // Relic bonuses
-  burnStackBonus: number;
-  slowStackBonus: number;
   lightningFlatBonus: number;
-  poisonDamageBonus: number;
+  burnNoDecay: boolean;
+  poisonNoDecay: boolean;
+  armorGainBonus: number;
+  frostbiteRing: boolean;
 }
 
 export function defaultPlayerStats(): PlayerStats {
   return {
     swapsPerTurn: 1,
-    armorCap: 20,
-    burnStackBonus: 0,
-    slowStackBonus: 0,
     lightningFlatBonus: 0,
-    poisonDamageBonus: 0,
+    burnNoDecay: false,
+    poisonNoDecay: false,
+    armorGainBonus: 0,
+    frostbiteRing: false,
   };
 }

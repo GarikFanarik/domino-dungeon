@@ -11,10 +11,14 @@ import { analyzeChain, applyChainEffects } from '../../../src/game/elements/elem
 import { calculateDamage, applyArmor } from '../../../src/game/damage';
 import { EnemyAI, EnemyType } from '../../../src/game/ai/enemy-ai';
 import { dealDamage, isDead } from '../../../src/game/hp';
+import { getSlowDamageMultiplier } from '../../../src/game/elements/ice';
 import type { Stone as GameStone } from '../../../src/game/models/stone';
 import { createElementalStone } from '../../../src/game/models/stone';
 import type { PlacedStone as GamePlacedStone } from '../../../src/game/chain';
 import type { CombatStateResponse, PlayStoneResponse, EndTurnResponse, UnplayStoneResponse } from '../../../src/types/api';
+import { RelicType } from '../../../src/game/relics/common';
+import { applyInfiniteBag, applyBloodPactEnd, applyTheLastStone, applyCurseOfGreed } from '../../../src/game/relics/legendary';
+import { applyTravelerBoots } from '../../../src/game/relics/common';
 
 const router = Router();
 
@@ -331,17 +335,31 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     relics: [],
   };
 
-  // 1. Analyse chain for element effects
-  const analysis = analyzeChain(chain);
+  const relics = session.relics ?? [];
 
-  // 2. Apply chain effects (element buffs/debuffs)
-  const effects = applyChainEffects(analysis, playerState, enemy);
+  // 1. Analyse chain for element effects (GlacialHeart: freeze at 1+, ElementalPrism: counts×2)
+  const analysis = analyzeChain(chain, relics);
+
+  // 2. Apply chain effects (PebbleCharm, IronSkin, StormAmulet wired inside)
+  const effects = applyChainEffects(analysis, playerState, enemy, relics);
 
   // 3. Calculate player's damage from chain
-  const damageBreakdown = calculateDamage(chain, {} as any, effects.lightningBonus);
+  let chainDamage = calculateDamage(chain, {} as any, effects.lightningBonus).finalDamage;
+
+  // TheLastStone: single-stone chain → (left + right) × 2
+  if (relics.includes(RelicType.TheLastStone)) {
+    const lastStoneDmg = applyTheLastStone(chain.stones as any);
+    if (lastStoneDmg > 0) chainDamage = lastStoneDmg;
+  }
+
+  // InfiniteBag: return played stones to bag after this turn
+  if (relics.includes(RelicType.InfiniteBag) && chain.stones.length > 0) {
+    const playedStones = chain.stones.map(p => p.stone as GameStone);
+    session.bag = applyInfiniteBag(playedStones, session.bag as any) as any;
+  }
 
   // 4. Deal player damage to enemy
-  dealDamage(enemy, damageBreakdown.finalDamage);
+  dealDamage(enemy, chainDamage);
 
   // Check if enemy died
   if (isDead(enemy)) {
@@ -368,16 +386,31 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
         else if (nodeType === 'elite') goldEarned = 20 + Math.floor(Math.random() * 6); // 20-25g
         else goldEarned = 10 + Math.floor(Math.random() * 6); // 10-15g
 
-        // TravelerBoots relic: +5g for elite/boss
-        const relics = session.relics ?? [];
-        if (relics.includes('travelers-boots') && (nodeType === 'elite' || nodeType === 'boss')) {
-          goldEarned += 5;
-          triggeredRelics.push('travelers-boots');
+        // TravelerBoots: +1 gold per stone in winning chain
+        if (relics.includes(RelicType.TravelerBoots)) {
+          const chainBonus = applyTravelerBoots(chain.stones.length);
+          goldEarned += chainBonus;
+          if (chainBonus > 0) triggeredRelics.push(RelicType.TravelerBoots);
+        }
+
+        // CurseOfGreed: double gold reward
+        if (relics.includes(RelicType.CurseOfGreed)) {
+          goldEarned = applyCurseOfGreed(goldEarned, 'reward');
+          triggeredRelics.push(RelicType.CurseOfGreed);
         }
 
         const currentGold = session.playerGold ?? 0;
         session.playerGold = currentGold + goldEarned;
         playerState.gold = session.playerGold;
+
+        // BloodPact: restore 20 HP at end of won combat
+        if (relics.includes(RelicType.BloodPact)) {
+          const hpObj = { current: session.playerHp ?? 80, max: session.playerMaxHp ?? 80 };
+          applyBloodPactEnd(hpObj);
+          session.playerHp = hpObj.current;
+          playerState.hp.current = hpObj.current;
+          triggeredRelics.push(RelicType.BloodPact);
+        }
 
         runState.playerState.hp.current = session.playerHp ?? runState.playerState.hp.current;
         runState.playerState.armor = session.playerArmor ?? runState.playerState.armor;
@@ -437,7 +470,6 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
 
   if (!enemy.status.stunned) {
     const ai = new EnemyAI();
-    // Build a minimal enemy hand based on remaining HP
     const enemyHand: GameStone[] = [
       {
         id: 'e1',
@@ -447,7 +479,11 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
       },
     ];
     const attack = ai.buildAttack(enemyHand, EnemyType.Normal);
-    enemyAttackDamage = attack.damage;
+
+    // FrostbiteRing: each slow stack reduces enemy damage by 30% instead of 20%
+    const slowPct = relics.includes(RelicType.FrostbiteRing) ? 0.3 : 0.2;
+    const slowMultiplier = getSlowDamageMultiplier(enemy, slowPct);
+    enemyAttackDamage = Math.floor(attack.damage * slowMultiplier);
 
     // Apply armor first
     const armorResult = applyArmor(enemyAttackDamage, playerState.armor);
@@ -456,16 +492,25 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     // Deal remaining damage to player
     if (armorResult.damageToDeal > 0) {
       dealDamage(playerState, armorResult.damageToDeal);
+
+      // CurseOfGreed: lose 1 gold when hit
+      if (relics.includes(RelicType.CurseOfGreed)) {
+        const goldLost = applyCurseOfGreed(0, 'hit');
+        session.playerGold = Math.max(0, (session.playerGold ?? 0) - goldLost);
+        playerState.gold = session.playerGold;
+      }
     }
   } else {
     enemyEffects.push('stunned');
     enemy.status.stunned = false;
   }
 
-  // Tick burn on enemy
+  // Tick burn on enemy — EmberCore: burn stacks don't decay
   if (enemy.status.burn > 0) {
     dealDamage(enemy, enemy.status.burn);
-    enemy.status.burn = Math.max(0, enemy.status.burn - 1);
+    if (!relics.includes(RelicType.EmberCore)) {
+      enemy.status.burn = Math.max(0, enemy.status.burn - 1);
+    }
   }
 
   // Check if player died

@@ -24,6 +24,6 @@ export function processSlowDecay(enemy: Enemy): void {
   enemy.status.slow = Math.max(0, enemy.status.slow - 1);
 }
 
-export function getSlowDamageMultiplier(enemy: Enemy): number {
-  return 1 - (enemy.status.slow * 0.2);
+export function getSlowDamageMultiplier(enemy: Enemy, pctPerStack: number = 0.2): number {
+  return 1 - (enemy.status.slow * pctPerStack);
 }

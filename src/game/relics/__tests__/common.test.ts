@@ -1,5 +1,4 @@
 import { defaultPlayerState } from '../../models/player-state';
-import { Bag } from '../../bag';
 import {
   RelicType,
   applyWornPouch,
@@ -22,26 +21,13 @@ describe('Common relics', () => {
     expect(ids).toContain(RelicType.PebbleCharm);
   });
 
-  test('WornPouch adds 2 stones to bag', () => {
-    const bag = new Bag([]);
-    expect(bag.size).toBe(0);
-    applyWornPouch(bag);
-    expect(bag.size).toBe(2);
+  test('WornPouch increases hand size by 1', () => {
+    expect(applyWornPouch(7)).toBe(8);
   });
 
-  test('LuckyPip swaps a stone in hand without using swap action', () => {
-    const bag = new Bag();
-    const hand = [bag.draw(1)[0]];
-    const originalId = hand[0].id;
-    const result = applyLuckyPip(hand, bag);
-    expect(result.success).toBe(true);
-    expect(hand[0].id).not.toBe(originalId);
-  });
-
-  test('LuckyPip fails when hand is empty', () => {
-    const bag = new Bag();
-    const result = applyLuckyPip([], bag);
-    expect(result.success).toBe(false);
+  test('LuckyPip increases swaps per turn by 1', () => {
+    expect(applyLuckyPip(1)).toBe(2);
+    expect(applyLuckyPip(2)).toBe(3);
   });
 
   test('CrackedShield grants 5 armor at combat start', () => {
@@ -50,15 +36,14 @@ describe('Common relics', () => {
     expect(player.armor).toBe(5);
   });
 
-  test('TravelerBoots grants 5 gold', () => {
-    const goldBefore = 10;
-    const gold = applyTravelerBoots(goldBefore);
-    expect(gold).toBe(15);
+  test('TravelerBoots returns 1 gold per stone in the winning chain', () => {
+    expect(applyTravelerBoots(5)).toBe(5);
+    expect(applyTravelerBoots(0)).toBe(0);
   });
 
-  test('PebbleCharm adds +1 armor per Earth stone (on top of normal)', () => {
-    // Normal earth gives 3 armor per stone, charm adds +1 = 4 per stone
-    const bonus = applyPebbleCharm(2); // 2 earth stones
-    expect(bonus).toBe(2); // +1 extra per stone = +2 total bonus armor
+  test('PebbleCharm triggers fortify at 2+ earth stones', () => {
+    expect(applyPebbleCharm(2)).toBe(true);
+    expect(applyPebbleCharm(3)).toBe(true);
+    expect(applyPebbleCharm(1)).toBe(false);
   });
 });
