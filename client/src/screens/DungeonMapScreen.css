@@ -28,7 +28,7 @@
 /* Floating HUD — HP, gold, element counts */
 .map-hud {
   position: absolute;
-  top: 20px;
+  bottom: 20px;
   left: 20px;
   z-index: 10;
   display: flex;

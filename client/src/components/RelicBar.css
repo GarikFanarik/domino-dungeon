@@ -1,11 +1,11 @@
 .relic-bar {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  left: 1rem;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap-reverse;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: 0.4rem;
   max-width: 400px;
   z-index: 50;
@@ -21,7 +21,7 @@
 .relic-bar__tooltip {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
+  left: 0;
   width: 190px;
   background: rgba(8, 6, 4, 0.92);
   border: 1px solid rgba(120, 90, 50, 0.6);
