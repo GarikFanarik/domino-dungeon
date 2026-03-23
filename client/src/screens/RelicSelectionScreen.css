@@ -185,7 +185,6 @@
   border-radius: 16px;
   border: 2px solid rgba(120, 90, 50, 0.6);
   object-fit: contain;
-  image-rendering: pixelated;
   background: rgba(0, 0, 0, 0.35);
 }
 

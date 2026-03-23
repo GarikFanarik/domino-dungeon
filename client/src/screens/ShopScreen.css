@@ -240,7 +240,6 @@
   border-radius: 10px;
   border: 2px solid var(--gold, #ffd066);
   object-fit: contain;
-  image-rendering: pixelated;
   background: rgba(0, 0, 0, 0.35);
   flex-shrink: 0;
 }
