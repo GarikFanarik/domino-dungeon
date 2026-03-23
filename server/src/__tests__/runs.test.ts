@@ -9,13 +9,13 @@ jest.mock('../../../src/lib/prisma', () => ({
 }));
 
 // Mock Redis before importing app so routes never actually connect
+const redisStore = new Map<string, string>();
 jest.mock('../../../src/lib/redis', () => {
-  const store = new Map<string, string>();
   return {
     __esModule: true,
     default: {
-      get: jest.fn(async (key: string) => store.get(key) ?? null),
-      set: jest.fn(async () => 'OK'),
+      get: jest.fn(async (key: string) => redisStore.get(key) ?? null),
+      set: jest.fn(async (key: string, value: string) => { redisStore.set(key, value); return 'OK'; }),
       del: jest.fn(async () => 1),
       on: jest.fn(),
     },
@@ -42,6 +42,34 @@ describe('Run management API', () => {
     it('returns 404 for unknown runId', async () => {
       const res = await request(app).get('/api/run/nonexistent-run-id');
       expect(res.status).toBe(404);
+    });
+
+    it('returns playerState.relics populated from run.relics', async () => {
+      const runId = 'test-relic-run-id';
+      const runState = {
+        run: {
+          id: runId,
+          userId: 'user-1',
+          seed: 'seed-1',
+          currentAct: 1,
+          currentNodeId: null,
+          status: 'ACTIVE',
+          hp: 80,
+          maxHp: 80,
+          gold: 0,
+          relics: ['cracked-shield', 'lucky-pip'],
+          completedAt: null,
+          createdAt: new Date().toISOString(),
+        },
+        playerState: { hp: { current: 80, max: 80 }, armor: 0, armorFortified: false, gold: 0, relics: [] },
+        map: [],
+        currentNodeId: null,
+      };
+      redisStore.set(`run:${runId}`, JSON.stringify(runState));
+
+      const res = await request(app).get(`/api/run/${runId}`);
+      expect(res.status).toBe(200);
+      expect(res.body.playerState.relics).toEqual(['cracked-shield', 'lucky-pip']);
     });
   });
 
