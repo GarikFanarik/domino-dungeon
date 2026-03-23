@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { useDiscordSdk, type DiscordAuth } from '../hooks/useDiscordSdk';
 
 export type Screen =
@@ -13,7 +13,7 @@ export type Screen =
   | 'run-summary'
   | 'leaderboard';
 
-interface GameContextValue {
+export interface GameContextValue {
   screen: Screen;
   navigate: (screen: Screen) => void;
   runId: string | null;
@@ -21,17 +21,28 @@ interface GameContextValue {
   auth: DiscordAuth | null;
   discordReady: boolean;
   discordError: string | null;
+  triggeredRelics: string[];
+  flashRelics: (ids: string[]) => void;
 }
 
-const GameContext = createContext<GameContextValue | null>(null);
+export const GameContext = createContext<GameContextValue | null>(null);
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [screen, setScreen] = useState<Screen>('loading');
   const [runId, setRunId] = useState<string | null>(null);
+  const [triggeredRelics, setTriggeredRelics] = useState<string[]>([]);
+  const clearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { ready: discordReady, auth, error: discordError } = useDiscordSdk();
 
+  const flashRelics = useCallback((ids: string[]) => {
+    if (ids.length === 0) return;
+    if (clearTimer.current) clearTimeout(clearTimer.current);
+    setTriggeredRelics(ids);
+    clearTimer.current = setTimeout(() => setTriggeredRelics([]), 1200);
+  }, []);
+
   return (
-    <GameContext.Provider value={{ screen, navigate: setScreen, runId, setRunId, auth, discordReady, discordError }}>
+    <GameContext.Provider value={{ screen, navigate: setScreen, runId, setRunId, auth, discordReady, discordError, triggeredRelics, flashRelics }}>
       {children}
     </GameContext.Provider>
   );

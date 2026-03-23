@@ -1,0 +1,17 @@
+.relic-bar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  max-width: 280px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.relic-bar .relic-icon {
+  pointer-events: auto;
+}

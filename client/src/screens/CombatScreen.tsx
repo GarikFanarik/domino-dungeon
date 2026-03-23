@@ -112,7 +112,7 @@ function StatusBadges({ status }: { status: EnemyStatus }) {
 }
 
 export function CombatScreen({ runId }: Props) {
-  const { navigate } = useGame();
+  const { navigate, flashRelics } = useGame();
   const [combat, setCombat] = useState<CombatState | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -237,6 +237,7 @@ export function CombatScreen({ runId }: Props) {
       const data = await res.json();
 
       if (data.combatResult === 'player-won') {
+        if (data.triggeredRelics?.length > 0) flashRelics(data.triggeredRelics);
         if (data.goldEarned > 0) setMessage(`Victory! +${data.goldEarned}g`);
         if (data.stoneRewards && data.stoneRewards.length > 0) {
           setStoneRewards(data.stoneRewards);

@@ -10,8 +10,11 @@ import { EventScreen } from './screens/EventScreen';
 import { RelicSelectionScreen } from './screens/RelicSelectionScreen';
 import { RunSummaryScreen } from './screens/RunSummaryScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
+import { RelicBar } from './components/RelicBar';
 import { useViewportScale } from './hooks/useViewportScale';
 import './App.css';
+
+const RELIC_BAR_SCREENS = new Set(['dungeon-map', 'combat', 'shop', 'rest', 'event', 'relic-selection']);
 
 function AppRouter() {
   const { screen, runId } = useGame();
@@ -28,6 +31,16 @@ function AppRouter() {
     case 'leaderboard': return <LeaderboardScreen />;
     default: return <LoadingScreen />;
   }
+}
+
+function AppContent() {
+  const { screen } = useGame();
+  return (
+    <>
+      <AppRouter />
+      {RELIC_BAR_SCREENS.has(screen) && <RelicBar />}
+    </>
+  );
 }
 
 const DESIGN_W = 1920;
@@ -50,7 +63,7 @@ export default function App() {
           top: `${offsetY}px`,
         }}
       >
-        <AppRouter />
+        <AppContent />
       </div>
     </GameProvider>
   );

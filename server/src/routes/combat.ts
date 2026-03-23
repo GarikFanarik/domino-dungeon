@@ -353,6 +353,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
 
     let goldEarned = 0;
     let stoneRewards: Array<{ element: string; leftPip: number; rightPip: number }> | null = null;
+    const triggeredRelics: string[] = [];
 
     // Sync player state back to run
     try {
@@ -371,6 +372,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
         const relics = session.relics ?? [];
         if (relics.includes('travelers-boots') && (nodeType === 'elite' || nodeType === 'boss')) {
           goldEarned += 5;
+          triggeredRelics.push('travelers-boots');
         }
 
         const currentGold = session.playerGold ?? 0;
@@ -423,6 +425,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
       combatResult: 'player-won',
       goldEarned,
       stoneRewards: stoneRewards ?? undefined,
+      triggeredRelics,
     };
     res.json(response);
     return;

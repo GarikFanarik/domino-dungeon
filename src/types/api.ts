@@ -59,6 +59,7 @@ export interface EndTurnResponse {
   hand?: Stone[];
   goldEarned?: number;
   stoneRewards?: Array<{ element: string; leftPip: number; rightPip: number }>;
+  triggeredRelics?: string[];
 }
 
 export interface MapNode {
