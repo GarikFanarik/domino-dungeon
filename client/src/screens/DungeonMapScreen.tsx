@@ -128,7 +128,7 @@ export function DungeonMapScreen({ runId }: Props) {
     navigate(NODE_TO_SCREEN[node.type] || 'combat');
   }
 
-  const rows = Array.from(new Set(nodes.map((n) => n.row))).sort((a, b) => a - b);
+  const rows = Array.from(new Set(nodes.map((n) => n.row))).sort((a, b) => b - a);
 
   if (!runId) {
     return (
