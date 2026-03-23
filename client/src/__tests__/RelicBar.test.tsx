@@ -57,10 +57,10 @@ describe('RelicBar', () => {
   });
 
   it('renders a relic icon for each relic', async () => {
-    renderWithContext(mockContext());
+    const { container } = renderWithContext(mockContext());
     await waitFor(() => {
-      expect(screen.getByText('Worn Pouch')).toBeInTheDocument();
-      expect(screen.getByText('Ember Core')).toBeInTheDocument();
+      const icons = container.querySelectorAll('.relic-icon');
+      expect(icons).toHaveLength(2);
     });
   });
 

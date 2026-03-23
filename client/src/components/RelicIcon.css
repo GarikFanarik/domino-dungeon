@@ -1,25 +1,25 @@
 .relic-icon {
+  position: relative;
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
-  padding: 0.5rem;
-  border-radius: var(--radius);
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
   border: 2px solid var(--border);
   background: var(--bg-surface);
-  min-width: 4rem;
-  text-align: center;
+  overflow: hidden;
   cursor: default;
+  flex-shrink: 0;
 }
 
 .relic-icon__symbol {
-  font-size: 1.5rem;
-  line-height: 1;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.4rem;
 }
 
 .relic-icon__img {
@@ -29,18 +29,28 @@
   image-rendering: pixelated;
 }
 
-.relic-icon__name {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.2;
+/* Rarity stripe at bottom via ::after */
+.relic-icon::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
 }
 
-.relic-icon__rarity {
-  font-size: 0.6rem;
-  text-transform: capitalize;
-  letter-spacing: 0.03em;
-}
+/* Rarity colour variants — border + stripe */
+.relic-icon--common    { border-color: var(--neutral); }
+.relic-icon--common::after    { background: var(--neutral); }
+
+.relic-icon--rare      { border-color: var(--armor); }
+.relic-icon--rare::after      { background: var(--armor); }
+
+.relic-icon--epic      { border-color: var(--earth); }
+.relic-icon--epic::after      { background: var(--earth); }
+
+.relic-icon--legendary { border-color: var(--gold); }
+.relic-icon--legendary::after { background: var(--gold); }
 
 /* Trigger glow animation */
 @keyframes relic-trigger-glow {
@@ -53,16 +63,3 @@
 .relic-icon--glowing {
   animation: relic-trigger-glow 1.2s ease-in-out forwards;
 }
-
-/* Rarity colour variants */
-.relic-icon--common   { border-color: var(--neutral); }
-.relic-icon--common   .relic-icon__rarity { color: var(--neutral); }
-
-.relic-icon--rare     { border-color: var(--armor); }
-.relic-icon--rare     .relic-icon__rarity { color: var(--armor); }
-
-.relic-icon--epic     { border-color: var(--earth); }
-.relic-icon--epic     .relic-icon__rarity { color: var(--earth); }
-
-.relic-icon--legendary { border-color: var(--gold); }
-.relic-icon--legendary .relic-icon__rarity { color: var(--gold); }
