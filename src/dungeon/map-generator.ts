@@ -46,23 +46,32 @@ export function generateActMap(act: number, seed: string): DungeonNode[] {
     nodes.push(...rowArr);
   }
 
-  // Connect rows: each node connects to 1-2 nodes in the next row
+  // Connect rows using column-proportional buckets so paths never cross.
+  // Node at col c (in row of M) maps to next-row columns [lo, hi] where
+  // lo = floor(c*N/M) and hi = min(N-1, floor((c+1)*N/M)).
+  // Buckets are non-overlapping so connections stay order-preserving.
   for (let row = 0; row < ROWS - 1; row++) {
     const current = rowNodes[row];
     const next = rowNodes[row + 1];
+    const M = current.length;
+    const N = next.length;
 
-    // Ensure every next-row node has at least one incoming connection
     const connected = new Set<number>();
 
-    for (const node of current) {
-      const targetIdx = Math.floor(rng() * next.length);
-      node.connections.push(next[targetIdx].id);
-      connected.add(targetIdx);
+    for (let c = 0; c < M; c++) {
+      const node = current[c];
+      const lo = Math.floor(c * N / M);
+      const hi = Math.min(N - 1, Math.floor((c + 1) * N / M));
 
-      // 40% chance of second connection
-      if (next.length > 1 && rng() < 0.4) {
-        let alt = Math.floor(rng() * next.length);
-        if (alt === targetIdx) alt = (alt + 1) % next.length;
+      // Primary connection: random within bucket
+      const primary = lo + Math.floor(rng() * (hi - lo + 1));
+      node.connections.push(next[primary].id);
+      connected.add(primary);
+
+      // 40% chance of a second connection within the same bucket
+      if (hi > lo && rng() < 0.4) {
+        let alt = lo + Math.floor(rng() * (hi - lo + 1));
+        if (alt === primary) alt = alt < hi ? alt + 1 : alt - 1;
         if (!node.connections.includes(next[alt].id)) {
           node.connections.push(next[alt].id);
           connected.add(alt);
@@ -70,10 +79,14 @@ export function generateActMap(act: number, seed: string): DungeonNode[] {
       }
     }
 
-    // Ensure all next-row nodes have at least one incoming connection
-    for (let i = 0; i < next.length; i++) {
+    // Ensure every next-row node has at least one incoming connection.
+    // Map unconnected node i back to the current-row node whose bucket covers it.
+    for (let i = 0; i < N; i++) {
       if (!connected.has(i)) {
-        current[Math.floor(rng() * current.length)].connections.push(next[i].id);
+        const c = Math.min(M - 1, Math.floor(i * M / N));
+        if (!current[c].connections.includes(next[i].id)) {
+          current[c].connections.push(next[i].id);
+        }
       }
     }
   }

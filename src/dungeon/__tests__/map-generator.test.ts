@@ -54,4 +54,29 @@ describe('Procedural map generation', () => {
     const nonBoss = nodes.filter(n => n.type !== NodeType.Boss);
     nonBoss.forEach(n => expect(n.connections.length).toBeGreaterThan(0));
   });
+
+  test('connections never cross (left node never connects further right than a right node)', () => {
+    for (const seed of ['seed1', 'seed2', 'test-seed', 'abc', 'xyz']) {
+      const nodes = generateActMap(1, seed);
+      const byRow: Record<number, typeof nodes> = {};
+      nodes.forEach(n => { (byRow[n.row] ??= []).push(n); });
+      const nodeById = Object.fromEntries(nodes.map(n => [n.id, n]));
+
+      const rows = Object.keys(byRow).map(Number).sort((a, b) => a - b);
+      for (const row of rows) {
+        const rowNodes = byRow[row].sort((a, b) => a.col - b.col);
+        for (let i = 0; i < rowNodes.length; i++) {
+          for (let j = i + 1; j < rowNodes.length; j++) {
+            const leftNode = rowNodes[i];
+            const rightNode = rowNodes[j];
+            const leftCols = leftNode.connections.map(id => nodeById[id].col);
+            const rightCols = rightNode.connections.map(id => nodeById[id].col);
+            const maxLeft = Math.max(...leftCols, -Infinity);
+            const minRight = Math.min(...rightCols, Infinity);
+            expect(maxLeft).toBeLessThanOrEqual(minRight);
+          }
+        }
+      }
+    }
+  });
 });
