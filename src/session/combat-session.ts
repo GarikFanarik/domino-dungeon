@@ -41,6 +41,7 @@ export interface CombatSession {
   playerArmor?: number;
   playerGold?: number;
   relics?: string[];
+  phoenixUsed?: boolean;
   pendingStoneRewards?: Array<{ element: string; leftPip: number; rightPip: number }>;
 }
 

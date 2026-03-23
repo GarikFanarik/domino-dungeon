@@ -18,6 +18,7 @@ import type { PlacedStone as GamePlacedStone } from '../../../src/game/chain';
 import type { CombatStateResponse, PlayStoneResponse, EndTurnResponse, UnplayStoneResponse } from '../../../src/types/api';
 import { RelicType } from '../../../src/game/relics/common';
 import { applyInfiniteBag, applyBloodPactEnd, applyTheLastStone, applyCurseOfGreed } from '../../../src/game/relics/legendary';
+import { applyPhoenixFeather } from '../../../src/game/relics/epic';
 import { applyTravelerBoots } from '../../../src/game/relics/common';
 
 const router = Router();
@@ -492,6 +493,16 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     // Deal remaining damage to player
     if (armorResult.damageToDeal > 0) {
       dealDamage(playerState, armorResult.damageToDeal);
+
+      // PhoenixFeather: survive a lethal hit once per run, restore 30% max HP
+      if (relics.includes(RelicType.PhoenixFeather) && isDead(playerState)) {
+        const phoenixState = { phoenixUsed: session.phoenixUsed ?? false };
+        const restored = applyPhoenixFeather(playerState.hp.current, playerState.hp.max, phoenixState);
+        if (restored > 0) {
+          playerState.hp.current = restored;
+          session.phoenixUsed = true;
+        }
+      }
 
       // CurseOfGreed: lose 1 gold when hit
       if (relics.includes(RelicType.CurseOfGreed)) {
