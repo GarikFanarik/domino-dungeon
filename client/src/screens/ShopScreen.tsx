@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
-import { RelicIcon } from '../components/RelicIcon';
-import { RELIC_DEFINITIONS } from '../data/relics';
+import { relicImage } from '../utils/relicImage';
 import './ShopScreen.css';
 
 interface ShopItem {
@@ -72,32 +71,41 @@ export function ShopScreen({ runId }: Props) {
         {message && <p className="shop-message">{message}</p>}
 
         <div className="shop-items">
-          {shop.items.map((item) => (
-            <div key={item.id} className={`shop-item-card${item.sold ? ' shop-item-card--sold' : ''}`}>
-              {item.type === 'relic' && item.relicId && RELIC_DEFINITIONS[item.relicId] && (
-                <RelicIcon relic={RELIC_DEFINITIONS[item.relicId]} />
-              )}
-              <div className={`shop-item-name${item.sold ? ' shop-item-name--sold' : ''}`}>
-                {item.name}
-                {item.type === 'stone' && item.element && (
-                  <span className={`shop-element-badge shop-element-badge--${item.element.toLowerCase()}`}>
-                    {item.element}
-                  </span>
+          {shop.items.map((item) => {
+            const isRelic = item.type === 'relic';
+            const imgSrc = isRelic && item.relicId ? relicImage(item.relicId) : undefined;
+            return (
+              <div
+                key={item.id}
+                className={`shop-item-card${item.sold ? ' shop-item-card--sold' : ''}${isRelic ? ' shop-item-card--relic' : ''}`}
+              >
+                {imgSrc && (
+                  <img src={imgSrc} alt={item.name} className="shop-relic-art" />
                 )}
+                <div className="shop-relic-body">
+                  <div className={`shop-item-name${item.sold ? ' shop-item-name--sold' : ''}`}>
+                    {item.name}
+                    {item.type === 'stone' && item.element && (
+                      <span className={`shop-element-badge shop-element-badge--${item.element.toLowerCase()}`}>
+                        {item.element}
+                      </span>
+                    )}
+                  </div>
+                  <div className="shop-item-desc">{item.description}</div>
+                  <div className="shop-item-footer">
+                    <span className="shop-item-cost">{item.cost}g</span>
+                    <button
+                      className="btn-shop-buy"
+                      onClick={() => handleBuy(item.id)}
+                      disabled={item.sold || shop.playerGold < item.cost}
+                    >
+                      {item.sold ? 'Sold' : 'Buy'}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="shop-item-desc">{item.description}</div>
-              <div className="shop-item-footer">
-                <span className="shop-item-cost">{item.cost}g</span>
-                <button
-                  className="btn-shop-buy"
-                  onClick={() => handleBuy(item.id)}
-                  disabled={item.sold || shop.playerGold < item.cost}
-                >
-                  {item.sold ? 'Sold' : 'Buy'}
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <button className="btn-shop-leave" onClick={handleLeave}>Leave Shop</button>

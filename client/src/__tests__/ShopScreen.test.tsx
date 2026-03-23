@@ -8,7 +8,7 @@ global.fetch = vi.fn();
 const mockShop = {
   items: [
     { id: 'item-1', type: 'stone', name: 'Fire Stone', description: 'Adds fire', cost: 30, sold: false },
-    { id: 'item-2', type: 'relic', name: 'Iron Shield', description: '+5 armor', cost: 80, sold: false },
+    { id: 'item-2', type: 'relic', name: 'Worn Pouch', description: 'Draw 1 extra stone', cost: 80, sold: false, element: null, relicId: 'worn-pouch' },
     { id: 'item-3', type: 'potion', name: 'Health Potion', description: '+20 HP', cost: 25, sold: false },
   ],
   playerGold: 45,
@@ -29,7 +29,7 @@ describe('ShopScreen', () => {
     renderShop();
     await waitFor(() => {
       expect(screen.getByText('Fire Stone')).toBeInTheDocument();
-      expect(screen.getByText('Iron Shield')).toBeInTheDocument();
+      expect(screen.getByText('Worn Pouch')).toBeInTheDocument();
     });
   });
 
@@ -40,7 +40,7 @@ describe('ShopScreen', () => {
 
   it('buy button disabled when item costs more than gold', async () => {
     renderShop();
-    await waitFor(() => screen.getByText('Iron Shield'));
+    await waitFor(() => screen.getByText('Worn Pouch'));
     const buyButtons = screen.getAllByRole('button', { name: /buy/i });
     expect(buyButtons[1]).toBeDisabled(); // Iron Shield 80g > 45g
   });
@@ -55,5 +55,12 @@ describe('ShopScreen', () => {
   it('shows Leave Shop button', async () => {
     renderShop();
     await waitFor(() => expect(screen.getByRole('button', { name: /leave/i })).toBeInTheDocument());
+  });
+
+  it('shows a relic image for relic items', async () => {
+    renderShop();
+    await waitFor(() => {
+      expect(screen.getByRole('img', { name: 'Worn Pouch' })).toBeInTheDocument();
+    });
   });
 });

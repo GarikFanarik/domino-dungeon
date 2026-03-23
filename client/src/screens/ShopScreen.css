@@ -226,3 +226,28 @@
   z-index: 20;
   font-family: 'Segoe UI', system-ui, sans-serif;
 }
+
+/* Horizontal layout for relic items */
+.shop-item-card--relic {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.shop-relic-art {
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  border: 2px solid var(--gold, #ffd066);
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.shop-relic-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
