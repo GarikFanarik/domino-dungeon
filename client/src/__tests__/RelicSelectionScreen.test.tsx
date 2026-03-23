@@ -6,9 +6,9 @@ import { GameProvider } from '../context/GameContext';
 global.fetch = vi.fn();
 
 const mockOffer = [
-  { relicId: 'PHOENIX_FEATHER', name: 'Phoenix Feather', rarity: 'EPIC', description: 'Revive once with 1 HP' },
-  { relicId: 'IRON_WILL', name: 'Iron Will', rarity: 'COMMON', description: '+5 max HP' },
-  { relicId: 'STORM_LENS', name: 'Storm Lens', rarity: 'RARE', description: 'Lightning +2 bonus' },
+  { relicId: 'phoenix-feather', name: 'Phoenix Feather', rarity: 'EPIC',   description: 'Survive a lethal hit' },
+  { relicId: 'worn-pouch',      name: 'Worn Pouch',      rarity: 'COMMON', description: 'Draw 1 extra stone' },
+  { relicId: 'storm-amulet',    name: 'Storm Amulet',    rarity: 'RARE',   description: 'Lightning +5 damage' },
 ];
 
 function renderRelics(runId = 'run-123') {
@@ -26,8 +26,8 @@ describe('RelicSelectionScreen', () => {
     renderRelics();
     await waitFor(() => {
       expect(screen.getByText('Phoenix Feather')).toBeInTheDocument();
-      expect(screen.getByText('Iron Will')).toBeInTheDocument();
-      expect(screen.getByText('Storm Lens')).toBeInTheDocument();
+      expect(screen.getByText('Worn Pouch')).toBeInTheDocument();
+      expect(screen.getByText('Storm Amulet')).toBeInTheDocument();
     });
   });
 
@@ -40,6 +40,14 @@ describe('RelicSelectionScreen', () => {
     renderRelics();
     await waitFor(() => {
       expect(screen.getAllByRole('button', { name: /select/i })).toHaveLength(3);
+    });
+  });
+
+  it('shows a relic image for each offer card', async () => {
+    renderRelics();
+    await waitFor(() => {
+      const imgs = screen.getAllByRole('img');
+      expect(imgs).toHaveLength(3);
     });
   });
 });

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
-import { RelicIcon } from '../components/RelicIcon';
+import { relicImage } from '../utils/relicImage';
 import './RelicSelectionScreen.css';
 
 interface RelicOffer { relicId: string; name: string; rarity: string; description: string; }
@@ -46,13 +46,21 @@ export function RelicSelectionScreen({ runId }: Props) {
         <div className="relic-cards">
           {offer.map((relic) => {
             const rc = rarityClass(relic.rarity);
+            const imgSrc = relicImage(relic.relicId);
             return (
               <div
                 key={relic.relicId}
                 className={`relic-card relic-card--${rc}`}
                 onClick={() => handlePick(relic.relicId)}
               >
-                <RelicIcon relic={{ type: relic.relicId, name: relic.name, rarity: relic.rarity as 'common' | 'rare' | 'epic' | 'legendary', description: relic.description }} />
+                {imgSrc && (
+                  <img
+                    src={imgSrc}
+                    alt={relic.name}
+                    className="relic-card__art"
+                    data-rarity={rc}
+                  />
+                )}
                 <div className="relic-name">{relic.name}</div>
                 <div className={`relic-rarity relic-rarity--${rc}`}>{relic.rarity}</div>
                 <div className="relic-description">{relic.description}</div>
