@@ -170,7 +170,7 @@
 
 .map-node--unavailable {
   border-color: rgba(60, 45, 25, 0.4);
-  opacity: 0.55;
+  opacity: 0.75;
   cursor: not-allowed;
 }
 
