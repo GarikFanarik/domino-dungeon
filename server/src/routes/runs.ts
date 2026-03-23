@@ -345,6 +345,8 @@ router.post('/:runId/travel/:nodeId', async (req: Request, res: Response) => {
       turnNumber: 1,
       swapsUsed: 0,
       swapsPerTurn,
+      handSize,
+      stonesPlayedTotal: 0,
       playerHp,
       playerMaxHp: state.playerState.hp.max,
       playerArmor,

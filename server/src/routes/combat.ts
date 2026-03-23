@@ -18,7 +18,7 @@ import type { PlacedStone as GamePlacedStone } from '../../../src/game/chain';
 import type { CombatStateResponse, PlayStoneResponse, EndTurnResponse, UnplayStoneResponse } from '../../../src/types/api';
 import { RelicType } from '../../../src/game/relics/common';
 import { applyInfiniteBag, applyBloodPactEnd, applyTheLastStone, applyCurseOfGreed } from '../../../src/game/relics/legendary';
-import { applyPhoenixFeather } from '../../../src/game/relics/epic';
+import { applyPhoenixFeather, applyChainMastersGlove, applyVoltaicLens } from '../../../src/game/relics/epic';
 import { applyTravelerBoots } from '../../../src/game/relics/common';
 
 const router = Router();
@@ -347,6 +347,24 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
   // 3. Calculate player's damage from chain
   let chainDamage = calculateDamage(chain, {} as any, effects.lightningBonus).finalDamage;
 
+  // VoltaicLens: Overload deals +15 bonus damage
+  if (relics.includes(RelicType.VoltaicLens)) {
+    chainDamage = applyVoltaicLens(analysis.overloadTriggered, chainDamage);
+  }
+
+  // ChainMastersGlove: every 5th stone played (across the whole combat) deals double pip damage
+  if (relics.includes(RelicType.ChainMastersGlove) && chain.stones.length > 0) {
+    const base = session.stonesPlayedTotal ?? 0;
+    let gloveBonus = 0;
+    chain.stones.forEach((ps, i) => {
+      const pos = base + i + 1; // 1-indexed cumulative position
+      const stonePipDmg = (ps.stone.leftPip + ps.stone.rightPip) * 2;
+      gloveBonus += applyChainMastersGlove(pos, stonePipDmg) - stonePipDmg;
+    });
+    chainDamage += gloveBonus;
+  }
+  session.stonesPlayedTotal = (session.stonesPlayedTotal ?? 0) + chain.stones.length;
+
   // TheLastStone: single-stone chain → (left + right) × 2
   if (relics.includes(RelicType.TheLastStone)) {
     const lastStoneDmg = applyTheLastStone(chain.stones as any);
@@ -469,7 +487,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
   let enemyAttackDamage = 0;
   const enemyEffects: string[] = [];
 
-  if (!enemy.status.stunned) {
+  if (!enemy.status.stunned && !enemy.status.frozen) {
     const ai = new EnemyAI();
     const enemyHand: GameStone[] = [
       {
@@ -512,16 +530,35 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
       }
     }
   } else {
-    enemyEffects.push('stunned');
-    enemy.status.stunned = false;
+    if (enemy.status.stunned) {
+      enemyEffects.push('stunned');
+      enemy.status.stunned = false;
+    }
+    if (enemy.status.frozen) {
+      enemyEffects.push('frozen');
+      enemy.status.frozen = false;
+    }
   }
 
-  // Tick burn on enemy — EmberCore: burn stacks don't decay
+  // Tick burn — EmberCore: burn stacks don't decay
   if (enemy.status.burn > 0) {
     dealDamage(enemy, enemy.status.burn);
     if (!relics.includes(RelicType.EmberCore)) {
       enemy.status.burn = Math.max(0, enemy.status.burn - 1);
     }
+  }
+
+  // Tick poison — VenomGland: poison stacks don't decay
+  if (enemy.status.poison > 0) {
+    dealDamage(enemy, enemy.status.poison);
+    if (!relics.includes(RelicType.VenomGland)) {
+      enemy.status.poison = Math.max(0, enemy.status.poison - 1);
+    }
+  }
+
+  // Slow decays by 1 each turn
+  if (enemy.status.slow > 0) {
+    enemy.status.slow = Math.max(0, enemy.status.slow - 1);
   }
 
   // Check if player died
@@ -543,8 +580,8 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     }
   }
 
-  // Refill hand to 7 from bag
-  const HAND_SIZE = 7;
+  // Refill hand from bag — WornPouch increases hand size to 8
+  const HAND_SIZE = session.handSize ?? 7;
   const bag = new Bag(session.bag as any[]);
   const needed = HAND_SIZE - session.hand.length;
   if (needed > 0) {

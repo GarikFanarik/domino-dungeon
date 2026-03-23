@@ -9,7 +9,7 @@ export const RELIC_DEFINITIONS: Record<string, RelicDef> = {
   // Common
   'worn-pouch':          { type: 'worn-pouch',          name: 'Worn Pouch',          rarity: 'common',    description: 'Draw 1 extra stone at the start of each turn.' },
   'lucky-pip':           { type: 'lucky-pip',           name: 'Lucky Pip',           rarity: 'common',    description: 'Gain 1 extra swap per turn.' },
-  'cracked-shield':      { type: 'cracked-shield',      name: 'Cracked Shield',      rarity: 'common',    description: 'Start each combat with 20 Armor.' },
+  'cracked-shield':      { type: 'cracked-shield',      name: 'Cracked Shield',      rarity: 'common',    description: 'Start each combat with 5 Armor.' },
   'travelers-boots':     { type: 'travelers-boots',     name: "Traveler's Boots",    rarity: 'common',    description: 'Gain gold equal to your chain length on combat win.' },
   'pebble-charm':        { type: 'pebble-charm',        name: 'Pebble Charm',        rarity: 'common',    description: 'Earth Fortify triggers at 2 stones instead of 3.' },
   // Rare
