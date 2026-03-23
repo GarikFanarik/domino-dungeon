@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { RelicIcon } from '../components/RelicIcon';
 import './RelicSelectionScreen.css';
 
 interface RelicOffer { relicId: string; name: string; rarity: string; description: string; }
@@ -51,6 +52,7 @@ export function RelicSelectionScreen({ runId }: Props) {
                 className={`relic-card relic-card--${rc}`}
                 onClick={() => handlePick(relic.relicId)}
               >
+                <RelicIcon relic={{ type: relic.relicId, name: relic.name, rarity: relic.rarity as 'common' | 'rare' | 'epic' | 'legendary', description: relic.description }} />
                 <div className="relic-name">{relic.name}</div>
                 <div className={`relic-rarity relic-rarity--${rc}`}>{relic.rarity}</div>
                 <div className="relic-description">{relic.description}</div>

@@ -5,7 +5,7 @@ import { RARE_RELICS } from '../game/relics/rare';
 import { EPIC_RELICS } from '../game/relics/epic';
 import { LEGENDARY_RELICS } from '../game/relics/legendary';
 
-const ALL_RELICS: RelicDefinition[] = [...COMMON_RELICS, ...RARE_RELICS, ...EPIC_RELICS, ...LEGENDARY_RELICS];
+export const ALL_RELICS: RelicDefinition[] = [...COMMON_RELICS, ...RARE_RELICS, ...EPIC_RELICS, ...LEGENDARY_RELICS];
 
 const RARITY_WEIGHTS = { common: 60, rare: 25, epic: 12, legendary: 3 };
 

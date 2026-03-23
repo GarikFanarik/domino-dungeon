@@ -5,7 +5,7 @@ import { RELIC_DEFINITIONS } from '../data/relics';
 import './RelicBar.css';
 
 export function RelicBar() {
-  const { runId, triggeredRelics } = useGame();
+  const { runId, screen, triggeredRelics } = useGame();
   const [relicIds, setRelicIds] = useState<string[]>([]);
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export function RelicBar() {
       .then(r => r.json())
       .then(data => setRelicIds(data.playerState?.relics ?? []))
       .catch(() => {});
-  }, [runId]);
+  }, [runId, screen]);
 
   if (!runId || relicIds.length === 0) return null;
 

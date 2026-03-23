@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { RelicIcon } from '../components/RelicIcon';
+import { RELIC_DEFINITIONS } from '../data/relics';
 import './ShopScreen.css';
 
 interface ShopItem {
@@ -10,6 +12,7 @@ interface ShopItem {
   cost: number;
   sold: boolean;
   element: string | null;
+  relicId: string | null;
 }
 
 interface ShopState {
@@ -71,6 +74,9 @@ export function ShopScreen({ runId }: Props) {
         <div className="shop-items">
           {shop.items.map((item) => (
             <div key={item.id} className={`shop-item-card${item.sold ? ' shop-item-card--sold' : ''}`}>
+              {item.type === 'relic' && item.relicId && RELIC_DEFINITIONS[item.relicId] && (
+                <RelicIcon relic={RELIC_DEFINITIONS[item.relicId]} />
+              )}
               <div className={`shop-item-name${item.sold ? ' shop-item-name--sold' : ''}`}>
                 {item.name}
                 {item.type === 'stone' && item.element && (

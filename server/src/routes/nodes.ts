@@ -82,6 +82,7 @@ router.get('/:runId/shop', async (req: Request, res: Response) => {
   res.json({
     items: items.map(item => {
       const element = (item.payload as any)?.element ?? null;
+      const relicId = (item.payload as any)?.relicId ?? null;
       return {
         id: item.id,
         type: item.type,
@@ -90,6 +91,7 @@ router.get('/:runId/shop', async (req: Request, res: Response) => {
         cost: item.price,
         sold: shopSoldIds.includes(item.id),
         element,
+        relicId,
       };
     }),
     playerGold: state.run.gold ?? state.playerState?.gold ?? 0,
@@ -132,6 +134,11 @@ router.post('/:runId/shop/buy', async (req: Request, res: Response) => {
       }
       state.stones.push(newStone);
     }
+  }
+
+  if (result.item && result.item.type === 'relic') {
+    const relicId = (result.item.payload as any)?.relicId;
+    if (relicId) pickRelic(state.run, relicId);
   }
 
   state.shopSoldIds = [...shopSoldIds, itemId];

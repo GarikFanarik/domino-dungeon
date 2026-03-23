@@ -3,6 +3,7 @@ import { Run } from './run';
 import { spendGold } from './gold';
 import { ShopItem } from './node-types';
 import { ElementType } from '../game/models/stone';
+import { ALL_RELICS } from './relic-offer';
 
 export interface ShopState {
   items: ShopItem[];
@@ -27,9 +28,10 @@ export function generateShopInventory(act: number, seed: string): ShopItem[] {
     items.push({ id: `shop-stone-${act}-${i}-${seed}`, type: 'stone', price, payload: { element } });
   }
 
-  // 1 relic (100-150g)
+  // 1 relic (100-150g) — pick a specific relic deterministically from seed
   const relicPrice = Math.floor(rng() * 51) + 100;
-  items.push({ id: `shop-relic-${act}-${seed}`, type: 'relic', price: relicPrice, payload: null });
+  const shopRelic = ALL_RELICS[Math.floor(rng() * ALL_RELICS.length)];
+  items.push({ id: `shop-relic-${act}-${seed}`, type: 'relic', price: relicPrice, payload: { relicId: shopRelic.id } });
 
   // 1 potion (30g)
   items.push({ id: `shop-potion-${act}-${seed}`, type: 'potion', price: 30, payload: null });
