@@ -71,14 +71,19 @@ function useNodePositions(nodes: MapNode[], containerRef: React.RefObject<HTMLDi
       const container = containerRef.current;
       if (!container) return;
       const rect = container.getBoundingClientRect();
+      // CSS zoom on the game canvas causes getBoundingClientRect to return
+      // viewport-space (zoomed) coords, but the SVG coordinate system is in
+      // CSS layout space (pre-zoom). Compute the ratio to convert between them.
+      const scaleX = container.offsetWidth > 0 ? rect.width / container.offsetWidth : 1;
+      const scaleY = container.offsetHeight > 0 ? rect.height / container.offsetHeight : 1;
       const map: Record<string, { x: number; y: number }> = {};
       nodes.forEach((node) => {
         const el = container.querySelector<HTMLElement>(`[data-node-id="${node.id}"]`);
         if (el) {
           const r = el.getBoundingClientRect();
           map[node.id] = {
-            x: r.left - rect.left + r.width / 2,
-            y: r.top - rect.top + r.height / 2,
+            x: (r.left - rect.left) / scaleX + r.width / scaleX / 2,
+            y: (r.top - rect.top) / scaleY + r.height / scaleY / 2,
           };
         }
       });
