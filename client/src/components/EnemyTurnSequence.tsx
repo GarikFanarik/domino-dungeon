@@ -14,6 +14,10 @@ interface Props {
   onDone: () => void;
 }
 
+function hide(visible: boolean): React.CSSProperties {
+  return visible ? {} : { visibility: 'hidden' };
+}
+
 export function EnemyTurnSequence({ enemyName, attack, skipReason, dotDamage, onDone }: Props) {
   const hasDot = dotDamage.burn > 0 || dotDamage.poison > 0;
   const duration = attack ? 2500 : hasDot ? 2200 : 1200;
@@ -30,10 +34,6 @@ export function EnemyTurnSequence({ enemyName, attack, skipReason, dotDamage, on
   const slot3Visible = !!(attack && attack.damage > 0);
   const slot4Visible = dotDamage.burn > 0;
   const slot5Visible = dotDamage.poison > 0;
-
-  function hide(visible: boolean): React.CSSProperties {
-    return visible ? {} : { visibility: 'hidden' };
-  }
 
   return (
     <div className="enemy-turn-sequence">
@@ -67,14 +67,14 @@ export function EnemyTurnSequence({ enemyName, attack, skipReason, dotDamage, on
       <div className="seq-step" style={hide(slot2Visible)}>
         <div className="seq-icon">🛡</div>
         <div className="seq-text">Your armor absorbs</div>
-        <div className="seq-val seq-val--block">−{attack?.armorBlocked} blocked</div>
+        <div className="seq-val seq-val--block">{attack ? `−${attack.armorBlocked} blocked` : ''}</div>
       </div>
 
       {/* Slot 3: HP taken */}
       <div className="seq-step" style={hide(slot3Visible)}>
         <div className="seq-icon">❤️</div>
         <div className="seq-text"><b>You take</b></div>
-        <div className="seq-val seq-val--net">−{attack?.damage} HP</div>
+        <div className="seq-val seq-val--net">{attack ? `−${attack.damage} HP` : ''}</div>
       </div>
 
       {/* Slot 4: burn DOT */}

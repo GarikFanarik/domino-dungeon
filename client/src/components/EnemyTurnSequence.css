@@ -57,29 +57,6 @@
   flex-shrink: 0;
 }
 
-/* Skip banner */
-.seq-skip-banner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: rgba(40, 30, 0, 0.7);
-  border: 1px solid rgba(255, 200, 40, 0.4);
-  border-radius: 6px;
-  animation: step-in 0.35s ease forwards;
-  opacity: 0;
-}
-.seq-skip-icon { font-size: 24px; }
-.seq-skip-text { font-size: 13px; }
-.seq-skip-text b { color: #ffd066; }
-.seq-skip-text span { color: #a08060; font-size: 11px; display: block; margin-top: 2px; }
-
-/* Stunned/frozen enemy sprite */
-.seq-enemy--skipped {
-  opacity: 0.45;
-  filter: grayscale(0.7);
-}
-
 /* Overlay wrapper */
 .enemy-turn-sequence {
   display: flex;
