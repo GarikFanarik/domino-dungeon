@@ -55,7 +55,15 @@ export interface EndTurnResponse {
   playerState: PlayerState;
   enemy: Enemy;
   combatResult: 'ongoing' | 'player-won' | 'player-died';
-  enemyAttack?: { damage: number; effects: string[] };
+  enemyAttack?: {
+    stone: { leftPip: number; rightPip: number };
+    rawDamage: number;
+    armorBlocked: number;
+    damage: number;       // net HP lost = rawDamage - armorBlocked
+    effects: string[];    // kept for backwards compat; always []
+  };
+  enemySkipped?: { reason: 'stunned' | 'frozen' };
+  dotDamage: { burn: number; poison: number };   // required; defaults { burn:0, poison:0 }
   hand?: Stone[];
   goldEarned?: number;
   stoneRewards?: Array<{ element: string; leftPip: number; rightPip: number }>;

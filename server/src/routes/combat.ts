@@ -475,6 +475,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
       playerState,
       enemy,
       combatResult: 'player-won',
+      dotDamage: { burn: 0, poison: 0 },
       goldEarned,
       stoneRewards: stoneRewards ?? undefined,
       triggeredRelics,
@@ -485,7 +486,12 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
 
   // 5. Enemy attacks (only if not stunned)
   let enemyAttackDamage = 0;
-  const enemyEffects: string[] = [];
+  let stone: { leftPip: number; rightPip: number } = { leftPip: 0, rightPip: 0 };
+  let rawDamage = 0;
+  let armorBlocked = 0;
+  let netDamage = 0;
+  let enemyWasSkipped = false;
+  let enemySkipReason: 'stunned' | 'frozen' = 'stunned';
 
   if (!enemy.status.stunned && !enemy.status.frozen) {
     const ai = new EnemyAI();
@@ -497,16 +503,20 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
         element: null,
       },
     ];
+    stone = { leftPip: enemyHand[0].leftPip, rightPip: enemyHand[0].rightPip };
     const attack = ai.buildAttack(enemyHand, EnemyType.Normal);
 
     // FrostbiteRing: each slow stack reduces enemy damage by 30% instead of 20%
     const slowPct = relics.includes(RelicType.FrostbiteRing) ? 0.3 : 0.2;
     const slowMultiplier = getSlowDamageMultiplier(enemy, slowPct);
     enemyAttackDamage = Math.floor(attack.damage * slowMultiplier);
+    rawDamage = enemyAttackDamage;
 
     // Apply armor first
     const armorResult = applyArmor(enemyAttackDamage, playerState.armor);
     playerState.armor = armorResult.armorRemaining;
+    armorBlocked = rawDamage - armorResult.damageToDeal;
+    netDamage = armorResult.damageToDeal;
 
     // Deal remaining damage to player
     if (armorResult.damageToDeal > 0) {
@@ -530,27 +540,31 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
       }
     }
   } else {
+    enemyWasSkipped = true;
     if (enemy.status.stunned) {
-      enemyEffects.push('stunned');
+      enemySkipReason = 'stunned';
       enemy.status.stunned = false;
-    }
-    if (enemy.status.frozen) {
-      enemyEffects.push('frozen');
+    } else if (enemy.status.frozen) {
+      enemySkipReason = 'frozen';
       enemy.status.frozen = false;
     }
   }
 
   // Tick burn — EmberCore: burn stacks don't decay
+  let burnDamage = 0;
   if (enemy.status.burn > 0) {
-    dealDamage(enemy, enemy.status.burn);
+    burnDamage = enemy.status.burn;  // capture before dealDamage
+    dealDamage(enemy, burnDamage);
     if (!relics.includes(RelicType.EmberCore)) {
       enemy.status.burn = Math.max(0, enemy.status.burn - 1);
     }
   }
 
   // Tick poison — VenomGland: poison stacks don't decay
+  let poisonDamage = 0;
   if (enemy.status.poison > 0) {
-    dealDamage(enemy, enemy.status.poison);
+    poisonDamage = enemy.status.poison;  // capture before dealDamage
+    dealDamage(enemy, poisonDamage);
     if (!relics.includes(RelicType.VenomGland)) {
       enemy.status.poison = Math.max(0, enemy.status.poison - 1);
     }
@@ -609,7 +623,10 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     playerState,
     enemy,
     combatResult,
-    enemyAttack: { damage: enemyAttackDamage, effects: enemyEffects },
+    ...(enemyWasSkipped
+      ? { enemySkipped: { reason: enemySkipReason } }
+      : { enemyAttack: { stone, rawDamage, armorBlocked, damage: netDamage, effects: [] } }),
+    dotDamage: { burn: burnDamage, poison: poisonDamage },
     hand: session.hand.map(toGameStone),
   };
 

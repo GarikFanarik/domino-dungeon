@@ -78,6 +78,7 @@ describe('API types', () => {
       playerState: {} as any,
       enemy: {} as any,
       combatResult: 'ongoing',
+      dotDamage: { burn: 0, poison: 0 },
     };
     expect(mock.combatResult).toBe('ongoing');
   });
@@ -87,7 +88,14 @@ describe('API types', () => {
       playerState: {} as any,
       enemy: {} as any,
       combatResult: 'player-won',
-      enemyAttack: { damage: 5, effects: ['burn'] },
+      dotDamage: { burn: 0, poison: 0 },
+      enemyAttack: {
+        stone: { leftPip: 2, rightPip: 3 },
+        rawDamage: 5,
+        armorBlocked: 0,
+        damage: 5,
+        effects: [],
+      },
     };
     expect(mock.enemyAttack?.damage).toBe(5);
   });
