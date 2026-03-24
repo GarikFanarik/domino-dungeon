@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { DominoStone } from '../components/DominoStone';
+import { EnemyTurnSequence } from '../components/EnemyTurnSequence';
 import './CombatScreen.css';
 
 interface Stone {
@@ -54,6 +55,18 @@ interface StoneReward {
   element: string;
   leftPip: number;
   rightPip: number;
+}
+
+interface EnemyTurnData {
+  enemyName: string;
+  attack?: {
+    stone: { leftPip: number; rightPip: number };
+    rawDamage: number;
+    armorBlocked: number;
+    damage: number;
+  };
+  skipReason?: 'stunned' | 'frozen';
+  dotDamage: { burn: number; poison: number };
 }
 
 interface Props { runId: string; }
@@ -121,6 +134,7 @@ export function CombatScreen({ runId }: Props) {
   const [swapMode, setSwapMode] = useState(false);
   const [showBag, setShowBag] = useState(false);
   const [stoneRewards, setStoneRewards] = useState<StoneReward[]>([]);
+  const [enemyTurnData, setEnemyTurnData] = useState<EnemyTurnData | null>(null);
 
   useEffect(() => {
     fetch(`/api/run/${runId}/combat`)
@@ -253,6 +267,19 @@ export function CombatScreen({ runId }: Props) {
         }
         setEnemyHit(true);
         setTimeout(() => setEnemyHit(false), 450);
+        setEnemyTurnData({
+          enemyName: data.enemy.name,
+          attack: data.enemyAttack
+            ? {
+                stone: data.enemyAttack.stone,
+                rawDamage: data.enemyAttack.rawDamage,
+                armorBlocked: data.enemyAttack.armorBlocked,
+                damage: data.enemyAttack.damage,
+              }
+            : undefined,
+          skipReason: data.enemySkipped?.reason,
+          dotDamage: data.dotDamage ?? { burn: 0, poison: 0 },
+        });
         setCombat(prev => prev ? {
           ...prev,
           playerState: data.playerState,
@@ -367,6 +394,15 @@ export function CombatScreen({ runId }: Props) {
               alt={combat.enemy.name}
             />
           </div>
+          {enemyTurnData && (
+            <EnemyTurnSequence
+              enemyName={enemyTurnData.enemyName}
+              attack={enemyTurnData.attack}
+              skipReason={enemyTurnData.skipReason}
+              dotDamage={enemyTurnData.dotDamage}
+              onDone={() => setEnemyTurnData(null)}
+            />
+          )}
         </div>
 
         {/* Chain */}
