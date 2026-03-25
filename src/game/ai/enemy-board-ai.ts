@@ -40,7 +40,7 @@ export class EnemyBoardAI {
 
       if (left) {
         const score = this._junctionPip(stone, 'left', board.leftOpen);
-        if (!best || score > best.score) {
+        if (!best || score > best.score || (score === best.score && best.side === 'left')) {
           best = { stone, side: 'left', score };
         }
       }
