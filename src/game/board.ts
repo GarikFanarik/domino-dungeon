@@ -123,7 +123,7 @@ export class Board {
         }
       } else {
         this._leftHead.x += 2;
-        if (this._leftHead.x > this._maxCol) {
+        if (this._leftHead.x + 1 >= this._maxCol) {
           this._leftHead.y = Math.min(this._leftHead.y + 1, 7);
           this._leftHead.dir = 'left';
           this._leftHead.x = this._maxCol;
@@ -171,8 +171,8 @@ export class Board {
 
   toJSON(): BoardJSON {
     return {
-      tiles: this._tiles,
-      orderedTiles: this._orderedTiles,
+      tiles: [...this._tiles],
+      orderedTiles: [...this._orderedTiles],
       leftOpen: this._leftOpen,
       rightOpen: this._rightOpen,
       rightHead: { ...this._rightHead },
