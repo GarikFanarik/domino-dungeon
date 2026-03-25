@@ -8,6 +8,8 @@ jest.mock('ioredis', () => {
   }));
 });
 
+import { Board } from '../../game/board';
+
 import {
   CombatSession,
   createCombatSession,
@@ -31,11 +33,9 @@ const makeSession = (overrides: Partial<CombatSession> = {}): CombatSession => (
   },
   hand: [],
   bag: [],
-  chain: {
-    stones: [],
-    leftOpen: null,
-    rightOpen: null,
-  },
+  board: new Board().toJSON(),
+  enemyHand: [],
+  enemyHandSize: 5,
   turnNumber: 1,
   swapsUsed: 0,
   swapsPerTurn: 1,
