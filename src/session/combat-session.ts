@@ -1,16 +1,11 @@
 import redis from '../lib/redis';
+import type { BoardJSON } from '../game/board';
 
 export interface Stone {
   id: string;
   leftPip: number;
   rightPip: number;
   element: string | null;
-}
-
-export interface PlacedStone {
-  stone: Stone;
-  side: 'left' | 'right';
-  flipped: boolean;
 }
 
 export interface CombatSession {
@@ -28,11 +23,9 @@ export interface CombatSession {
   };
   hand: Stone[];
   bag: Stone[];
-  chain: {
-    stones: PlacedStone[];
-    leftOpen: number | null;
-    rightOpen: number | null;
-  };
+  board: BoardJSON;
+  enemyHand: Stone[];
+  enemyHandSize: number;
   turnNumber: number;
   swapsUsed: number;
   swapsPerTurn: number;

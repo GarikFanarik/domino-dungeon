@@ -1,7 +1,7 @@
 import type { Stone } from '../game/models/stone';
 import type { Enemy } from '../game/models/enemy';
 import type { PlayerState } from '../game/models/player-state';
-import type { PlacedStone } from '../game/chain';
+import type { BoardJSON } from '../game/board';
 import type { RunStatus } from '../dungeon/run';
 import type { NodeType } from '../dungeon/node-types';
 
@@ -25,30 +25,19 @@ export interface RunStateResponse {
 export interface CombatStateResponse {
   enemy: Enemy;
   playerHand: Stone[];
-  chain: PlacedStone[];
+  board: BoardJSON;
+  enemyHandCount: number;
   playerState: PlayerState;
   turnNumber: number;
   phase: 'player-turn' | 'enemy-turn' | 'resolving';
   swapsUsed?: number;
   swapsPerTurn?: number;
-  leftOpen?: number | null;
-  rightOpen?: number | null;
   bag?: Stone[];
 }
 
 export interface PlayStoneResponse {
-  chain: PlacedStone[];
+  board: BoardJSON;
   hand: Stone[];
-  leftOpen?: number | null;
-  rightOpen?: number | null;
-  message?: string;
-}
-
-export interface UnplayStoneResponse {
-  chain: PlacedStone[];
-  hand: Stone[];
-  leftOpen?: number | null;
-  rightOpen?: number | null;
 }
 
 export interface EndTurnResponse {
@@ -56,11 +45,11 @@ export interface EndTurnResponse {
   enemy: Enemy;
   combatResult: 'ongoing' | 'player-won' | 'player-died';
   enemyAttack?: {
-    stone: { leftPip: number; rightPip: number };
+    stonesPlayed: { leftPip: number; rightPip: number }[];
     rawDamage: number;
     armorBlocked: number;
-    damage: number;       // net HP lost = rawDamage - armorBlocked
-    effects: string[];    // kept for backwards compat; always []
+    damage: number;
+    effects: string[];
   };
   enemySkipped?: { reason: 'stunned' | 'frozen' };
   dotDamage: { burn: number; poison: number };   // required; defaults { burn:0, poison:0 }
