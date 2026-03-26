@@ -333,23 +333,12 @@ export function CombatScreen({ runId }: Props) {
 
       {/* ── Top HUD bar ── */}
       <div className="combat-hud-top">
-        {/* Left: player HP */}
-        <div className="combat-hud-player">
-          <div className="hud-hp-track hud-hp-track--player">
-            <div
-              className="hud-hp-fill"
-              style={{ width: `${Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100)}%` }}
-            />
-          </div>
-          <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max} HP</div>
-        </div>
-
         {/* Center: enemy hand */}
         <div className="combat-hud-center">
           <EnemyHand count={combat.enemyHandCount} />
         </div>
 
-        {/* Right: enemy HP + status */}
+        {/* Right: enemy name + HP + status */}
         <div className="combat-hud-enemy">
           <div className="hud-name">{combat.enemy.name}</div>
           <div className="hud-hp-track">
@@ -363,7 +352,7 @@ export function CombatScreen({ runId }: Props) {
         </div>
       </div>
 
-      {/* ── Main area: board + enemy sprite ── */}
+      {/* ── Main area: board (centered) + enemy sprite (absolute right) ── */}
       <div className="combat-main">
         <div className="combat-board-zone">
           <DominoBoard
@@ -390,6 +379,15 @@ export function CombatScreen({ runId }: Props) {
             src="/assets/combat/hero/hero.png"
             alt="Hero"
           />
+          <div className="combat-player-hp">
+            <div className="hud-hp-track">
+              <div
+                className="hud-hp-fill"
+                style={{ width: `${Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100)}%` }}
+              />
+            </div>
+            <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max} HP</div>
+          </div>
         </div>
 
         <div className="combat-hand-tiles">
