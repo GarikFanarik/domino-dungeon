@@ -331,28 +331,12 @@ export function CombatScreen({ runId }: Props) {
         </div>
       )}
 
-      {/* ── Top HUD bar ── */}
+      {/* ── Top HUD bar (enemy hand only) ── */}
       <div className="combat-hud-top">
-        {/* Center: enemy hand */}
-        <div className="combat-hud-center">
-          <EnemyHand count={combat.enemyHandCount} />
-        </div>
-
-        {/* Right: enemy name + HP + status */}
-        <div className="combat-hud-enemy">
-          <div className="hud-name">{combat.enemy.name}</div>
-          <div className="hud-hp-track">
-            <div
-              className="hud-hp-fill"
-              style={{ width: `${Math.max(0, (combat.enemy.hp.current / combat.enemy.hp.max) * 100)}%` }}
-            />
-          </div>
-          <div className="hud-hp-label">{combat.enemy.hp.current} / {combat.enemy.hp.max} HP</div>
-          <StatusBadges status={combat.enemy.status} />
-        </div>
+        <EnemyHand count={combat.enemyHandCount} />
       </div>
 
-      {/* ── Main area: board (centered) + enemy sprite (absolute right) ── */}
+      {/* ── Main area: board (centered) + enemy box (absolute right) ── */}
       <div className="combat-main">
         <div className="combat-board-zone">
           <DominoBoard
@@ -363,23 +347,34 @@ export function CombatScreen({ runId }: Props) {
           />
         </div>
         <div className="combat-enemy-zone">
-          <img
-            className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
-            src={getEnemySprite(combat.enemy)}
-            alt={combat.enemy.name}
-          />
+          <div className="combat-entity-box">
+            <div className="hud-name">{combat.enemy.name}</div>
+            <div className="hud-hp-track">
+              <div
+                className="hud-hp-fill"
+                style={{ width: `${Math.max(0, (combat.enemy.hp.current / combat.enemy.hp.max) * 100)}%` }}
+              />
+            </div>
+            <div className="hud-hp-label">{combat.enemy.hp.current} / {combat.enemy.hp.max} HP</div>
+            <StatusBadges status={combat.enemy.status} />
+            <img
+              className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
+              src={getEnemySprite(combat.enemy)}
+              alt={combat.enemy.name}
+            />
+          </div>
         </div>
       </div>
 
       {/* ── Bottom: hero + hand ── */}
       <div className="combat-bottom">
         <div className="combat-player-zone">
-          <img
-            className={`hero-sprite${playerHit ? ' hero-sprite--hit' : ''}`}
-            src="/assets/combat/hero/hero.png"
-            alt="Hero"
-          />
-          <div className="combat-player-hp">
+          <div className="combat-entity-box">
+            <img
+              className={`hero-sprite${playerHit ? ' hero-sprite--hit' : ''}`}
+              src="/assets/combat/hero/hero.png"
+              alt="Hero"
+            />
             <div className="hud-hp-track">
               <div
                 className="hud-hp-fill"

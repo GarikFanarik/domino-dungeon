@@ -13,31 +13,14 @@
   box-sizing: border-box;
 }
 
-/* ── Top HUD bar ── */
+/* ── Top HUD bar (enemy hand) ── */
 .combat-hud-top {
   display: flex;
-  gap: 0.75rem;
-  align-items: flex-start;
-  justify-content: flex-end;
+  justify-content: center;
   background: rgba(0, 0, 0, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   padding: 0.5rem 0.75rem;
-}
-
-.combat-hud-center {
-  display: flex;
-  justify-content: center;
-  margin-right: auto;
-}
-
-.combat-hud-enemy {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 140px;
-  align-items: flex-end;
-  text-align: right;
 }
 
 /* ── Relic bar (centered top) ── */
@@ -90,7 +73,18 @@
   bottom: 0;
   display: flex;
   align-items: flex-end;
-  pointer-events: none;
+}
+
+/* ── Entity boxes (hero + enemy) ── */
+.combat-entity-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 0.5rem 0.6rem;
 }
 
 /* ── Bottom ── */
@@ -106,18 +100,6 @@
 
 .combat-player-zone {
   flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.combat-player-hp {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  align-items: center;
 }
 
 .combat-hand-tiles {
