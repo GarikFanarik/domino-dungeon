@@ -73,8 +73,10 @@ interface DragState {
   stoneIndex: number;
   stone: Stone;
   flipped: boolean;
-  x: number;
-  y: number;
+  x: number;       // cursor x (viewport)
+  y: number;       // cursor y (viewport)
+  offsetX: number; // cursor offset from tile's left edge at grab time
+  offsetY: number; // cursor offset from tile's top edge at grab time
   invalid: boolean;
 }
 
@@ -140,6 +142,7 @@ export function CombatScreen({ runId }: Props) {
 
   const dragRef = useRef<DragState | null>(null);
   const combatRef = useRef<CombatState | null>(null);
+  const boardZoneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { combatRef.current = combat; }, [combat]);
 
@@ -170,8 +173,13 @@ export function CombatScreen({ runId }: Props) {
       const ds = dragRef.current;
       if (!ds) return;
 
-      const overBoard = document.elementsFromPoint(e.clientX, e.clientY)
-        .some(el => el.closest('[data-drop-zone="board"]') !== null);
+      const boardEl = boardZoneRef.current;
+      let overBoard = false;
+      if (boardEl) {
+        const rect = boardEl.getBoundingClientRect();
+        overBoard = e.clientX >= rect.left && e.clientX <= rect.right &&
+                    e.clientY >= rect.top  && e.clientY <= rect.bottom;
+      }
 
       if (!overBoard) {
         dragRef.current = null;
@@ -265,12 +273,15 @@ export function CombatScreen({ runId }: Props) {
     const { left, right } = canStonePlay(stone, combat.board);
     if (!left && !right) return;
     e.preventDefault();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const newState: DragState = {
       stoneIndex: index,
       stone,
       flipped: false,
       x: e.clientX,
       y: e.clientY,
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
       invalid: false,
     };
     dragRef.current = newState;
@@ -410,7 +421,7 @@ export function CombatScreen({ runId }: Props) {
         <div className="combat-enemy-hand-zone">
           <EnemyHand count={combat.enemyHandCount} />
         </div>
-        <div className="combat-board-zone">
+        <div className="combat-board-zone" ref={boardZoneRef}>
           <DominoBoard
             board={combat.board}
             isPlayerTurn={isPlayerTurn}
@@ -523,7 +534,7 @@ export function CombatScreen({ runId }: Props) {
       {dragState && dragDisplayStone && (
         <div
           className={`drag-overlay${dragState.invalid ? ' drag-overlay--invalid' : ''}`}
-          style={{ left: dragState.x, top: dragState.y }}
+          style={{ left: dragState.x - dragState.offsetX, top: dragState.y - dragState.offsetY }}
         >
           <DominoStone stone={dragDisplayStone} horizontal />
           <div className="drag-label">
