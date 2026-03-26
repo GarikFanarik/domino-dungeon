@@ -121,14 +121,13 @@ describe('Combat API', () => {
       redisStore.set('combat:test-et-run', JSON.stringify(session));
       const res = await request(app).post('/api/run/test-et-run/combat/end-turn').send({});
       expect(res.status).toBe(200);
-      if (res.body.enemyAttack) {
-        expect(res.body.enemyAttack.stonesPlayed).toBeDefined();
-        expect(Array.isArray(res.body.enemyAttack.stonesPlayed)).toBe(true);
-        expect(res.body.enemyAttack.rawDamage).toBeGreaterThanOrEqual(0);
-        expect(res.body.enemyAttack.armorBlocked).toBeGreaterThanOrEqual(0);
-        expect(res.body.enemyAttack.damage).toBeGreaterThanOrEqual(0);
-        expect(res.body.enemyAttack.rawDamage - res.body.enemyAttack.armorBlocked).toBe(res.body.enemyAttack.damage);
-      }
+      expect(res.body.enemyAttack).toBeDefined();
+      expect(res.body.enemyAttack.stonesPlayed).toBeDefined();
+      expect(Array.isArray(res.body.enemyAttack.stonesPlayed)).toBe(true);
+      expect(res.body.enemyAttack.rawDamage).toBeGreaterThanOrEqual(0);
+      expect(res.body.enemyAttack.armorBlocked).toBeGreaterThanOrEqual(0);
+      expect(res.body.enemyAttack.damage).toBeGreaterThanOrEqual(0);
+      expect(res.body.enemyAttack.rawDamage - res.body.enemyAttack.armorBlocked).toBe(res.body.enemyAttack.damage);
       expect(res.body.dotDamage).toEqual({ burn: 0, poison: 0 });
     });
 
@@ -140,10 +139,9 @@ describe('Combat API', () => {
       redisStore.set('combat:test-et-run', JSON.stringify(session));
       const res = await request(app).post('/api/run/test-et-run/combat/end-turn').send({});
       expect(res.status).toBe(200);
-      if (res.body.enemyAttack) {
-        expect(res.body.enemyAttack.damage).toBe(0);
-        expect(res.body.enemyAttack.armorBlocked).toBe(res.body.enemyAttack.rawDamage);
-      }
+      expect(res.body.enemyAttack).toBeDefined();
+      expect(res.body.enemyAttack.damage).toBe(0);
+      expect(res.body.enemyAttack.armorBlocked).toBe(res.body.enemyAttack.rawDamage);
     });
 
     it('dotDamage.burn > 0 when enemy has burn stacks', async () => {
@@ -214,11 +212,10 @@ describe('Combat API', () => {
       const res = await request(app).post('/api/run/test-et-run/combat/end-turn').send({});
       expect(res.status).toBe(200);
       // Enemy should have played the 4-5 stone (connecting pip = 4 = rightOpen)
-      if (res.body.enemyAttack) {
-        expect(res.body.enemyAttack.stonesPlayed.length).toBeGreaterThan(0);
-        const played = res.body.enemyAttack.stonesPlayed[0];
-        expect(played.leftPip === 4 || played.rightPip === 4).toBe(true);
-      }
+      expect(res.body.enemyAttack).toBeDefined();
+      expect(res.body.enemyAttack.stonesPlayed.length).toBeGreaterThan(0);
+      const played = res.body.enemyAttack.stonesPlayed[0];
+      expect(played.leftPip === 4 || played.rightPip === 4).toBe(true);
     });
 
     it('stonesPlayedTotal incremented after end-turn', async () => {

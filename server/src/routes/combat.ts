@@ -427,11 +427,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     return;
   }
 
-  // Step 12: enemy AI plays (after player win check, before enemy damage)
-  const ai = new EnemyBoardAI();
-  session.enemyHand = ai.playTurn(board, (session.enemyHand ?? []) as any[], current) as any[];
-
-  // Step 13: enemy damage calculation
+  // Step 12 & 13: enemy AI plays and damage calculation (skipped if stunned/frozen)
   let enemyWasSkipped = false;
   let enemySkipReason: 'stunned' | 'frozen' = 'stunned';
   let rawEnemyDamage = 0;
@@ -440,6 +436,9 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
   let enemyTilesPlayed: ReturnType<typeof board.getTilesForTurn> = [];
 
   if (!enemy.status.stunned && !enemy.status.frozen) {
+    const ai = new EnemyBoardAI();
+    session.enemyHand = ai.playTurn(board, (session.enemyHand ?? []) as any[], current) as any[];
+
     enemyTilesPlayed = board.getTilesForTurn(current, 'enemy');
     const enemyChain = board.toChainForTurn(current, 'enemy');
     const enemyDamageResult = calculateDamage(enemyChain, {} as any);
