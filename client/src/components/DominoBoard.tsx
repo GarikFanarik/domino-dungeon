@@ -9,8 +9,10 @@ interface Props {
 }
 
 // Each tile occupies 2 x-cells wide, 1 y-cell tall
-const CELL_W = 55; // px per x-grid-unit (tile spans 2 → ~110px)
-const CELL_H = 76; // px per y-grid-unit (matches placed tile height)
+// Placed horizontal tile: height 72px, two halves at aspect-ratio 1 = 72px each,
+// + padding 8*2 + gap 2*2 + divider 2 + border 2 = 132px wide → 66px per x-cell
+const CELL_W = 66; // px per x-grid-unit (tile spans 2 → 132px)
+const CELL_H = 76; // px per y-grid-unit (matches placed tile height ~72px + 4px gap)
 
 export function DominoBoard({ board, isPlayerTurn: _isPlayerTurn, dragValidEnds }: Props) {
   const hasBoard = board.tiles.length > 0;
