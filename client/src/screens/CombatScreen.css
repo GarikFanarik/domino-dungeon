@@ -70,9 +70,9 @@
 .combat-enemy-zone {
   position: absolute;
   right: 0;
-  bottom: 0;
+  top: 0;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 /* ── Entity boxes (hero + enemy) ── */
