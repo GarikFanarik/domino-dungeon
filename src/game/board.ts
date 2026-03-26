@@ -1,6 +1,6 @@
-import { randomUUID } from 'crypto';
 import type { Stone } from './models/stone';
-import { Chain, PlacedStone } from './chain';
+import { Chain } from './chain';
+import type { PlacedStone } from './chain';
 
 export interface BoardTile {
   id: string;
@@ -132,7 +132,7 @@ export class Board {
     }
 
     const tile: BoardTile = {
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       stone,
       x,
       y,
