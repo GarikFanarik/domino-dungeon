@@ -167,15 +167,20 @@ export function CombatScreen({ runId }: Props) {
 
   async function playStone(index: number, side: 'left' | 'right') {
     setLoading(true);
-    const res = await fetch(`/api/run/${runId}/combat/play`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stoneIndex: index, side }),
-    });
-    setLoading(false);
-    const data = await res.json();
-    if (!res.ok) { setMessage(data.error || 'Invalid move'); return; }
-    setCombat(prev => prev ? { ...prev, board: data.board, playerHand: data.hand } : prev);
+    try {
+      const res = await fetch(`/api/run/${runId}/combat/play`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stoneIndex: index, side }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setMessage(data.error || 'Invalid move'); return; }
+      setCombat(prev => prev ? { ...prev, board: data.board, playerHand: data.hand } : prev);
+    } catch {
+      setMessage('Network error');
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleStoneClick(index: number) {
