@@ -331,13 +331,11 @@ export function CombatScreen({ runId }: Props) {
         </div>
       )}
 
-      {/* ── Top HUD bar (enemy hand only) ── */}
-      <div className="combat-hud-top">
-        <EnemyHand count={combat.enemyHandCount} />
-      </div>
-
       {/* ── Main area: board (centered) + enemy box (absolute right) ── */}
       <div className="combat-main">
+        <div className="combat-enemy-hand-zone">
+          <EnemyHand count={combat.enemyHandCount} />
+        </div>
         <div className="combat-board-zone">
           <DominoBoard
             board={combat.board}

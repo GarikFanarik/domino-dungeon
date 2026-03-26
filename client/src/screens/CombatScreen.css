@@ -13,14 +13,12 @@
   box-sizing: border-box;
 }
 
-/* ── Top HUD bar (enemy hand) ── */
-.combat-hud-top {
-  display: flex;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 0.5rem 0.75rem;
+/* ── Enemy hand (absolute top-left of combat-main) ── */
+.combat-enemy-hand-zone {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
 }
 
 /* ── Relic bar (centered top) ── */
