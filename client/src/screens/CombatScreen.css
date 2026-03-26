@@ -48,11 +48,13 @@
   text-align: right;
 }
 
-/* ── Relics ── */
-.combat-relics {
+/* ── Relic bar (centered top) ── */
+.combat-relic-bar {
   display: flex;
-  gap: 4px;
+  gap: 6px;
+  justify-content: center;
   flex-wrap: wrap;
+  padding: 4px 0.75rem;
 }
 
 .combat-relic-icon {

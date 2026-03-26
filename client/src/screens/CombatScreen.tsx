@@ -319,20 +319,22 @@ export function CombatScreen({ runId }: Props) {
         </div>
       )}
 
+      {/* ── Relic bar (centered top) ── */}
+      {combat.playerState.relics && combat.playerState.relics.length > 0 && (
+        <div className="combat-relic-bar">
+          {combat.playerState.relics.map(id => {
+            const img = relicImage(id);
+            return img
+              ? <img key={id} src={img} alt={id} className="combat-relic-icon" title={id} />
+              : <span key={id} className="combat-relic-icon combat-relic-icon--fallback">✨</span>;
+          })}
+        </div>
+      )}
+
       {/* ── Top HUD bar ── */}
       <div className="combat-hud-top">
-        {/* Left: player relics + HP */}
+        {/* Left: player HP */}
         <div className="combat-hud-player">
-          {combat.playerState.relics && combat.playerState.relics.length > 0 && (
-            <div className="combat-relics">
-              {combat.playerState.relics.map(id => {
-                const img = relicImage(id);
-                return img
-                  ? <img key={id} src={img} alt={id} className="combat-relic-icon" title={id} />
-                  : <span key={id} className="combat-relic-icon combat-relic-icon--fallback">✨</span>;
-              })}
-            </div>
-          )}
           <div className="hud-hp-track hud-hp-track--player">
             <div
               className="hud-hp-fill"
