@@ -1,4 +1,4 @@
-import { Stone } from './models/stone';
+import type { Stone } from './models/stone';
 
 export interface PlacedStone {
   stone: Stone;

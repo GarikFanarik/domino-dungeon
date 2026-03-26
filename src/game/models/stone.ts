@@ -1,10 +1,11 @@
-export enum ElementType {
-  Fire = 'Fire',
-  Ice = 'Ice',
-  Lightning = 'Lightning',
-  Poison = 'Poison',
-  Earth = 'Earth',
-}
+export const ElementType = {
+  Fire: 'Fire',
+  Ice: 'Ice',
+  Lightning: 'Lightning',
+  Poison: 'Poison',
+  Earth: 'Earth',
+} as const;
+export type ElementType = typeof ElementType[keyof typeof ElementType];
 
 export interface Stone {
   id: string;
