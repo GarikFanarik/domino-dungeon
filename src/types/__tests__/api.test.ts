@@ -43,6 +43,7 @@ describe('API types', () => {
       playerState: {} as any,
       turnNumber: 1,
       phase: 'player-turn',
+      act: 1,
     };
     expect(mock.turnNumber).toBe(1);
     expect(mock.phase).toBe('player-turn');
@@ -61,6 +62,7 @@ describe('API types', () => {
     const mock: PlayStoneResponse = {
       board: {} as any,
       hand: [],
+      previewDamage: 0,
     };
     expect(mock.board).toBeDefined();
   });
@@ -69,6 +71,7 @@ describe('API types', () => {
     const mock: PlayStoneResponse = {
       board: {} as any,
       hand: [],
+      previewDamage: 0,
     };
     expect(Array.isArray(mock.hand)).toBe(true);
   });

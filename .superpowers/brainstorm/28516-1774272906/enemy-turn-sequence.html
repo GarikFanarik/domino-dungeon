@@ -1,0 +1,233 @@
+<h2>Enemy Turn — Animated Sequence Design</h2>
+<p class="subtitle">Each step fades in with a short delay. Auto-advances to your turn after ~2.5 seconds. No click needed.</p>
+
+<style>
+  :root {
+    --gold: #ffd066; --red: #ff6666; --blue: #88aaff; --muted: #a08060;
+    --surface: rgba(8,6,4,0.85); --border: rgba(120,90,50,0.5); --text: #e8d8b0;
+    --fire: #ff7733; --ice: #66ccff; --poison: #88ff44;
+  }
+
+  .scenario-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--muted); margin: 28px 0 12px;
+  }
+  .scenario-label:first-child { margin-top: 0; }
+
+  .battle-frame {
+    background: rgba(6,4,2,0.75); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden; max-width: 560px;
+  }
+  .phase-banner {
+    text-align: center; padding: 7px;
+    background: rgba(180,30,30,0.3);
+    border-bottom: 1px solid rgba(220,60,60,0.4);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--red);
+    animation: pulse-red 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse-red {
+    0%,100% { background: rgba(180,30,30,0.25); }
+    50%      { background: rgba(180,30,30,0.5); }
+  }
+
+  .hud { display:flex; justify-content:space-between; padding: 10px 18px;
+    background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--border); }
+  .hud-side { display:flex; flex-direction:column; gap:3px; }
+  .hud-name { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .hud-hp { font-size:15px; font-weight:700; }
+  .hud-armor { font-size:11px; color:#aaccff; }
+
+  /* ── Sprites row ── */
+  .sprites-row {
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 18px 40px 10px; gap: 16px; position: relative;
+  }
+  .sprite {
+    width: 80px; height: 80px; border-radius: 8px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 44px;
+    position: relative;
+  }
+  .sprite--hit { filter: brightness(3) saturate(0) sepia(1) hue-rotate(300deg); }
+  .floating-dmg {
+    position: absolute; top: -18px; left: 50%; transform: translateX(-50%);
+    font-size: 26px; font-weight: 900; color: var(--red);
+    text-shadow: 0 0 10px rgba(255,80,80,0.8);
+    white-space: nowrap;
+  }
+
+  /* ── Sequence steps ── */
+  .seq-area {
+    padding: 6px 18px 16px;
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .seq-step {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 12px; border-radius: 6px;
+    opacity: 0; animation: step-in 0.3s ease forwards;
+  }
+  .seq-step:nth-child(1) { animation-delay: 0.1s; }
+  .seq-step:nth-child(2) { animation-delay: 0.55s; }
+  .seq-step:nth-child(3) { animation-delay: 0.95s; }
+  .seq-step:nth-child(4) { animation-delay: 1.35s; }
+  .seq-step:nth-child(5) { animation-delay: 1.75s; }
+  @keyframes step-in {
+    from { opacity:0; transform: translateX(-8px); }
+    to   { opacity:1; transform: translateX(0); }
+  }
+
+  .seq-icon { font-size: 17px; flex-shrink: 0; width: 22px; text-align: center; }
+  .seq-text { font-size: 13px; color: var(--muted); flex: 1; }
+  .seq-text b { color: var(--text); }
+  .seq-val { font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .seq-val--base  { color: #ff9966; }
+  .seq-val--block { color: #aaccff; }
+  .seq-val--net   { color: var(--red); font-size: 17px; }
+  .seq-val--dot   { color: var(--fire); }
+  .seq-val--skip  { color: var(--gold); }
+  .seq-sep { height:1px; background:var(--border); margin: 4px 0; opacity:0; animation: step-in 0.3s ease forwards; }
+  .seq-sep:nth-child(4) { animation-delay: 1.15s; }
+
+  /* ── Domino tile (enemy style) ── */
+  .domino-tile {
+    display: inline-flex; align-items: center;
+    background: rgba(160,30,30,0.35); border: 1px solid rgba(220,80,80,0.55);
+    border-radius: 4px; overflow: hidden;
+    font-size: 14px; font-weight: 800; color: var(--text);
+    padding: 2px;
+  }
+  .pip { width: 26px; height: 22px; display:flex; align-items:center; justify-content:center; }
+  .pip-div { width:1px; height:16px; background: rgba(220,80,80,0.4); flex-shrink:0; }
+
+  /* ── Stun/Freeze banner ── */
+  .skip-banner {
+    margin: 8px 18px 16px;
+    background: rgba(40,30,0,0.7);
+    border: 1px solid rgba(255,200,40,0.4);
+    border-radius: 6px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px;
+    animation: step-in 0.35s ease forwards;
+  }
+  .skip-icon { font-size: 24px; }
+  .skip-text { font-size: 13px; }
+  .skip-text b { color: var(--gold); }
+  .skip-text span { color: var(--muted); font-size: 11px; display: block; margin-top: 2px; }
+</style>
+
+<!-- ── SCENARIO 1: Normal attack + armor block ── -->
+<div class="scenario-label">Scenario 1 — enemy attacks, armor absorbs some damage</div>
+<div class="battle-frame">
+  <div class="phase-banner">⚔ Enemy Turn</div>
+  <div class="hud">
+    <div class="hud-side">
+      <div class="hud-name">Skeleton</div>
+      <div class="hud-hp" style="color:#ff8888">58 / 80 HP</div>
+    </div>
+    <div class="hud-side" style="align-items:flex-end">
+      <div class="hud-name">You</div>
+      <div class="hud-hp" style="color:#88ff99">34 / 50 HP</div>
+      <div class="hud-armor">🛡 4 armor</div>
+    </div>
+  </div>
+  <div class="sprites-row">
+    <div class="sprite">💀</div>
+    <div style="font-size:12px;color:var(--muted)">VS</div>
+    <div class="sprite sprite--hit">
+      🧙
+      <div class="floating-dmg">−4</div>
+    </div>
+  </div>
+  <div class="seq-area">
+    <div class="seq-step">
+      <div class="seq-icon">💀</div>
+      <div class="seq-text">Skeleton plays <div class="domino-tile" style="display:inline-flex;margin-left:6px"><div class="pip">5</div><div class="pip-div"></div><div class="pip">3</div></div></div>
+      <div class="seq-val seq-val--base">8 dmg</div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-icon">🛡</div>
+      <div class="seq-text">Your armor absorbs</div>
+      <div class="seq-val seq-val--block">−4 blocked</div>
+    </div>
+    <div class="seq-sep"></div>
+    <div class="seq-step">
+      <div class="seq-icon">❤️</div>
+      <div class="seq-text"><b>You take</b></div>
+      <div class="seq-val seq-val--net">−4 HP</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCENARIO 2: Attack + DOT ticks ── -->
+<div class="scenario-label">Scenario 2 — attack + burn and poison ticking</div>
+<div class="battle-frame">
+  <div class="phase-banner">⚔ Enemy Turn</div>
+  <div class="hud">
+    <div class="hud-side">
+      <div class="hud-name">Skeleton</div>
+      <div class="hud-hp" style="color:#ff8888">40 / 80 HP</div>
+    </div>
+    <div class="hud-side" style="align-items:flex-end">
+      <div class="hud-name">You</div>
+      <div class="hud-hp" style="color:#88ff99">28 / 50 HP</div>
+    </div>
+  </div>
+  <div class="sprites-row">
+    <div class="sprite">💀</div>
+    <div style="font-size:12px;color:var(--muted)">VS</div>
+    <div class="sprite sprite--hit">🧙<div class="floating-dmg">−4</div></div>
+  </div>
+  <div class="seq-area">
+    <div class="seq-step">
+      <div class="seq-icon">💀</div>
+      <div class="seq-text">Skeleton plays <div class="domino-tile" style="display:inline-flex;margin-left:6px"><div class="pip">4</div><div class="pip-div"></div><div class="pip">2</div></div></div>
+      <div class="seq-val seq-val--base">6 dmg</div>
+    </div>
+    <div class="seq-sep" style="animation-delay:0.45s"></div>
+    <div class="seq-step">
+      <div class="seq-icon">❤️</div>
+      <div class="seq-text"><b>You take</b></div>
+      <div class="seq-val seq-val--net">−6 HP</div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-icon">🔥</div>
+      <div class="seq-text">Burn tick (3 stacks)</div>
+      <div class="seq-val seq-val--dot">−3 HP</div>
+    </div>
+    <div class="seq-step">
+      <div class="seq-icon">☠️</div>
+      <div class="seq-text">Poison tick (2 stacks)</div>
+      <div class="seq-val seq-val--dot" style="color:var(--poison)">−2 HP</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SCENARIO 3: Stunned — enemy skips ── -->
+<div class="scenario-label">Scenario 3 — enemy stunned (Lightning overload), skips attack</div>
+<div class="battle-frame">
+  <div class="phase-banner">⚔ Enemy Turn</div>
+  <div class="hud">
+    <div class="hud-side">
+      <div class="hud-name">Skeleton</div>
+      <div class="hud-hp" style="color:#ff8888">40 / 80 HP</div>
+    </div>
+    <div class="hud-side" style="align-items:flex-end">
+      <div class="hud-name">You</div>
+      <div class="hud-hp" style="color:#88ff99">44 / 50 HP</div>
+    </div>
+  </div>
+  <div class="sprites-row">
+    <div class="sprite" style="opacity:0.45;filter:grayscale(0.7)">💀</div>
+    <div style="font-size:12px;color:var(--muted)">VS</div>
+    <div class="sprite">🧙</div>
+  </div>
+  <div class="skip-banner">
+    <div class="skip-icon">⚡</div>
+    <div class="skip-text">
+      <b>Skeleton is stunned!</b>
+      <span>Skips their attack this turn.</span>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:20px">Does this layout and pacing feel right? Any changes to the steps or styling?</p>

@@ -174,9 +174,13 @@ router.post('/:runId/combat/play', async (req: Request, res: Response) => {
     // non-fatal in tests
   }
 
+  const playerChain = board.toChainForTurn(session.turnNumber, 'player');
+  const previewDamage = calculateDamage(playerChain, {} as any).finalDamage;
+
   const response: PlayStoneResponse = {
     board: board.toJSON(),
     hand: newHand.map(toGameStone),
+    previewDamage,
   };
 
   res.json(response);
@@ -422,6 +426,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
       playerState,
       enemy,
       combatResult: 'player-won',
+      board: board.toJSON(),
       dotDamage: { burn: 0, poison: 0 },
       goldEarned,
       stoneRewards: stoneRewards ?? undefined,
@@ -571,6 +576,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     playerState,
     enemy,
     combatResult,
+    board: board.toJSON(),
     ...(enemyWasSkipped
       ? { enemySkipped: { reason: enemySkipReason } }
       : {

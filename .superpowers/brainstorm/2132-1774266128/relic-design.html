@@ -1,0 +1,263 @@
+
+<h2>Relic UI Redesign</h2>
+<p class="subtitle">Three contexts — selection screen, shop, and inventory bar. Pick the image size/layout you prefer for each.</p>
+
+<style>
+  /* Game palette */
+  :root {
+    --gold: #ffd066;
+    --gold-glow: rgba(255,200,40,0.45);
+    --rare: #88aaff;
+    --epic: #cc88ff;
+    --legendary: #ffd066;
+    --common: #aaa;
+    --surface: rgba(8,6,4,0.82);
+    --border: rgba(120,90,50,0.45);
+    --text: #e8d8b0;
+    --muted: #a08060;
+  }
+
+  .demo-section {
+    margin-bottom: 40px;
+    padding: 28px 32px;
+    background: rgba(6,4,2,0.6);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .demo-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .row { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+
+  /* ── SELECTION CARDS ── */
+  .sel-card {
+    width: 300px;
+    background: rgba(8,6,4,0.85);
+    border: 1px solid rgba(120,90,50,0.45);
+    border-radius: 10px;
+    padding: 28px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    text-align: center;
+  }
+  .sel-card:hover { transform: translateY(-4px); }
+
+  /* Option A – small icon (current) */
+  .sel-img-sm { width: 56px; height: 56px; background: rgba(255,200,80,0.12); border-radius: 8px; border: 2px solid var(--gold); display:flex;align-items:center;justify-content:center;font-size:28px; }
+
+  /* Option B – medium prominent */
+  .sel-img-md { width: 100px; height: 100px; background: rgba(255,200,80,0.12); border-radius: 12px; border: 2px solid var(--gold); display:flex;align-items:center;justify-content:center;font-size:52px; }
+
+  /* Option C – large hero */
+  .sel-img-lg { width: 140px; height: 140px; background: rgba(255,200,80,0.12); border-radius: 16px; border: 2px solid var(--gold); display:flex;align-items:center;justify-content:center;font-size:72px; }
+
+  .sel-name { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: 0.04em; }
+  .sel-rarity { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 3px 10px; border-radius: 3px; border: 1px solid var(--gold); color: var(--gold); background: rgba(80,50,0,0.4); }
+  .sel-desc { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .sel-btn { width: 100%; padding: 10px; background: linear-gradient(145deg,#3a1010,#5c1c1c,#3a1010); border: 1px solid #7a3030; color: #ffcc88; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 4px; cursor: pointer; font-family: inherit; margin-top: 4px; }
+
+  /* ── SHOP CARDS ── */
+  .shop-card {
+    width: 260px;
+    background: rgba(4,3,2,0.75);
+    border: 1px solid rgba(120,90,50,0.38);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  .shop-card-v { flex-direction: column; align-items: flex-start; }
+  .shop-img-sm { width: 44px; height: 44px; background: rgba(255,200,80,0.12); border-radius: 8px; border: 2px solid var(--gold); display:flex;align-items:center;justify-content:center;font-size:22px; flex-shrink:0; }
+  .shop-img-md { width: 72px; height: 72px; background: rgba(255,200,80,0.12); border-radius: 10px; border: 2px solid var(--gold); display:flex;align-items:center;justify-content:center;font-size:36px; flex-shrink:0; }
+  .shop-card-body { display:flex;flex-direction:column;gap:4px;flex:1; }
+  .shop-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .shop-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .shop-footer { display:flex;align-items:center;justify-content:space-between;margin-top:8px; }
+  .shop-cost { font-size: 16px; font-weight: 700; color: var(--gold); }
+  .shop-buy { background: linear-gradient(145deg,#3a1010,#5c1c1c); border: 1px solid #7a3030; color: #ffcc88; font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 3px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; font-family: inherit; }
+
+  /* ── RELIC BAR ── */
+  .bar-wrap { display:flex;gap:8px;align-items:center; }
+  /* Option A – current: icon + labels */
+  .bar-icon-labeled {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 7px; border-radius: 6px; border: 2px solid var(--gold);
+    background: rgba(8,6,4,0.8); min-width: 56px;
+  }
+  .bar-img-sm { width: 36px; height: 36px; background: rgba(255,200,80,0.12); border-radius: 5px; display:flex;align-items:center;justify-content:center;font-size:18px; }
+  .bar-tiny-name { font-size: 8px; color: var(--text); font-weight: 600; }
+  .bar-tiny-rar  { font-size: 7px; color: var(--gold); }
+
+  /* Option B – circular, image-only, no labels */
+  .bar-icon-circle {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: rgba(8,6,4,0.8);
+    display:flex;align-items:center;justify-content:center;
+    font-size: 24px;
+    box-shadow: 0 0 8px var(--gold-glow);
+    cursor: default;
+    position: relative;
+  }
+  .bar-icon-circle.bar-rare  { border-color: var(--rare);  box-shadow: 0 0 8px rgba(136,170,255,0.4); }
+  .bar-icon-circle.bar-epic  { border-color: var(--epic);  box-shadow: 0 0 8px rgba(204,136,255,0.4); }
+  .bar-icon-circle.bar-legendary { border-color: var(--legendary); box-shadow: 0 0 12px var(--gold-glow); }
+
+  /* Option C – small square with rarity stripe */
+  .bar-icon-stripe {
+    width: 52px; height: 52px; border-radius: 8px;
+    background: rgba(8,6,4,0.8);
+    border: 2px solid var(--gold);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;
+    position: relative;
+  }
+  .bar-icon-stripe .stripe { position:absolute;bottom:0;left:0;right:0;height:4px;background:var(--gold); }
+  .bar-icon-stripe.bar-rare  .stripe { background:var(--rare); }
+  .bar-icon-stripe.bar-epic  .stripe { background:var(--epic); }
+  .bar-icon-stripe .inner { font-size: 24px; }
+
+  .vs-label { font-size: 10px; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .vs-col { display:flex;flex-direction:column;align-items:flex-start; }
+</style>
+
+<!-- ═══ SECTION 1: Relic Selection Screen Cards ═══ -->
+<div class="demo-section">
+  <div class="demo-label">1 · Relic Selection Screen — Image size in card</div>
+  <div class="row">
+
+    <div class="vs-col">
+      <div class="vs-label">A · Small (current ~56px)</div>
+      <div class="sel-card">
+        <div class="sel-img-sm">🪶</div>
+        <div class="sel-name">Phoenix Feather</div>
+        <div class="sel-rarity">Epic</div>
+        <div class="sel-desc">Once per run: survive a lethal hit and restore 30% max HP.</div>
+        <button class="sel-btn">Select</button>
+      </div>
+    </div>
+
+    <div class="vs-col">
+      <div class="vs-label">B · Medium (100px) — recommended</div>
+      <div class="sel-card" style="border-color:rgba(160,60,240,0.6);box-shadow:0 0 20px rgba(160,60,240,0.2)">
+        <div class="sel-img-md">🪶</div>
+        <div class="sel-name">Phoenix Feather</div>
+        <div class="sel-rarity" style="border-color:rgba(160,60,240,0.6);color:#cc88ff;background:rgba(60,20,100,0.4)">Epic</div>
+        <div class="sel-desc">Once per run: survive a lethal hit and restore 30% max HP.</div>
+        <button class="sel-btn">Select</button>
+      </div>
+    </div>
+
+    <div class="vs-col">
+      <div class="vs-label">C · Large hero (140px)</div>
+      <div class="sel-card">
+        <div class="sel-img-lg">🪶</div>
+        <div class="sel-name">Phoenix Feather</div>
+        <div class="sel-rarity">Epic</div>
+        <div class="sel-desc">Once per run: survive a lethal hit and restore 30% max HP.</div>
+        <button class="sel-btn">Select</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ SECTION 2: Shop Item Card Layout ═══ -->
+<div class="demo-section">
+  <div class="demo-label">2 · Shop Screen — Relic card layout</div>
+  <div class="row">
+
+    <div class="vs-col">
+      <div class="vs-label">A · Image left, text right (horizontal)</div>
+      <div class="shop-card">
+        <div class="shop-img-md">🪶</div>
+        <div class="shop-card-body">
+          <div class="shop-name">Phoenix Feather</div>
+          <div class="sel-rarity" style="font-size:9px;padding:2px 7px;margin:2px 0;display:inline-block">Epic</div>
+          <div class="shop-desc">Once per run: survive a lethal hit and restore 30% max HP.</div>
+          <div class="shop-footer">
+            <span class="shop-cost">120g</span>
+            <button class="shop-buy">Buy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="vs-col">
+      <div class="vs-label">B · Centred, image on top (vertical)</div>
+      <div class="shop-card shop-card-v" style="align-items:center;text-align:center">
+        <div class="shop-img-md">🪶</div>
+        <div class="shop-name">Phoenix Feather</div>
+        <div class="sel-rarity" style="font-size:9px;padding:2px 7px;display:inline-block">Epic</div>
+        <div class="shop-desc" style="text-align:center">Once per run: survive a lethal hit and restore 30% max HP.</div>
+        <div class="shop-footer" style="width:100%">
+          <span class="shop-cost">120g</span>
+          <button class="shop-buy">Buy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="vs-col">
+      <div class="vs-label">C · Small icon inline (like stone cards)</div>
+      <div class="shop-card">
+        <div class="shop-img-sm">🪶</div>
+        <div class="shop-card-body">
+          <div class="shop-name">Phoenix Feather <span class="sel-rarity" style="font-size:9px;padding:2px 7px;vertical-align:middle">Epic</span></div>
+          <div class="shop-desc">Once per run: survive a lethal hit and restore 30% max HP.</div>
+          <div class="shop-footer">
+            <span class="shop-cost">120g</span>
+            <button class="shop-buy">Buy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ SECTION 3: Inventory Bar Icon Style ═══ -->
+<div class="demo-section">
+  <div class="demo-label">3 · Relic Bar (persistent inventory) — icon style</div>
+  <div class="row">
+
+    <div class="vs-col">
+      <div class="vs-label">A · With labels (current)</div>
+      <div class="bar-wrap">
+        <div class="bar-icon-labeled"><div class="bar-img-sm">💰</div><div class="bar-tiny-name">Worn Pouch</div><div class="bar-tiny-rar">common</div></div>
+        <div class="bar-icon-labeled" style="border-color:var(--rare)"><div class="bar-img-sm" style="border-color:var(--rare)">🔴</div><div class="bar-tiny-name">Ember Core</div><div class="bar-tiny-rar" style="color:var(--rare)">rare</div></div>
+        <div class="bar-icon-labeled" style="border-color:var(--epic)"><div class="bar-img-sm" style="border-color:var(--epic)">🪶</div><div class="bar-tiny-name">Phoenix</div><div class="bar-tiny-rar" style="color:var(--epic)">epic</div></div>
+      </div>
+    </div>
+
+    <div class="vs-col">
+      <div class="vs-label">B · Circles only, tooltip on hover — recommended</div>
+      <div class="bar-wrap">
+        <div class="bar-icon-circle" title="Worn Pouch — Draw 1 extra stone">💰</div>
+        <div class="bar-icon-circle bar-rare" title="Ember Core — Burn stacks never decay">🔴</div>
+        <div class="bar-icon-circle bar-epic" title="Phoenix Feather — Survive one lethal hit">🪶</div>
+        <div class="bar-icon-circle bar-legendary" title="Domino Crown — Replace stones with doubles">👑</div>
+      </div>
+    </div>
+
+    <div class="vs-col">
+      <div class="vs-label">C · Squares with rarity stripe at bottom</div>
+      <div class="bar-wrap">
+        <div class="bar-icon-stripe"><div class="inner">💰</div><div class="stripe"></div></div>
+        <div class="bar-icon-stripe bar-rare"><div class="inner">🔴</div><div class="stripe"></div></div>
+        <div class="bar-icon-stripe bar-epic" style="border-color:var(--epic)"><div class="inner">🪶</div><div class="stripe" style="background:var(--epic)"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:8px">The emojis represent the actual PNG images — real art will look much richer. Click an option if one jumps out, or just tell me in the terminal.</p>

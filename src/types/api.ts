@@ -39,6 +39,7 @@ export interface CombatStateResponse {
 export interface PlayStoneResponse {
   board: BoardJSON;
   hand: Stone[];
+  previewDamage: number;
 }
 
 export interface EndTurnResponse {
@@ -55,6 +56,7 @@ export interface EndTurnResponse {
   enemySkipped?: { reason: 'stunned' | 'frozen' };
   dotDamage: { burn: number; poison: number };   // required; defaults { burn:0, poison:0 }
   hand?: Stone[];
+  board?: BoardJSON;
   goldEarned?: number;
   stoneRewards?: Array<{ element: string; leftPip: number; rightPip: number }>;
   triggeredRelics?: string[];

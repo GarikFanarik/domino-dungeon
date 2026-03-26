@@ -128,6 +128,7 @@ export function CombatScreen({ runId }: Props) {
   const [enemyTurnData, setEnemyTurnData] = useState<EnemyTurnData | null>(null);
   const [choosingEnd, setChoosingEnd] = useState<'both' | null>(null);
   const [pendingStone, setPendingStone] = useState<{ index: number } | null>(null);
+  const [previewDamage, setPreviewDamage] = useState<number | null>(null);
 
   useEffect(() => {
     fetch(`/api/run/${runId}/combat`)
@@ -178,6 +179,7 @@ export function CombatScreen({ runId }: Props) {
       const data = await res.json();
       if (!res.ok) { setMessage(data.error || 'Invalid move'); return; }
       setCombat(prev => prev ? { ...prev, board: data.board, playerHand: data.hand } : prev);
+      setPreviewDamage(data.previewDamage ?? null);
     } catch {
       setMessage('Network error');
     } finally {
@@ -261,6 +263,7 @@ export function CombatScreen({ runId }: Props) {
           swapsUsed: 0,
           playerHand: data.hand ?? prev.playerHand,
         } : prev);
+        setPreviewDamage(null);
       }
     } finally {
       setLoading(false);
@@ -316,25 +319,36 @@ export function CombatScreen({ runId }: Props) {
         </div>
       )}
 
-      {/* Relic bar */}
-      {combat.playerState.relics && combat.playerState.relics.length > 0 && (
-        <div className="combat-relics">
-          {combat.playerState.relics.map(id => {
-            const img = relicImage(id);
-            return img
-              ? <img key={id} src={img} alt={id} className="combat-relic-icon" title={id} />
-              : <span key={id} className="combat-relic-icon combat-relic-icon--fallback">✨</span>;
-          })}
+      {/* ── Top HUD bar ── */}
+      <div className="combat-hud-top">
+        {/* Left: player relics + HP */}
+        <div className="combat-hud-player">
+          {combat.playerState.relics && combat.playerState.relics.length > 0 && (
+            <div className="combat-relics">
+              {combat.playerState.relics.map(id => {
+                const img = relicImage(id);
+                return img
+                  ? <img key={id} src={img} alt={id} className="combat-relic-icon" title={id} />
+                  : <span key={id} className="combat-relic-icon combat-relic-icon--fallback">✨</span>;
+              })}
+            </div>
+          )}
+          <div className="hud-hp-track hud-hp-track--player">
+            <div
+              className="hud-hp-fill"
+              style={{ width: `${Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100)}%` }}
+            />
+          </div>
+          <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max} HP</div>
         </div>
-      )}
 
-      <div className="combat-top">
-        <img
-          className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
-          src={getEnemySprite(combat.enemy)}
-          alt={combat.enemy.name}
-        />
-        <div className="combat-enemy-info">
+        {/* Center: enemy hand */}
+        <div className="combat-hud-center">
+          <EnemyHand count={combat.enemyHandCount} />
+        </div>
+
+        {/* Right: enemy HP + status */}
+        <div className="combat-hud-enemy">
           <div className="hud-name">{combat.enemy.name}</div>
           <div className="hud-hp-track">
             <div
@@ -345,18 +359,28 @@ export function CombatScreen({ runId }: Props) {
           <div className="hud-hp-label">{combat.enemy.hp.current} / {combat.enemy.hp.max} HP</div>
           <StatusBadges status={combat.enemy.status} />
         </div>
-        <EnemyHand count={combat.enemyHandCount} />
       </div>
 
-      <div className="combat-board-zone">
-        <DominoBoard
-          board={combat.board}
-          isPlayerTurn={isPlayerTurn}
-          choosingEnd={choosingEnd}
-          onEndSelect={handleEndSelect}
-        />
+      {/* ── Main area: board + enemy sprite ── */}
+      <div className="combat-main">
+        <div className="combat-board-zone">
+          <DominoBoard
+            board={combat.board}
+            isPlayerTurn={isPlayerTurn}
+            choosingEnd={choosingEnd}
+            onEndSelect={handleEndSelect}
+          />
+        </div>
+        <div className="combat-enemy-zone">
+          <img
+            className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
+            src={getEnemySprite(combat.enemy)}
+            alt={combat.enemy.name}
+          />
+        </div>
       </div>
 
+      {/* ── Bottom: hero + hand ── */}
       <div className="combat-bottom">
         <div className="combat-player-zone">
           <img
@@ -364,29 +388,6 @@ export function CombatScreen({ runId }: Props) {
             src="/assets/combat/hero/hero.png"
             alt="Hero"
           />
-          <div className="combat-player-info">
-            <div className="hud-hp-track">
-              <div
-                className="hud-hp-fill"
-                style={{ width: `${Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100)}%` }}
-              />
-            </div>
-            <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max}</div>
-          </div>
-        </div>
-
-        <div className="combat-hand-controls">
-          {isPlayerTurn && swapsLeft > 0 && (
-            <button
-              className={`btn-swap${swapMode ? ' btn-swap--active' : ''}`}
-              onClick={() => setSwapMode(s => !s)}
-            >
-              {swapMode ? 'Cancel' : `Swap (${swapsLeft})`}
-            </button>
-          )}
-          <button className="btn-swap" onClick={() => setShowBag(s => !s)}>
-            Bag ({combat.bag?.length ?? 0})
-          </button>
         </div>
 
         <div className="combat-hand-tiles">
@@ -407,6 +408,24 @@ export function CombatScreen({ runId }: Props) {
         </div>
 
         <div className="combat-actions-end">
+          <div className="combat-hand-controls">
+            {isPlayerTurn && swapsLeft > 0 && (
+              <button
+                className={`btn-swap${swapMode ? ' btn-swap--active' : ''}`}
+                onClick={() => setSwapMode(s => !s)}
+              >
+                {swapMode ? 'Cancel' : `Swap (${swapsLeft})`}
+              </button>
+            )}
+            <button className="btn-swap" onClick={() => setShowBag(s => !s)}>
+              Bag ({combat.bag?.length ?? 0})
+            </button>
+          </div>
+          {previewDamage !== null && previewDamage > 0 && (
+            <div className="combat-preview-damage">
+              ⚔ {previewDamage} dmg
+            </div>
+          )}
           {message && <span className="combat-message">{message}</span>}
           <button
             className="btn-end-turn"
