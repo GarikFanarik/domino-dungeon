@@ -38,7 +38,8 @@ describe('API types', () => {
     const mock: CombatStateResponse = {
       enemy: {} as any,
       playerHand: [],
-      chain: [],
+      board: {} as any,
+      enemyHandCount: 0,
       playerState: {} as any,
       turnNumber: 1,
       phase: 'player-turn',
@@ -58,19 +59,18 @@ describe('API types', () => {
 
   it('PlayStoneResponse shape is valid', () => {
     const mock: PlayStoneResponse = {
-      chain: [],
+      board: {} as any,
       hand: [],
     };
-    expect(mock.chain).toEqual([]);
+    expect(mock.board).toBeDefined();
   });
 
-  it('PlayStoneResponse optional message works', () => {
+  it('PlayStoneResponse hand is an array', () => {
     const mock: PlayStoneResponse = {
-      chain: [],
+      board: {} as any,
       hand: [],
-      message: 'Stone played',
     };
-    expect(mock.message).toBe('Stone played');
+    expect(Array.isArray(mock.hand)).toBe(true);
   });
 
   it('EndTurnResponse shape is valid', () => {
@@ -90,7 +90,7 @@ describe('API types', () => {
       combatResult: 'player-won',
       dotDamage: { burn: 0, poison: 0 },
       enemyAttack: {
-        stone: { leftPip: 2, rightPip: 3 },
+        stonesPlayed: [{ leftPip: 2, rightPip: 3 }],
         rawDamage: 5,
         armorBlocked: 0,
         damage: 5,

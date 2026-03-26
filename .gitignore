@@ -6,3 +6,5 @@ client/.env
 coverage/
 .claude/
 discord-last-processed.txt
+
+.worktrees/

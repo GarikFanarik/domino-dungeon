@@ -6,16 +6,15 @@ import { failRun, startRun } from '../../../src/dungeon/run';
 import { defaultPlayerState } from '../../../src/game/models/player-state';
 import type { DungeonNode } from '../../../src/dungeon/node-types';
 import { Bag } from '../../../src/game/bag';
-import { Chain } from '../../../src/game/chain';
+import { Board } from '../../../src/game/board';
+import { EnemyBoardAI } from '../../../src/game/ai/enemy-board-ai';
 import { analyzeChain, applyChainEffects } from '../../../src/game/elements/element-engine';
 import { calculateDamage, applyArmor } from '../../../src/game/damage';
-import { EnemyAI, EnemyType } from '../../../src/game/ai/enemy-ai';
 import { dealDamage, isDead } from '../../../src/game/hp';
 import { getSlowDamageMultiplier } from '../../../src/game/elements/ice';
 import type { Stone as GameStone } from '../../../src/game/models/stone';
 import { createElementalStone } from '../../../src/game/models/stone';
-import type { PlacedStone as GamePlacedStone } from '../../../src/game/chain';
-import type { CombatStateResponse, PlayStoneResponse, EndTurnResponse, UnplayStoneResponse } from '../../../src/types/api';
+import type { CombatStateResponse, PlayStoneResponse, EndTurnResponse } from '../../../src/types/api';
 import { RelicType } from '../../../src/game/relics/common';
 import { applyInfiniteBag, applyBloodPactEnd, applyTheLastStone, applyCurseOfGreed } from '../../../src/game/relics/legendary';
 import { applyPhoenixFeather, applyChainMastersGlove, applyVoltaicLens } from '../../../src/game/relics/epic';
@@ -61,15 +60,6 @@ function toGameStone(s: CombatSession['hand'][number]): GameStone {
   return s as unknown as GameStone;
 }
 
-function toGamePlacedStones(stones: CombatSession['chain']['stones']): GamePlacedStone[] {
-  return stones as unknown as GamePlacedStone[];
-}
-
-// Helper: reconstruct a Chain instance from serialised session data
-function chainFromSession(session: CombatSession): Chain {
-  return Chain.fromJSON(session.chain);
-}
-
 // GET /:runId/combat — return current combat state
 router.get('/:runId/combat', async (req: Request, res: Response) => {
   const runId = req.params['runId'] as string;
@@ -94,7 +84,8 @@ router.get('/:runId/combat', async (req: Request, res: Response) => {
       status: session.enemyStatus,
     },
     playerHand: session.hand.map(toGameStone),
-    chain: toGamePlacedStones(session.chain.stones),
+    board: session.board,
+    enemyHandCount: (session.enemyHand ?? []).length,
     playerState: {
       hp: { current: session.playerHp ?? 80, max: session.playerMaxHp ?? 80 },
       armor: session.playerArmor ?? 0,
@@ -106,22 +97,26 @@ router.get('/:runId/combat', async (req: Request, res: Response) => {
     phase: 'player-turn',
     swapsUsed: session.swapsUsed,
     swapsPerTurn: session.swapsPerTurn,
-    leftOpen: session.chain.leftOpen,
-    rightOpen: session.chain.rightOpen,
     bag: session.bag.map(toGameStone),
   };
 
   res.json(response);
 });
 
-// POST /:runId/combat/play — play a stone from hand onto the chain
+// POST /:runId/combat/play — play a stone from hand onto the board
 router.post('/:runId/combat/play', async (req: Request, res: Response) => {
   const runId = req.params['runId'] as string;
-  const { stoneIndex } = req.body as { stoneIndex?: unknown };
+  const { stoneIndex, side } = req.body as { stoneIndex?: unknown; side?: unknown };
 
   // Validate stoneIndex before fetching session
   if (stoneIndex === undefined || stoneIndex === null || typeof stoneIndex !== 'number') {
     res.status(400).json({ error: 'stoneIndex is required and must be a number' });
+    return;
+  }
+
+  // Validate side
+  if (side !== 'left' && side !== 'right') {
+    res.status(400).json({ error: 'side must be "left" or "right"' });
     return;
   }
 
@@ -144,23 +139,29 @@ router.post('/:runId/combat/play', async (req: Request, res: Response) => {
   }
 
   const stone = toGameStone(hand[stoneIndex]);
-  const chain = chainFromSession(session);
-  const { right } = chain.canPlay(stone);
+  const board = Board.fromJSON(session.board);
 
-  if (!right) {
-    res.status(400).json({ error: 'Stone cannot be played on the current chain' });
+  // Return 400 if board is empty and side === 'left'
+  if (board.leftOpen === null && board.rightOpen === null && side === 'left') {
+    res.status(400).json({ error: 'Cannot play to the left on an empty board' });
     return;
   }
 
-  // Always play to the right; flipped=true when rightPip is the connecting pip
-  const flipped = chain.stones.length > 0 && stone.rightPip === chain.rightOpen;
-  chain.playStone(stone, 'right', flipped);
+  // Validate: board.canPlay(stone)[side]
+  const canPlay = board.canPlay(stone);
+  if (!canPlay[side]) {
+    res.status(400).json({ error: 'Stone cannot be played on the current board at that side' });
+    return;
+  }
+
+  // Play the stone
+  board.playStone(stone, side, 'player', session.turnNumber);
 
   // Remove stone from hand
   const newHand = [...hand.slice(0, stoneIndex), ...hand.slice(stoneIndex + 1)];
 
   // Persist updated session
-  session.chain = chain.toJSON() as CombatSession['chain'];
+  session.board = board.toJSON();
   session.hand = newHand;
 
   try {
@@ -170,72 +171,8 @@ router.post('/:runId/combat/play', async (req: Request, res: Response) => {
   }
 
   const response: PlayStoneResponse = {
-    chain: toGamePlacedStones(session.chain.stones),
+    board: board.toJSON(),
     hand: newHand.map(toGameStone),
-    leftOpen: chain.leftOpen,
-    rightOpen: chain.rightOpen,
-  };
-
-  res.json(response);
-});
-
-// POST /:runId/combat/unplay — remove a stone from the chain (and everything after it) back to hand
-router.post('/:runId/combat/unplay', async (req: Request, res: Response) => {
-  const runId = req.params['runId'] as string;
-  const { chainIndex } = req.body as { chainIndex?: unknown };
-
-  if (chainIndex === undefined || chainIndex === null || typeof chainIndex !== 'number') {
-    res.status(400).json({ error: 'chainIndex is required and must be a number' });
-    return;
-  }
-
-  let session: CombatSession | null = null;
-  try {
-    session = await getCombatSession(runId);
-  } catch {
-    session = null;
-  }
-
-  if (session === null) {
-    res.status(404).json({ error: 'Combat session not found' });
-    return;
-  }
-
-  const chainStones = session.chain.stones;
-  if (chainIndex < 0 || chainIndex >= chainStones.length) {
-    res.status(400).json({ error: 'chainIndex out of range' });
-    return;
-  }
-
-  // Cannot remove the first/only stone if it came from an initial play
-  // (removing index 0 would clear the whole chain — allow it)
-  const removedPlaced = chainStones.slice(chainIndex);
-  const keptPlaced = chainStones.slice(0, chainIndex);
-
-  // Rebuild chain from kept stones
-  const newChain = new Chain();
-  for (const ps of keptPlaced) {
-    newChain.playStone(toGameStone(ps.stone as any), ps.side, ps.flipped);
-  }
-
-  // Stones removed go back to hand (in original orientation)
-  const returnedStones = removedPlaced.map((ps) => ps.stone);
-  const newHand = [...session.hand, ...returnedStones];
-
-  session.chain = newChain.toJSON() as CombatSession['chain'];
-  session.hand = newHand;
-
-  try {
-    await saveCombatSession(session);
-  } catch {
-    // non-fatal
-  }
-
-  const response: UnplayStoneResponse = {
-    chain: toGamePlacedStones(session.chain.stones),
-    hand: newHand.map(toGameStone),
-    leftOpen: newChain.leftOpen,
-    rightOpen: newChain.rightOpen,
   };
 
   res.json(response);
@@ -318,8 +255,8 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     return;
   }
 
-  // Reconstruct domain objects
-  const chain = chainFromSession(session);
+  const board = Board.fromJSON(session.board);
+  const current = session.turnNumber;
 
   const enemy = {
     id: session.enemyId,
@@ -338,53 +275,59 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
 
   const relics = session.relics ?? [];
 
-  // 1. Analyse chain for element effects (GlacialHeart: freeze at 1+, ElementalPrism: counts×2)
-  const analysis = analyzeChain(chain, relics);
+  // Steps 1-4: player damage
+  const playerChain = board.toChainForTurn(current, 'player');
+
+  // 1. Analyse chain for element effects
+  const analysis = analyzeChain(playerChain, relics);
 
   // 2. Apply chain effects (PebbleCharm, IronSkin, StormAmulet wired inside)
   const effects = applyChainEffects(analysis, playerState, enemy, relics);
 
   // 3. Calculate player's damage from chain
-  let chainDamage = calculateDamage(chain, {} as any, effects.lightningBonus).finalDamage;
+  let chainDamage = calculateDamage(playerChain, {} as any, effects.lightningBonus).finalDamage;
+
+  // Steps 5-10: relic bonuses
+  const gloveTiles = board.getTilesForTurn(current, 'player');
+  const gloveBase = session.stonesPlayedTotal ?? 0;
+
+  // ChainMastersGlove: every 5th stone played (across the whole combat) deals double pip damage
+  if (relics.includes(RelicType.ChainMastersGlove) && gloveTiles.length > 0) {
+    let gloveBonus = 0;
+    gloveTiles.forEach((tile, i) => {
+      const pos = gloveBase + i + 1; // 1-indexed cumulative position
+      const stonePipDmg = (tile.stone.leftPip + tile.stone.rightPip) * 2;
+      gloveBonus += applyChainMastersGlove(pos, stonePipDmg) - stonePipDmg;
+    });
+    chainDamage += gloveBonus;
+  }
+  session.stonesPlayedTotal = gloveBase + gloveTiles.length;
+
+  // TheLastStone: single-stone chain → (left + right) × 2
+  if (relics.includes(RelicType.TheLastStone)) {
+    const lastStoneDmg = applyTheLastStone(gloveTiles.map(t => ({ stone: t.stone, side: t.side, flipped: t.flipped })) as any);
+    if (lastStoneDmg > 0) chainDamage = lastStoneDmg;
+  }
 
   // VoltaicLens: Overload deals +15 bonus damage
   if (relics.includes(RelicType.VoltaicLens)) {
     chainDamage = applyVoltaicLens(analysis.overloadTriggered, chainDamage);
   }
 
-  // ChainMastersGlove: every 5th stone played (across the whole combat) deals double pip damage
-  if (relics.includes(RelicType.ChainMastersGlove) && chain.stones.length > 0) {
-    const base = session.stonesPlayedTotal ?? 0;
-    let gloveBonus = 0;
-    chain.stones.forEach((ps, i) => {
-      const pos = base + i + 1; // 1-indexed cumulative position
-      const stonePipDmg = (ps.stone.leftPip + ps.stone.rightPip) * 2;
-      gloveBonus += applyChainMastersGlove(pos, stonePipDmg) - stonePipDmg;
-    });
-    chainDamage += gloveBonus;
-  }
-  session.stonesPlayedTotal = (session.stonesPlayedTotal ?? 0) + chain.stones.length;
-
-  // TheLastStone: single-stone chain → (left + right) × 2
-  if (relics.includes(RelicType.TheLastStone)) {
-    const lastStoneDmg = applyTheLastStone(chain.stones as any);
-    if (lastStoneDmg > 0) chainDamage = lastStoneDmg;
-  }
-
   // InfiniteBag: return played stones to bag after this turn
-  if (relics.includes(RelicType.InfiniteBag) && chain.stones.length > 0) {
-    const playedStones = chain.stones.map(p => p.stone as GameStone);
-    session.bag = applyInfiniteBag(playedStones, session.bag as any) as any;
+  if (relics.includes(RelicType.InfiniteBag) && gloveTiles.length > 0) {
+    const playedStones = gloveTiles.map(t => t.stone);
+    session.bag = applyInfiniteBag(playedStones as any, session.bag as any) as any;
   }
 
-  // 4. Deal player damage to enemy
+  // Step 10-11: deal damage, check win
   dealDamage(enemy, chainDamage);
 
   // Check if enemy died
   if (isDead(enemy)) {
     session.enemyHp = enemy.hp.current;
     session.enemyStatus = enemy.status;
-    session.chain = { stones: [], leftOpen: null, rightOpen: null };
+    session.board = board.toJSON();
     session.turnNumber += 1;
     session.swapsUsed = 0;
 
@@ -405,9 +348,9 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
         else if (nodeType === 'elite') goldEarned = 20 + Math.floor(Math.random() * 6); // 20-25g
         else goldEarned = 10 + Math.floor(Math.random() * 6); // 10-15g
 
-        // TravelerBoots: +1 gold per stone in winning chain
+        // TravelerBoots fires on win only: +1 gold per stone in winning chain
         if (relics.includes(RelicType.TravelerBoots)) {
-          const chainBonus = applyTravelerBoots(chain.stones.length);
+          const chainBonus = applyTravelerBoots(gloveTiles.length);
           goldEarned += chainBonus;
           if (chainBonus > 0) triggeredRelics.push(RelicType.TravelerBoots);
         }
@@ -484,39 +427,33 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     return;
   }
 
-  // 5. Enemy attacks (only if not stunned)
-  let enemyAttackDamage = 0;
-  let stone: { leftPip: number; rightPip: number } = { leftPip: 0, rightPip: 0 };
-  let rawDamage = 0;
-  let armorBlocked = 0;
-  let netDamage = 0;
+  // Step 12 & 13: enemy AI plays and damage calculation (skipped if stunned/frozen)
   let enemyWasSkipped = false;
   let enemySkipReason: 'stunned' | 'frozen' = 'stunned';
+  let rawEnemyDamage = 0;
+  let armorBlocked = 0;
+  let netEnemyDamage = 0;
+  let enemyTilesPlayed: ReturnType<typeof board.getTilesForTurn> = [];
 
   if (!enemy.status.stunned && !enemy.status.frozen) {
-    const ai = new EnemyAI();
-    const enemyHand: GameStone[] = [
-      {
-        id: 'e1',
-        leftPip: Math.min(6, Math.floor(enemy.hp.current / 10)),
-        rightPip: Math.min(6, Math.floor(enemy.hp.current / 5)),
-        element: null,
-      },
-    ];
-    stone = { leftPip: enemyHand[0].leftPip, rightPip: enemyHand[0].rightPip };
-    const attack = ai.buildAttack(enemyHand, EnemyType.Normal);
+    const ai = new EnemyBoardAI();
+    session.enemyHand = ai.playTurn(board, (session.enemyHand ?? []) as any[], current) as any[];
+
+    enemyTilesPlayed = board.getTilesForTurn(current, 'enemy');
+    const enemyChain = board.toChainForTurn(current, 'enemy');
+    const enemyDamageResult = calculateDamage(enemyChain, {} as any);
+    rawEnemyDamage = enemyDamageResult.finalDamage;
 
     // FrostbiteRing: each slow stack reduces enemy damage by 30% instead of 20%
     const slowPct = relics.includes(RelicType.FrostbiteRing) ? 0.3 : 0.2;
     const slowMultiplier = getSlowDamageMultiplier(enemy, slowPct);
-    enemyAttackDamage = Math.floor(attack.damage * slowMultiplier);
-    rawDamage = enemyAttackDamage;
+    rawEnemyDamage = Math.floor(rawEnemyDamage * slowMultiplier);
 
-    // Apply armor first
-    const armorResult = applyArmor(enemyAttackDamage, playerState.armor);
+    // Step 14: apply armor
+    const armorResult = applyArmor(rawEnemyDamage, playerState.armor);
     playerState.armor = armorResult.armorRemaining;
-    armorBlocked = rawDamage - armorResult.damageToDeal;
-    netDamage = armorResult.damageToDeal;
+    armorBlocked = rawEnemyDamage - armorResult.damageToDeal;
+    netEnemyDamage = armorResult.damageToDeal;
 
     // Deal remaining damage to player
     if (armorResult.damageToDeal > 0) {
@@ -550,6 +487,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     }
   }
 
+  // Steps 15-17: DoT, status decay
   // Tick burn — EmberCore: burn stacks don't decay
   let burnDamage = 0;
   if (enemy.status.burn > 0) {
@@ -594,18 +532,21 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     }
   }
 
-  // Refill hand from bag — WornPouch increases hand size to 8
+  // Refill both hands from bag
   const HAND_SIZE = session.handSize ?? 7;
   const bag = new Bag(session.bag as any[]);
-  const needed = HAND_SIZE - session.hand.length;
-  if (needed > 0) {
-    const drawn = bag.draw(needed);
-    session.hand = [...session.hand, ...drawn];
-    session.bag = bag.stones;
+  const playerNeeded = Math.max(0, HAND_SIZE - session.hand.length);
+  if (playerNeeded > 0) {
+    session.hand = [...session.hand, ...bag.draw(playerNeeded)];
   }
+  const enemyNeeded = Math.max(0, session.enemyHandSize - session.enemyHand.length);
+  if (enemyNeeded > 0) {
+    session.enemyHand = [...session.enemyHand, ...bag.draw(enemyNeeded)];
+  }
+  session.bag = bag.stones;
 
-  // Reset chain and advance turn
-  session.chain = { stones: [], leftOpen: null, rightOpen: null };
+  // Steps 18-19: save board state, increment turn
+  session.board = board.toJSON();
   session.turnNumber += 1;
   session.swapsUsed = 0;
   session.enemyHp = enemy.hp.current;
@@ -619,13 +560,20 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     // non-fatal in tests
   }
 
+  // Build enemyAttack with stonesPlayed[]
+  const stonesPlayed = enemyTilesPlayed.map(t => ({ leftPip: t.stone.leftPip, rightPip: t.stone.rightPip }));
+
   const response: EndTurnResponse = {
     playerState,
     enemy,
     combatResult,
     ...(enemyWasSkipped
       ? { enemySkipped: { reason: enemySkipReason } }
-      : { enemyAttack: { stone, rawDamage, armorBlocked, damage: netDamage, effects: [] } }),
+      : {
+          enemyAttack: enemyTilesPlayed.length > 0
+            ? { stonesPlayed, rawDamage: rawEnemyDamage, armorBlocked, damage: netEnemyDamage, effects: [] }
+            : undefined,
+        }),
     dotDamage: { burn: burnDamage, poison: poisonDamage },
     hand: session.hand.map(toGameStone),
   };

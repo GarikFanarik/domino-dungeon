@@ -1,0 +1,23 @@
+.enemy-hand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.enemy-hand-tiles {
+  display: flex;
+  gap: 4px;
+}
+
+.enemy-hand-tile {
+  width: 24px;
+  height: 40px;
+  background: #3a2a4a;
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 4px;
+}
+
+.enemy-hand-count {
+  color: #ccc;
+  font-size: 0.85rem;
+}

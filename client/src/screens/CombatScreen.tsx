@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { DominoStone } from '../components/DominoStone';
+import { DominoBoard } from '../components/DominoBoard';
+import { EnemyHand } from '../components/EnemyHand';
 import { EnemyTurnSequence } from '../components/EnemyTurnSequence';
+import type { BoardJSON } from '../../../src/game/board';
 import './CombatScreen.css';
 
 interface Stone {
@@ -9,12 +12,6 @@ interface Stone {
   leftPip: number;
   rightPip: number;
   element: string | null;
-}
-
-interface PlacedStone {
-  stone: Stone;
-  side: 'left' | 'right';
-  flipped: boolean;
 }
 
 interface EnemyStatus {
@@ -26,6 +23,7 @@ interface EnemyStatus {
 }
 
 interface Enemy {
+  id?: string;
   name: string;
   hp: { current: number; max: number };
   status: EnemyStatus;
@@ -35,19 +33,19 @@ interface PlayerState {
   hp: { current: number; max: number };
   gold: number;
   armor: number;
+  relics?: unknown[];
 }
 
 interface CombatState {
   enemy: Enemy;
   playerHand: Stone[];
-  chain: PlacedStone[];
+  board: BoardJSON;
+  enemyHandCount: number;
   playerState: PlayerState;
   turnNumber: number;
   phase: 'player-turn' | 'enemy-turn' | 'resolving';
   swapsUsed: number;
   swapsPerTurn: number;
-  leftOpen: number | null;
-  rightOpen: number | null;
   bag: Stone[];
 }
 
@@ -60,7 +58,7 @@ interface StoneReward {
 interface EnemyTurnData {
   enemyName: string;
   attack?: {
-    stone: { leftPip: number; rightPip: number };
+    stonesPlayed: { leftPip: number; rightPip: number }[];
     rawDamage: number;
     armorBlocked: number;
     damage: number;
@@ -79,29 +77,20 @@ const ELEMENT_ICONS: Record<string, string> = {
   earth:     '/assets/elements/earth/rock.png',
 };
 
-function getEnemySprite(name: string): string {
-  const n = name.toLowerCase();
-  if (n.includes('rat')  || n.includes('tomb'))    return '/assets/combat/enemies/act1/tomb-rat/tomb-rat.png';
+function getEnemySprite(enemy: Enemy): string {
+  const n = enemy.name.toLowerCase();
+  if (n.includes('rat')  || n.includes('tomb'))      return '/assets/combat/enemies/act1/tomb-rat/tomb-rat.png';
   if (n.includes('crypt') || n.includes('sentinel')) return '/assets/combat/enemies/act1/crypt-sentinel/crypt-sentinel.png';
   return '/assets/combat/enemies/act1/stonewarden/stonewarden.png';
 }
 
-function calcChainDamage(chain: PlacedStone[]): number {
-  return chain.slice(1).reduce((sum, placed) => {
-    const junction = placed.flipped ? placed.stone.rightPip : placed.stone.leftPip;
-    return sum + junction * 2;
-  }, 0);
-}
-
-function canStoneBePlayed(stone: Stone, chain: PlacedStone[], rightOpen: number | null): boolean {
-  if (chain.length === 0) return true;
-  return stone.leftPip === rightOpen || stone.rightPip === rightOpen;
-}
-
-function computeRightOpen(chain: PlacedStone[]): number | null {
-  if (chain.length === 0) return null;
-  const last = chain[chain.length - 1];
-  return last.flipped ? last.stone.leftPip : last.stone.rightPip;
+function canStonePlay(stone: Stone, board: BoardJSON): { left: boolean; right: boolean } {
+  if (!board || board.tiles.length === 0) return { left: false, right: true };
+  const left = board.leftOpen !== null &&
+    (stone.leftPip === board.leftOpen || stone.rightPip === board.leftOpen);
+  const right = board.rightOpen !== null &&
+    (stone.leftPip === board.rightOpen || stone.rightPip === board.rightOpen);
+  return { left, right };
 }
 
 function StatusBadges({ status }: { status: EnemyStatus }) {
@@ -135,6 +124,8 @@ export function CombatScreen({ runId }: Props) {
   const [showBag, setShowBag] = useState(false);
   const [stoneRewards, setStoneRewards] = useState<StoneReward[]>([]);
   const [enemyTurnData, setEnemyTurnData] = useState<EnemyTurnData | null>(null);
+  const [choosingEnd, setChoosingEnd] = useState<'both' | null>(null);
+  const [pendingStone, setPendingStone] = useState<{ index: number } | null>(null);
 
   useEffect(() => {
     fetch(`/api/run/${runId}/combat`)
@@ -143,20 +134,18 @@ export function CombatScreen({ runId }: Props) {
         ...data,
         swapsUsed: data.swapsUsed ?? 0,
         swapsPerTurn: data.swapsPerTurn ?? 1,
-        leftOpen: data.leftOpen ?? null,
-        rightOpen: data.rightOpen ?? null,
         bag: data.bag ?? [],
       }))
       .catch(() => setMessage('Failed to load combat'));
   }, [runId]);
 
-  async function handleStoneClick(index: number) {
-    if (swapMode) {
-      await handleSwapStone(index);
-    } else {
-      await handlePlayStone(index);
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { setChoosingEnd(null); setPendingStone(null); }
     }
-  }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   async function handleSwapStone(index: number) {
     if (!combat || combat.phase !== 'player-turn') return;
@@ -176,66 +165,48 @@ export function CombatScreen({ runId }: Props) {
     }
   }
 
-  async function handlePlayStone(index: number) {
-    if (!combat || combat.phase !== 'player-turn') return;
-    setMessage('');
-
-    const stone = combat.playerHand[index];
-    const flipped = combat.chain.length > 0 && stone.rightPip === combat.rightOpen;
-    const newPlaced: PlacedStone = { stone, side: 'right', flipped };
-    const newChain = [...combat.chain, newPlaced];
-    const newHand = combat.playerHand.filter((_, i) => i !== index);
-    const newRightOpen = computeRightOpen(newChain);
-
-    // Optimistic update — instant UI response
-    setCombat(prev => prev ? { ...prev, chain: newChain, playerHand: newHand, rightOpen: newRightOpen } : prev);
-
+  async function playStone(index: number, side: 'left' | 'right') {
+    setLoading(true);
     try {
       const res = await fetch(`/api/run/${runId}/combat/play`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stoneIndex: index }),
+        body: JSON.stringify({ stoneIndex: index, side }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        // Roll back
-        setCombat(prev => prev ? { ...prev, chain: combat.chain, playerHand: combat.playerHand, rightOpen: combat.rightOpen } : prev);
-        setMessage(data.error || 'Invalid move');
-      }
+      if (!res.ok) { setMessage(data.error || 'Invalid move'); return; }
+      setCombat(prev => prev ? { ...prev, board: data.board, playerHand: data.hand } : prev);
     } catch {
-      setCombat(prev => prev ? { ...prev, chain: combat.chain, playerHand: combat.playerHand, rightOpen: combat.rightOpen } : prev);
       setMessage('Network error');
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function handleUnplayStone(chainIndex: number) {
+  async function handleStoneClick(index: number) {
     if (!combat || combat.phase !== 'player-turn') return;
-    setMessage('');
+    if (swapMode) { await handleSwapStone(index); return; }
 
-    const removedStones = combat.chain.slice(chainIndex).map(p => p.stone);
-    const newChain = combat.chain.slice(0, chainIndex);
-    const newHand = [...combat.playerHand, ...removedStones];
-    const newRightOpen = computeRightOpen(newChain);
+    const stone = combat.playerHand[index];
+    const { left, right } = canStonePlay(stone, combat.board);
 
-    // Optimistic update — instant UI response
-    setCombat(prev => prev ? { ...prev, chain: newChain, playerHand: newHand, rightOpen: newRightOpen } : prev);
+    if (!left && !right) return;
 
-    try {
-      const res = await fetch(`/api/run/${runId}/combat/unplay`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chainIndex }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        // Roll back
-        setCombat(prev => prev ? { ...prev, chain: combat.chain, playerHand: combat.playerHand, rightOpen: combat.rightOpen } : prev);
-        setMessage(data.error || 'Cannot remove stone');
-      }
-    } catch {
-      setCombat(prev => prev ? { ...prev, chain: combat.chain, playerHand: combat.playerHand, rightOpen: combat.rightOpen } : prev);
-      setMessage('Network error');
+    if (left && right) {
+      setPendingStone({ index });
+      setChoosingEnd('both');
+      return;
     }
+
+    const side = right ? 'right' : 'left';
+    await playStone(index, side);
+  }
+
+  async function handleEndSelect(side: 'left' | 'right') {
+    if (!pendingStone) return;
+    setChoosingEnd(null);
+    await playStone(pendingStone.index, side);
+    setPendingStone(null);
   }
 
   async function handleEndTurn() {
@@ -271,7 +242,7 @@ export function CombatScreen({ runId }: Props) {
           enemyName: data.enemy.name,
           attack: data.enemyAttack
             ? {
-                stone: data.enemyAttack.stone,
+                stonesPlayed: data.enemyAttack.stonesPlayed ?? [],
                 rawDamage: data.enemyAttack.rawDamage,
                 armorBlocked: data.enemyAttack.armorBlocked,
                 damage: data.enemyAttack.damage,
@@ -284,11 +255,9 @@ export function CombatScreen({ runId }: Props) {
           ...prev,
           playerState: data.playerState,
           enemy: data.enemy,
-          chain: [],
+          board: data.board ?? prev.board,
           swapsUsed: 0,
           playerHand: data.hand ?? prev.playerHand,
-          leftOpen: null,
-          rightOpen: null,
         } : prev);
       }
     } finally {
@@ -317,13 +286,11 @@ export function CombatScreen({ runId }: Props) {
   if (!combat) return <div className="combat-loading">Entering the dungeon…</div>;
 
   const isPlayerTurn = combat.phase === 'player-turn';
-  const enemyHpPct = Math.max(0, (combat.enemy.hp.current / combat.enemy.hp.max) * 100);
-  const playerHpPct = Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100);
-  const chainDamage = calcChainDamage(combat.chain);
   const swapsLeft = combat.swapsPerTurn - combat.swapsUsed;
 
   return (
     <div className="combat-screen">
+      {/* Stone reward overlay */}
       {stoneRewards.length > 0 && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <h2 style={{ color: '#e8d8b0', marginBottom: '1.5rem', fontSize: '1.5rem' }}>Choose a Stone Reward</h2>
@@ -341,159 +308,85 @@ export function CombatScreen({ runId }: Props) {
           </div>
         </div>
       )}
-      <div className="combat-bg" />
 
-      <div className="combat-content">
-        {/* Phase banner */}
-        <div className={`combat-phase ${isPlayerTurn ? 'combat-phase--player' : 'combat-phase--enemy'}`}>
-          {isPlayerTurn ? 'Your Turn' : 'Enemy Turn'}
+      <div className="combat-top">
+        <EnemyHand count={combat.enemyHandCount} />
+        <div className="combat-enemy-zone">
+          <img
+            className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
+            src={getEnemySprite(combat.enemy)}
+            alt={combat.enemy.name}
+          />
+          <div className="hud-name">{combat.enemy.name}</div>
+          <div className="hud-hp-track">
+            <div
+              className="hud-hp-fill"
+              style={{ width: `${Math.max(0, (combat.enemy.hp.current / combat.enemy.hp.max) * 100)}%` }}
+            />
+          </div>
+          <div className="hud-hp-label">{combat.enemy.hp.current} / {combat.enemy.hp.max} HP</div>
+          <StatusBadges status={combat.enemy.status} />
+        </div>
+      </div>
+
+      <div className="combat-board-zone">
+        <DominoBoard
+          board={combat.board}
+          isPlayerTurn={isPlayerTurn}
+          choosingEnd={choosingEnd}
+          onEndSelect={handleEndSelect}
+        />
+      </div>
+
+      <div className="combat-bottom">
+        <div className="combat-player-zone">
+          <img
+            className={`hero-sprite${playerHit ? ' hero-sprite--hit' : ''}`}
+            src="/assets/combat/hero/hero.png"
+            alt="Hero"
+          />
+          <div className="hud-hp-track">
+            <div
+              className="hud-hp-fill"
+              style={{ width: `${Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100)}%` }}
+            />
+          </div>
+          <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max}</div>
         </div>
 
-        {/* HUD */}
-        <div className="combat-hud">
-          {/* Enemy panel */}
-          <div className="hud-panel">
-            <div className="hud-name">{combat.enemy.name}</div>
-            <div className="hud-hp-track">
-              <div className="hud-hp-fill" style={{ width: `${enemyHpPct}%` }} />
-            </div>
-            <div className="hud-hp-label">{combat.enemy.hp.current} / {combat.enemy.hp.max} HP</div>
-            <StatusBadges status={combat.enemy.status} />
-          </div>
-
-          {/* Player panel */}
-          <div className="hud-panel">
-            <div className="hud-name">You</div>
-            <div className="hud-hp-track">
-              <div className="hud-hp-fill" style={{ width: `${playerHpPct}%` }} />
-            </div>
-            <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max} HP</div>
-            <div className="hud-stats">
-              {combat.playerState.armor > 0 && (
-                <span className="hud-stat">🛡 <span className="hud-stat-val">{combat.playerState.armor}</span></span>
-              )}
-              <span className="hud-stat">💰 <span className="hud-stat-val">{combat.playerState.gold}g</span></span>
-              <span className="hud-stat">🔄 <span className="hud-stat-val">{swapsLeft}</span> swap</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Battlefield */}
-        <div className="combat-battlefield">
-          <div className="sprite-container">
-            <img
-              className={`hero-sprite${playerHit ? ' hero-sprite--hit' : ''}`}
-              src="/assets/combat/hero/hero.png"
-              alt="Hero"
-            />
-          </div>
-          <div className="sprite-container">
-            <img
-              className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
-              src={getEnemySprite(combat.enemy.name)}
-              alt={combat.enemy.name}
-            />
-          </div>
-          {enemyTurnData && (
-            <EnemyTurnSequence
-              enemyName={enemyTurnData.enemyName}
-              attack={enemyTurnData.attack}
-              skipReason={enemyTurnData.skipReason}
-              dotDamage={enemyTurnData.dotDamage}
-              onDone={() => setEnemyTurnData(null)}
-            />
+        <div className="combat-hand-controls">
+          {isPlayerTurn && swapsLeft > 0 && (
+            <button
+              className={`btn-swap${swapMode ? ' btn-swap--active' : ''}`}
+              onClick={() => setSwapMode(s => !s)}
+            >
+              {swapMode ? 'Cancel' : `Swap (${swapsLeft})`}
+            </button>
           )}
+          <button className="btn-swap" onClick={() => setShowBag(s => !s)}>
+            Bag ({combat.bag?.length ?? 0})
+          </button>
         </div>
 
-        {/* Chain */}
-        <div className="combat-chain-wrap">
-          <div className="combat-chain-label">
-            Chain
-            {chainDamage > 0 && (
-              <span className="chain-damage-preview">{chainDamage} dmg</span>
-            )}
-          </div>
-          <div className="combat-chain-tiles">
-            {combat.chain.length === 0 ? (
-              <span className="combat-chain-empty">Play stones to build a chain…</span>
-            ) : (
-              combat.chain.map((p, i) => {
-                const displayStone = p.flipped
-                  ? { ...p.stone, leftPip: p.stone.rightPip, rightPip: p.stone.leftPip }
-                  : p.stone;
-                return (
-                  <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                    {i > 0 && <div className="chain-connector" />}
-                    <DominoStone
-                      stone={displayStone}
-                      placed
-                      horizontal
-                      onClick={isPlayerTurn ? () => handleUnplayStone(i) : undefined}
-                    />
-                  </span>
-                );
-              })
-            )}
-          </div>
+        <div className="combat-hand-tiles">
+          {combat.playerHand.map((stone, i) => {
+            const { left, right } = canStonePlay(stone, combat.board);
+            const playable = isPlayerTurn && (left || right);
+            return (
+              <DominoStone
+                key={stone.id}
+                stone={stone}
+                horizontal
+                onClick={() => handleStoneClick(i)}
+                disabled={!isPlayerTurn || (!swapMode && !playable)}
+                selected={swapMode || (choosingEnd === 'both' && pendingStone?.index === i)}
+              />
+            );
+          })}
         </div>
 
-        {/* Hand */}
-        <div className="combat-hand-wrap">
-          <div className="combat-hand-label">
-            Your Hand
-            <div className="hand-label-actions">
-              {isPlayerTurn && swapsLeft > 0 && (
-                <button
-                  className={`btn-swap${swapMode ? ' btn-swap--active' : ''}`}
-                  onClick={() => setSwapMode(s => !s)}
-                >
-                  {swapMode ? 'Cancel' : `Swap (${swapsLeft})`}
-                </button>
-              )}
-              <button
-                className={`btn-swap${showBag ? ' btn-swap--active' : ''}`}
-                onClick={() => setShowBag(s => !s)}
-              >
-                Bag ({combat.bag.length})
-              </button>
-            </div>
-          </div>
-          <div className="combat-hand-tiles">
-            {combat.playerHand.map((stone, i) => {
-              const playable = isPlayerTurn && canStoneBePlayed(stone, combat.chain, combat.rightOpen);
-              return (
-                <DominoStone
-                  key={stone.id}
-                  stone={stone}
-                  horizontal
-                  onClick={() => handleStoneClick(i)}
-                  disabled={!isPlayerTurn || (!swapMode && !playable)}
-                  selected={swapMode}
-                />
-              );
-            })}
-          </div>
-
-          {/* Bag viewer */}
-          {showBag && (
-            <div className="bag-viewer">
-              <div className="bag-viewer-label">Bag contents ({combat.bag.length} stones)</div>
-              <div className="bag-viewer-tiles">
-                {combat.bag.length === 0
-                  ? <span className="combat-chain-empty">Bag is empty</span>
-                  : combat.bag.map((stone, i) => (
-                      <DominoStone key={`bag-${stone.id}-${i}`} stone={stone} horizontal disabled />
-                    ))
-                }
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="combat-actions">
-          <span className="combat-message">{message}</span>
-          <span className="combat-turn-info">Turn {combat.turnNumber}</span>
+        <div className="combat-actions-end">
+          {message && <span className="combat-message">{message}</span>}
           <button
             className="btn-end-turn"
             onClick={handleEndTurn}
@@ -504,6 +397,31 @@ export function CombatScreen({ runId }: Props) {
           </button>
         </div>
       </div>
+
+      {/* Bag viewer */}
+      {showBag && (
+        <div className="bag-viewer">
+          <div className="bag-viewer-label">Bag contents ({combat.bag.length} stones)</div>
+          <div className="bag-viewer-tiles">
+            {combat.bag.length === 0
+              ? <span className="combat-chain-empty">Bag is empty</span>
+              : combat.bag.map((stone, i) => (
+                  <DominoStone key={`bag-${stone.id}-${i}`} stone={stone} horizontal disabled />
+                ))
+            }
+          </div>
+        </div>
+      )}
+
+      {enemyTurnData && (
+        <EnemyTurnSequence
+          enemyName={combat.enemy.name}
+          attack={enemyTurnData.attack}
+          skipReason={enemyTurnData.skipReason}
+          dotDamage={enemyTurnData.dotDamage}
+          onDone={() => setEnemyTurnData(null)}
+        />
+      )}
     </div>
   );
 }

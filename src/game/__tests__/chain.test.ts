@@ -1,4 +1,4 @@
-import { Chain } from '../chain';
+import { Chain, PlacedStone } from '../chain';
 import { Stone } from '../models/stone';
 
 function makeStone(id: string, leftPip: number, rightPip: number): Stone {
@@ -131,5 +131,32 @@ describe('Chain — toJSON / fromJSON', () => {
     expect(restored.leftOpen).toBe(chain.leftOpen);
     expect(restored.rightOpen).toBe(chain.rightOpen);
     expect(restored.length).toBe(chain.length);
+  });
+});
+
+describe('Chain — fromPlacedStones', () => {
+  it('builds a chain with the given stones array', () => {
+    const placed: PlacedStone[] = [
+      { stone: makeStone('s1', 2, 4), side: 'right', flipped: false },
+      { stone: makeStone('s2', 4, 6), side: 'right', flipped: false },
+    ];
+    const chain = Chain.fromPlacedStones(placed);
+    expect(chain.stones).toHaveLength(2);
+    expect(chain.stones[0].stone.id).toBe('s1');
+    expect(chain.stones[1].stone.id).toBe('s2');
+  });
+
+  it('leaves leftOpen and rightOpen as null', () => {
+    const placed: PlacedStone[] = [
+      { stone: makeStone('s1', 2, 4), side: 'right', flipped: false },
+    ];
+    const chain = Chain.fromPlacedStones(placed);
+    expect(chain.leftOpen).toBeNull();
+    expect(chain.rightOpen).toBeNull();
+  });
+
+  it('returns empty chain for empty array', () => {
+    const chain = Chain.fromPlacedStones([]);
+    expect(chain.stones).toHaveLength(0);
   });
 });

@@ -85,4 +85,11 @@ export class Chain {
     chain.rightOpen = data.rightOpen;
     return chain;
   }
+
+  static fromPlacedStones(stones: PlacedStone[]): Chain {
+    const c = new Chain();
+    c.stones = stones;
+    // leftOpen and rightOpen remain null — calculateDamage never reads them
+    return c;
+  }
 }
