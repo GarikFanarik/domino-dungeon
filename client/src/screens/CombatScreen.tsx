@@ -48,6 +48,7 @@ interface CombatState {
   swapsUsed: number;
   swapsPerTurn: number;
   bag: Stone[];
+  act: number;
 }
 
 interface StoneReward {
@@ -289,8 +290,13 @@ export function CombatScreen({ runId }: Props) {
   const isPlayerTurn = combat.phase === 'player-turn';
   const swapsLeft = combat.swapsPerTurn - combat.swapsUsed;
 
+  const bgImage = `/assets/combat/background/arena-act${combat.act}.jpg`;
+
   return (
-    <div className="combat-screen">
+    <div
+      className="combat-screen"
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
       {/* Stone reward overlay */}
       {stoneRewards.length > 0 && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>

@@ -33,6 +33,7 @@ export interface CombatStateResponse {
   swapsUsed?: number;
   swapsPerTurn?: number;
   bag?: Stone[];
+  act: number;
 }
 
 export interface PlayStoneResponse {

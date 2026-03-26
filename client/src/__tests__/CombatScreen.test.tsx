@@ -36,6 +36,7 @@ const mockCombatState = {
   swapsUsed: 0,
   swapsPerTurn: 1,
   bag: [],
+  act: 1,
 };
 
 function renderCombat(runId = 'run-123') {

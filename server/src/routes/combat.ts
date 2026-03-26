@@ -76,6 +76,9 @@ router.get('/:runId/combat', async (req: Request, res: Response) => {
     return;
   }
 
+  const runState = await getRunState(runId);
+  const act = runState?.run?.currentAct ?? 1;
+
   const response: CombatStateResponse = {
     enemy: {
       id: session.enemyId,
@@ -98,6 +101,7 @@ router.get('/:runId/combat', async (req: Request, res: Response) => {
     swapsUsed: session.swapsUsed,
     swapsPerTurn: session.swapsPerTurn,
     bag: session.bag.map(toGameStone),
+    act,
   };
 
   res.json(response);
