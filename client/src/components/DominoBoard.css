@@ -1,18 +1,62 @@
-.domino-board-scroll {
-  overflow-x: auto;
-  overflow-y: hidden;
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
-  background: rgba(0,0,0,0.3);
+.domino-board {
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
   min-height: 100px;
+  display: flex;
+  align-items: center;
 }
 
-.domino-board-grid {
+.domino-board-chain {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.domino-board-empty {
+  color: rgba(255, 255, 255, 0.25);
+  font-style: italic;
+  font-size: 0.9rem;
+  text-align: center;
+  width: 100%;
+}
+
+/* Player tiles — normal appearance */
+.board-tile--player {
   position: relative;
 }
 
+/* Enemy tiles — purple glow to make them clearly distinct */
 .board-tile--enemy {
-  opacity: 0.75;
+  position: relative;
+}
+
+.board-tile--enemy .domino-tile {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 220, 140, 0.3),
+    0 6px 18px rgba(0, 0, 0, 0.85),
+    0 0 14px rgba(160, 60, 255, 0.6),
+    0 0 4px rgba(200, 100, 255, 0.4);
+  border-color: rgba(180, 80, 255, 0.5);
+}
+
+.board-tile-owner {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  color: rgba(180, 100, 255, 0.9);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
 .open-end {
@@ -20,7 +64,7 @@
   height: 48px;
   border-radius: 50%;
   border: 2px solid gold;
-  background: rgba(255,200,0,0.2);
+  background: rgba(255, 200, 0, 0.2);
   color: #fff;
   font-weight: bold;
   font-size: 1rem;
@@ -28,6 +72,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.open-end:hover {
+  background: rgba(255, 200, 0, 0.35);
+  box-shadow: 0 0 12px rgba(255, 200, 0, 0.5);
 }
 
 .open-end--pulse {
@@ -36,5 +87,5 @@
 
 @keyframes pulse {
   from { box-shadow: 0 0 4px gold; }
-  to   { box-shadow: 0 0 16px gold; }
+  to   { box-shadow: 0 0 20px gold, 0 0 8px rgba(255, 220, 80, 0.8); }
 }

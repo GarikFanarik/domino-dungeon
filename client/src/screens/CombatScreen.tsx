@@ -4,6 +4,7 @@ import { DominoStone } from '../components/DominoStone';
 import { DominoBoard } from '../components/DominoBoard';
 import { EnemyHand } from '../components/EnemyHand';
 import { EnemyTurnSequence } from '../components/EnemyTurnSequence';
+import { relicImage } from '../utils/relicImage';
 import type { BoardJSON } from '../../../src/game/board';
 import './CombatScreen.css';
 
@@ -33,7 +34,7 @@ interface PlayerState {
   hp: { current: number; max: number };
   gold: number;
   armor: number;
-  relics?: unknown[];
+  relics?: string[];
 }
 
 interface CombatState {
@@ -309,14 +310,25 @@ export function CombatScreen({ runId }: Props) {
         </div>
       )}
 
+      {/* Relic bar */}
+      {combat.playerState.relics && combat.playerState.relics.length > 0 && (
+        <div className="combat-relics">
+          {combat.playerState.relics.map(id => {
+            const img = relicImage(id);
+            return img
+              ? <img key={id} src={img} alt={id} className="combat-relic-icon" title={id} />
+              : <span key={id} className="combat-relic-icon combat-relic-icon--fallback">✨</span>;
+          })}
+        </div>
+      )}
+
       <div className="combat-top">
-        <EnemyHand count={combat.enemyHandCount} />
-        <div className="combat-enemy-zone">
-          <img
-            className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
-            src={getEnemySprite(combat.enemy)}
-            alt={combat.enemy.name}
-          />
+        <img
+          className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
+          src={getEnemySprite(combat.enemy)}
+          alt={combat.enemy.name}
+        />
+        <div className="combat-enemy-info">
           <div className="hud-name">{combat.enemy.name}</div>
           <div className="hud-hp-track">
             <div
@@ -327,6 +339,7 @@ export function CombatScreen({ runId }: Props) {
           <div className="hud-hp-label">{combat.enemy.hp.current} / {combat.enemy.hp.max} HP</div>
           <StatusBadges status={combat.enemy.status} />
         </div>
+        <EnemyHand count={combat.enemyHandCount} />
       </div>
 
       <div className="combat-board-zone">
@@ -345,13 +358,15 @@ export function CombatScreen({ runId }: Props) {
             src="/assets/combat/hero/hero.png"
             alt="Hero"
           />
-          <div className="hud-hp-track">
-            <div
-              className="hud-hp-fill"
-              style={{ width: `${Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100)}%` }}
-            />
+          <div className="combat-player-info">
+            <div className="hud-hp-track">
+              <div
+                className="hud-hp-fill"
+                style={{ width: `${Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100)}%` }}
+              />
+            </div>
+            <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max}</div>
           </div>
-          <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max}</div>
         </div>
 
         <div className="combat-hand-controls">

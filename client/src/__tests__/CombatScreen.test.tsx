@@ -146,7 +146,7 @@ describe('CombatScreen', () => {
     const boardBothEnds = {
       ...mockBoard,
       tiles: [{ id: 't1', stone: { id: 's0', leftPip: 3, rightPip: 3, element: null }, x: 10, y: 4, orientation: 'h', flipped: false, side: 'right', playedBy: 'player', turnNumber: 1 }],
-      orderedTiles: [],
+      orderedTiles: [{ id: 't1', stone: { id: 's0', leftPip: 3, rightPip: 3, element: null }, x: 10, y: 4, orientation: 'h' as const, flipped: false, side: 'right' as const, playedBy: 'player' as const, turnNumber: 1 }],
       leftOpen: 3,
       rightOpen: 3,
     };
