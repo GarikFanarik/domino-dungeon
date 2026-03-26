@@ -2,9 +2,9 @@ import { render, screen } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { EnemyTurnSequence } from '../EnemyTurnSequence';
 
-const normalAttack  = { stone: { leftPip: 5, rightPip: 3 }, rawDamage: 8, armorBlocked: 4, damage: 4 };
-const noArmorAttack = { stone: { leftPip: 5, rightPip: 3 }, rawDamage: 8, armorBlocked: 0, damage: 8 };
-const fullAbsorb    = { stone: { leftPip: 5, rightPip: 3 }, rawDamage: 8, armorBlocked: 8, damage: 0 };
+const normalAttack  = { stonesPlayed: [{ leftPip: 5, rightPip: 3 }], rawDamage: 8, armorBlocked: 4, damage: 4 };
+const noArmorAttack = { stonesPlayed: [{ leftPip: 5, rightPip: 3 }], rawDamage: 8, armorBlocked: 0, damage: 8 };
+const fullAbsorb    = { stonesPlayed: [{ leftPip: 5, rightPip: 3 }], rawDamage: 8, armorBlocked: 8, damage: 0 };
 const dotDamage     = { burn: 3, poison: 2 };
 const zeroDot       = { burn: 0, poison: 0 };
 
@@ -97,5 +97,20 @@ describe('EnemyTurnSequence', () => {
     expect(onDone).not.toHaveBeenCalled();
     vi.advanceTimersByTime(1);
     expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders multiple enemy stones when stonesPlayed has 2 entries', () => {
+    const { container } = render(
+      <EnemyTurnSequence
+        enemyName="Goblin"
+        attack={{ stonesPlayed: [{ leftPip: 2, rightPip: 4 }, { leftPip: 4, rightPip: 1 }], rawDamage: 8, armorBlocked: 0, damage: 8 }}
+        dotDamage={{ burn: 0, poison: 0 }}
+        onDone={() => {}}
+      />
+    );
+    const dominoes = container.querySelectorAll('.seq-domino');
+    expect(dominoes).toHaveLength(2);
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
   });
 });

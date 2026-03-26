@@ -4,7 +4,7 @@ import './EnemyTurnSequence.css';
 interface Props {
   enemyName: string;
   attack?: {
-    stone: { leftPip: number; rightPip: number };
+    stonesPlayed: { leftPip: number; rightPip: number }[];
     rawDamage: number;
     armorBlocked: number;
     damage: number;
@@ -44,11 +44,13 @@ export function EnemyTurnSequence({ enemyName, attack, skipReason, dotDamage, on
             <div className="seq-icon">💀</div>
             <div className="seq-text">
               {enemyName} plays
-              <span className="seq-domino">
-                <span className="seq-domino__pip">{attack.stone.leftPip}</span>
-                <span className="seq-domino__div" />
-                <span className="seq-domino__pip">{attack.stone.rightPip}</span>
-              </span>
+              {attack.stonesPlayed.map((s, i) => (
+                <span key={i} className="seq-domino">
+                  <span className="seq-domino__pip">{s.leftPip}</span>
+                  <span className="seq-domino__div" />
+                  <span className="seq-domino__pip">{s.rightPip}</span>
+                </span>
+              ))}
             </div>
             <div className="seq-val seq-val--base">{attack.rawDamage} dmg</div>
           </>
