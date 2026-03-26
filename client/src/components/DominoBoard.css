@@ -44,6 +44,19 @@
   border-color: rgba(180, 80, 255, 0.5);
 }
 
+/* Valid drop zone highlights during drag */
+.domino-board-scroll--drag-valid {
+  box-shadow: 0 0 0 2px rgba(255, 200, 0, 0.7), 0 0 18px rgba(255, 200, 0, 0.35);
+}
+
+.drag-valid-end {
+  border-radius: 6px;
+  border: 2px solid rgba(255, 200, 0, 0.8);
+  box-shadow: 0 0 14px rgba(255, 200, 0, 0.5);
+  pointer-events: none;
+  z-index: 2;
+}
+
 .open-end {
   position: absolute;
   width: 48px;

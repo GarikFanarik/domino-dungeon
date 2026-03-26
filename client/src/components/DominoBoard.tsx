@@ -5,15 +5,14 @@ import './DominoBoard.css';
 interface Props {
   board: BoardJSON;
   isPlayerTurn: boolean;
-  choosingEnd: 'both' | null;
-  onEndSelect: (side: 'left' | 'right') => void;
+  dragValidEnds?: { left: boolean; right: boolean };
 }
 
 // Each tile occupies 2 x-cells wide, 1 y-cell tall
 const CELL_W = 55; // px per x-grid-unit (tile spans 2 → ~110px)
 const CELL_H = 76; // px per y-grid-unit (matches placed tile height)
 
-export function DominoBoard({ board, isPlayerTurn, choosingEnd, onEndSelect }: Props) {
+export function DominoBoard({ board, isPlayerTurn: _isPlayerTurn, dragValidEnds }: Props) {
   const hasBoard = board.tiles.length > 0;
 
   // Show the area from 2 cells before leftHead to maxCol+2, y=2 to y=10
@@ -24,8 +23,14 @@ export function DominoBoard({ board, isPlayerTurn, choosingEnd, onEndSelect }: P
   const gridW = cols * CELL_W;
   const gridH = rows * CELL_H;
 
+  const isDragging = !!dragValidEnds;
+
   return (
-    <div className="domino-board-scroll" data-testid="domino-board">
+    <div
+      className={`domino-board-scroll${!hasBoard && isDragging ? ' domino-board-scroll--drag-valid' : ''}`}
+      data-drop-zone="board"
+      data-testid="domino-board"
+    >
       <div
         className="domino-board-grid"
         style={{
@@ -57,34 +62,30 @@ export function DominoBoard({ board, isPlayerTurn, choosingEnd, onEndSelect }: P
           );
         })}
 
-        {hasBoard && isPlayerTurn && board.leftOpen !== null && (
-          <button
-            data-testid="open-end-left"
-            className={`open-end${choosingEnd === 'both' ? ' open-end--pulse' : ''}`}
+        {/* Valid end zone highlights during drag */}
+        {hasBoard && isDragging && dragValidEnds!.left && (
+          <div
+            className="drag-valid-end drag-valid-end--left"
             style={{
               position: 'absolute',
-              left: (board.leftHead.x - offsetX - 1) * CELL_W + 4,
-              top: (board.leftHead.y - offsetY) * CELL_H + CELL_H / 2 - 24,
+              left: (board.leftHead.x - offsetX - 1) * CELL_W,
+              top: (board.leftHead.y - offsetY) * CELL_H,
+              width: CELL_W * 2,
+              height: CELL_H,
             }}
-            onClick={() => onEndSelect('left')}
-          >
-            {board.leftOpen}
-          </button>
+          />
         )}
-
-        {hasBoard && isPlayerTurn && board.rightOpen !== null && (
-          <button
-            data-testid="open-end-right"
-            className={`open-end${choosingEnd === 'both' ? ' open-end--pulse' : ''}`}
+        {hasBoard && isDragging && dragValidEnds!.right && (
+          <div
+            className="drag-valid-end drag-valid-end--right"
             style={{
               position: 'absolute',
-              left: (board.rightHead.x - offsetX) * CELL_W + 4,
-              top: (board.rightHead.y - offsetY) * CELL_H + CELL_H / 2 - 24,
+              left: (board.rightHead.x - offsetX) * CELL_W,
+              top: (board.rightHead.y - offsetY) * CELL_H,
+              width: CELL_W * 2,
+              height: CELL_H,
             }}
-            onClick={() => onEndSelect('right')}
-          >
-            {board.rightOpen}
-          </button>
+          />
         )}
       </div>
     </div>

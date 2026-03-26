@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { DominoStone } from '../components/DominoStone';
 import { DominoBoard } from '../components/DominoBoard';
@@ -69,6 +69,15 @@ interface EnemyTurnData {
   dotDamage: { burn: number; poison: number };
 }
 
+interface DragState {
+  stoneIndex: number;
+  stone: Stone;
+  flipped: boolean;
+  x: number;
+  y: number;
+  invalid: boolean;
+}
+
 interface Props { runId: string; }
 
 const ELEMENT_ICONS: Record<string, string> = {
@@ -87,7 +96,7 @@ function getEnemySprite(enemy: Enemy): string {
 }
 
 function canStonePlay(stone: Stone, board: BoardJSON): { left: boolean; right: boolean } {
-  if (!board || board.tiles.length === 0) return { left: false, right: true };
+  if (!board || board.tiles.length === 0) return { left: true, right: true };
   const left = board.leftOpen !== null &&
     (stone.leftPip === board.leftOpen || stone.rightPip === board.leftOpen);
   const right = board.rightOpen !== null &&
@@ -126,9 +135,13 @@ export function CombatScreen({ runId }: Props) {
   const [showBag, setShowBag] = useState(false);
   const [stoneRewards, setStoneRewards] = useState<StoneReward[]>([]);
   const [enemyTurnData, setEnemyTurnData] = useState<EnemyTurnData | null>(null);
-  const [choosingEnd, setChoosingEnd] = useState<'both' | null>(null);
-  const [pendingStone, setPendingStone] = useState<{ index: number } | null>(null);
   const [previewDamage, setPreviewDamage] = useState<number | null>(null);
+  const [dragState, setDragState] = useState<DragState | null>(null);
+
+  const dragRef = useRef<DragState | null>(null);
+  const combatRef = useRef<CombatState | null>(null);
+
+  useEffect(() => { combatRef.current = combat; }, [combat]);
 
   useEffect(() => {
     fetch(`/api/run/${runId}/combat`)
@@ -142,13 +155,72 @@ export function CombatScreen({ runId }: Props) {
       .catch(() => setMessage('Failed to load combat'));
   }, [runId]);
 
+  // Attach drag listeners only while a drag is active
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') { setChoosingEnd(null); setPendingStone(null); }
+    if (!dragState) return;
+
+    function onMove(e: PointerEvent) {
+      if (!dragRef.current) return;
+      const updated = { ...dragRef.current, x: e.clientX, y: e.clientY };
+      dragRef.current = updated;
+      setDragState(updated);
     }
+
+    async function onUp(e: PointerEvent) {
+      const ds = dragRef.current;
+      if (!ds) return;
+
+      const overBoard = document.elementsFromPoint(e.clientX, e.clientY)
+        .some(el => el.closest('[data-drop-zone="board"]') !== null);
+
+      if (!overBoard) {
+        dragRef.current = null;
+        setDragState(null);
+        return;
+      }
+
+      const side: 'left' | 'right' = ds.flipped ? 'left' : 'right';
+      const board = combatRef.current?.board;
+      const valid = board ? canStonePlay(ds.stone, board)[side] : false;
+
+      if (!valid) {
+        const invalidState = { ...ds, invalid: true };
+        dragRef.current = invalidState;
+        setDragState(invalidState);
+        setTimeout(() => { dragRef.current = null; setDragState(null); }, 400);
+        return;
+      }
+
+      const stoneIndex = ds.stoneIndex;
+      dragRef.current = null;
+      setDragState(null);
+      await playStone(stoneIndex, side);
+    }
+
+    function onKey(e: KeyboardEvent) {
+      const ds = dragRef.current;
+      if (!ds) return;
+      if (e.key === 'r' || e.key === 'R') {
+        const updated = { ...ds, flipped: !ds.flipped };
+        dragRef.current = updated;
+        setDragState(updated);
+      }
+      if (e.key === 'Escape') {
+        dragRef.current = null;
+        setDragState(null);
+      }
+    }
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('keydown', onKey);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!dragState]);
 
   async function handleSwapStone(index: number) {
     if (!combat || combat.phase !== 'player-turn') return;
@@ -187,30 +259,22 @@ export function CombatScreen({ runId }: Props) {
     }
   }
 
-  async function handleStoneClick(index: number) {
+  function handlePointerDown(index: number, stone: Stone, e: React.PointerEvent) {
     if (!combat || combat.phase !== 'player-turn') return;
-    if (swapMode) { await handleSwapStone(index); return; }
-
-    const stone = combat.playerHand[index];
+    if (swapMode) { handleSwapStone(index); return; }
     const { left, right } = canStonePlay(stone, combat.board);
-
     if (!left && !right) return;
-
-    if (left && right) {
-      setPendingStone({ index });
-      setChoosingEnd('both');
-      return;
-    }
-
-    const side = right ? 'right' : 'left';
-    await playStone(index, side);
-  }
-
-  async function handleEndSelect(side: 'left' | 'right') {
-    if (!pendingStone) return;
-    setChoosingEnd(null);
-    await playStone(pendingStone.index, side);
-    setPendingStone(null);
+    e.preventDefault();
+    const newState: DragState = {
+      stoneIndex: index,
+      stone,
+      flipped: false,
+      x: e.clientX,
+      y: e.clientY,
+      invalid: false,
+    };
+    dragRef.current = newState;
+    setDragState(newState);
   }
 
   async function handleEndTurn() {
@@ -295,6 +359,16 @@ export function CombatScreen({ runId }: Props) {
 
   const bgImage = `/assets/combat/background/arena-act${combat.act}.jpg`;
 
+  const dragValidEnds = dragState
+    ? canStonePlay(dragState.stone, combat.board)
+    : undefined;
+
+  const dragDisplayStone = dragState
+    ? (dragState.flipped
+        ? { ...dragState.stone, leftPip: dragState.stone.rightPip, rightPip: dragState.stone.leftPip }
+        : dragState.stone)
+    : null;
+
   return (
     <div
       className="combat-screen"
@@ -340,8 +414,7 @@ export function CombatScreen({ runId }: Props) {
           <DominoBoard
             board={combat.board}
             isPlayerTurn={isPlayerTurn}
-            choosingEnd={choosingEnd}
-            onEndSelect={handleEndSelect}
+            dragValidEnds={dragValidEnds}
           />
         </div>
         <div className="combat-enemy-zone">
@@ -367,35 +440,35 @@ export function CombatScreen({ runId }: Props) {
       {/* ── Bottom: hero + hand ── */}
       <div className="combat-bottom">
         <div className="combat-player-zone">
-          <div className="combat-entity-box">
-            <img
-              className={`hero-sprite${playerHit ? ' hero-sprite--hit' : ''}`}
-              src="/assets/combat/hero/hero.png"
-              alt="Hero"
+          <img
+            className={`hero-sprite${playerHit ? ' hero-sprite--hit' : ''}`}
+            src="/assets/combat/hero/hero.png"
+            alt="Hero"
+          />
+          <div className="hud-hp-track hud-hp-track--player">
+            <div
+              className="hud-hp-fill"
+              style={{ width: `${Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100)}%` }}
             />
-            <div className="hud-hp-track">
-              <div
-                className="hud-hp-fill"
-                style={{ width: `${Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100)}%` }}
-              />
-            </div>
-            <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max} HP</div>
           </div>
+          <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max} HP</div>
         </div>
 
         <div className="combat-hand-tiles">
           {combat.playerHand.map((stone, i) => {
             const { left, right } = canStonePlay(stone, combat.board);
             const playable = isPlayerTurn && (left || right);
+            const isDraggingThis = dragState?.stoneIndex === i;
             return (
-              <DominoStone
-                key={stone.id}
-                stone={stone}
-                horizontal
-                onClick={() => handleStoneClick(i)}
-                disabled={!isPlayerTurn || (!swapMode && !playable)}
-                selected={swapMode || (choosingEnd === 'both' && pendingStone?.index === i)}
-              />
+              <div key={stone.id} className={isDraggingThis ? 'hand-tile--dragging' : undefined}>
+                <DominoStone
+                  stone={stone}
+                  horizontal
+                  onPointerDown={(e) => handlePointerDown(i, stone, e)}
+                  disabled={!isPlayerTurn || (!swapMode && !playable)}
+                  selected={swapMode}
+                />
+              </div>
             );
           })}
         </div>
@@ -442,6 +515,19 @@ export function CombatScreen({ runId }: Props) {
                   <DominoStone key={`bag-${stone.id}-${i}`} stone={stone} horizontal disabled />
                 ))
             }
+          </div>
+        </div>
+      )}
+
+      {/* ── Drag overlay ── */}
+      {dragState && dragDisplayStone && (
+        <div
+          className={`drag-overlay${dragState.invalid ? ' drag-overlay--invalid' : ''}`}
+          style={{ left: dragState.x, top: dragState.y }}
+        >
+          <DominoStone stone={dragDisplayStone} horizontal />
+          <div className="drag-label">
+            {dragState.flipped ? '← L' : 'R →'}
           </div>
         </div>
       )}
