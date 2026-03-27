@@ -16,6 +16,12 @@ interface Props {
   prevOrderedTiles?: BoardTile[];
   /** Called when the animation sequence finishes. */
   onAnimationDone?: () => void;
+  /**
+   * Called each time an enemy tile is revealed during the animation.
+   * revealedCount: how many enemy tiles have appeared so far (1-based)
+   * totalCount: total number of enemy tiles being revealed this turn
+   */
+  onEnemyTileRevealed?: (revealedCount: number, totalCount: number) => void;
 }
 
 interface AnimState {
@@ -49,11 +55,14 @@ export function DominoBoard({
   dragValidEnds,
   prevOrderedTiles,
   onAnimationDone,
+  onEnemyTileRevealed,
 }: Props) {
   const [animState, setAnimState] = useState<AnimState | null>(null);
   const [compressedState, setCompressedState] = useState<CompressedState | null>(null);
   const onAnimationDoneRef = useRef(onAnimationDone);
   onAnimationDoneRef.current = onAnimationDone;
+  const onEnemyTileRevealedRef = useRef(onEnemyTileRevealed);
+  onEnemyTileRevealedRef.current = onEnemyTileRevealed;
 
   useEffect(() => {
     if (!prevOrderedTiles) return;
@@ -74,6 +83,7 @@ export function DominoBoard({
 
     // Enemy tiles that weren't on the board before, in chain order
     const newEnemyTiles = newTiles.filter(t => !prevIds.has(t.id) && t.playedBy === 'enemy');
+    const totalEnemyTiles = newEnemyTiles.length;
 
     const timeouts: ReturnType<typeof setTimeout>[] = [];
 
@@ -95,6 +105,7 @@ export function DominoBoard({
           enteringIds: new Set([tile.id]),
           exitingIds: new Set(),
         });
+        onEnemyTileRevealedRef.current?.(i + 1, totalEnemyTiles);
       }, 3000 + i * 1200);
       timeouts.push(t);
     });

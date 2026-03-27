@@ -162,12 +162,18 @@ export function CombatScreen({ runId }: Props) {
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [prevBoardTiles, setPrevBoardTiles] = useState<BoardTile[] | null>(null);
   const [enemyDamageDisplay, setEnemyDamageDisplay] = useState<number | null>(null);
+  /** HP to show during the board animation — freezes at the pre-damage value until onAnimationDone. */
+  const [displayedPlayerHP, setDisplayedPlayerHP] = useState<PlayerState['hp'] | null>(null);
 
   const dragRef = useRef<DragState | null>(null);
   const combatRef = useRef<CombatState | null>(null);
   const boardZoneRef = useRef<HTMLDivElement>(null);
+  const damageTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => { combatRef.current = combat; }, [combat]);
+
+  // Clear damage counter timers on unmount
+  useEffect(() => () => { damageTimerRef.current.forEach(clearTimeout); }, []);
 
   useEffect(() => {
     fetch(`/api/run/${runId}/combat`)
@@ -337,10 +343,6 @@ export function CombatScreen({ runId }: Props) {
       } else if (data.combatResult === 'player-died') {
         navigate('run-summary');
       } else {
-        if (data.enemyAttack?.damage > 0) {
-          setPlayerHit(true);
-          setTimeout(() => setPlayerHit(false), 450);
-        }
         setEnemyHit(true);
         setTimeout(() => setEnemyHit(false), 450);
         setEnemyTurnData({
@@ -356,6 +358,10 @@ export function CombatScreen({ runId }: Props) {
           skipReason: data.enemySkipped?.reason,
           dotDamage: data.dotDamage ?? { burn: 0, poison: 0 },
         });
+        // Freeze HP bar at current (pre-damage) value — it will unfreeze in onAnimationDone.
+        setDisplayedPlayerHP(combat.playerState.hp);
+        // Update full combat state immediately (playerState now has new HP in state,
+        // but we show displayedPlayerHP until the animation finishes).
         setCombat(prev => prev ? {
           ...prev,
           playerState: data.playerState,
@@ -364,8 +370,20 @@ export function CombatScreen({ runId }: Props) {
           swapsUsed: 0,
           playerHand: data.hand ?? prev.playerHand,
         } : prev);
+        // Progressive damage counter — same timing as DominoBoard tile reveal.
+        const totalDamage = data.enemyAttack?.damage ?? 0;
+        const numEnemyTiles = data.enemyAttack?.stonesPlayed?.length ?? 0;
+        damageTimerRef.current.forEach(clearTimeout);
+        damageTimerRef.current = [];
+        if (numEnemyTiles > 0 && totalDamage > 0) {
+          for (let i = 0; i < numEnemyTiles; i++) {
+            const t = setTimeout(() => {
+              setEnemyDamageDisplay(Math.round(totalDamage * (i + 1) / numEnemyTiles));
+            }, 3000 + i * 1200);
+            damageTimerRef.current.push(t);
+          }
+        }
         setPrevBoardTiles(prevTiles);
-        if (data.enemyAttack?.damage > 0) setEnemyDamageDisplay(data.enemyAttack.damage);
         setPreviewDamage(null);
       }
     } finally {
@@ -455,7 +473,17 @@ export function CombatScreen({ runId }: Props) {
             isPlayerTurn={isPlayerTurn}
             dragValidEnds={dragValidEnds}
             prevOrderedTiles={prevBoardTiles ?? undefined}
-            onAnimationDone={() => { setPrevBoardTiles(null); setEnemyDamageDisplay(null); }}
+            onAnimationDone={() => {
+              setPrevBoardTiles(null);
+              setEnemyDamageDisplay(null);
+              damageTimerRef.current.forEach(clearTimeout);
+              damageTimerRef.current = [];
+              if (displayedPlayerHP) {
+                setDisplayedPlayerHP(null);
+                setPlayerHit(true);
+                setTimeout(() => setPlayerHit(false), 450);
+              }
+            }}
           />
         </div>
         <div className="combat-enemy-zone">
@@ -489,10 +517,10 @@ export function CombatScreen({ runId }: Props) {
           <div className="hud-hp-track hud-hp-track--player">
             <div
               className="hud-hp-fill"
-              style={{ width: `${Math.max(0, (combat.playerState.hp.current / combat.playerState.hp.max) * 100)}%` }}
+              style={{ width: `${Math.max(0, ((displayedPlayerHP ?? combat.playerState.hp).current / (displayedPlayerHP ?? combat.playerState.hp).max) * 100)}%` }}
             />
           </div>
-          <div className="hud-hp-label">{combat.playerState.hp.current} / {combat.playerState.hp.max} HP</div>
+          <div className="hud-hp-label">{(displayedPlayerHP ?? combat.playerState.hp).current} / {(displayedPlayerHP ?? combat.playerState.hp).max} HP</div>
         </div>
 
         <div className="combat-hand-tiles">
