@@ -58,19 +58,28 @@ export function DominoBoard({
   useEffect(() => {
     if (!prevOrderedTiles) return;
 
-    // New End Turn starting — reset any previous compression state
-    setCompressedState(null);
-
     const newTiles = board.orderedTiles;
     const prevIds = new Set(prevOrderedTiles.map(t => t.id));
+
+    // What was actually visible before End Turn (compressed view, not full orderedTiles).
+    // compressedState is read from this render's snapshot before we reset it below.
+    const visibleBeforeTurn = compressedState
+      ? prevOrderedTiles.filter(
+          t => compressedState.survivorIds.has(t.id) || !compressedState.baseIds.has(t.id)
+        )
+      : prevOrderedTiles;
+
+    // Now reset compression and begin animation
+    setCompressedState(null);
 
     // Enemy tiles that weren't on the board before, in chain order
     const newEnemyTiles = newTiles.filter(t => !prevIds.has(t.id) && t.playedBy === 'enemy');
 
     const timeouts: ReturnType<typeof setTimeout>[] = [];
 
-    // Start: display only what was there before (no new enemy tiles yet)
-    let currentDisplay = [...prevOrderedTiles];
+    // Start: show only what was visually there before (no new enemy tiles yet)
+    let currentDisplay = [...visibleBeforeTurn];
+    const visibleIds = new Set(visibleBeforeTurn.map(t => t.id));
     const revealedIds = new Set<string>();
     setAnimState({ displayTiles: currentDisplay, enteringIds: new Set(), exitingIds: new Set() });
 
@@ -78,7 +87,9 @@ export function DominoBoard({
     newEnemyTiles.forEach((tile, i) => {
       const t = setTimeout(() => {
         revealedIds.add(tile.id);
-        currentDisplay = newTiles.filter(t => prevIds.has(t.id) || revealedIds.has(t.id));
+        // Filter from newTiles to preserve chain order, but only show
+        // previously-visible tiles + newly revealed enemy tiles
+        currentDisplay = newTiles.filter(t => visibleIds.has(t.id) || revealedIds.has(t.id));
         setAnimState({
           displayTiles: currentDisplay,
           enteringIds: new Set([tile.id]),
@@ -94,9 +105,12 @@ export function DominoBoard({
     const tCompress = setTimeout(() => {
       const compressed = compressChain(newTiles);
       const compressedIds = new Set(compressed.map(t => t.id));
-      const exitingIds = new Set(newTiles.filter(t => !compressedIds.has(t.id)).map(t => t.id));
+      // Only animate-out tiles that are currently visible, not ones already hidden
+      const exitingIds = new Set(
+        currentDisplay.filter(t => !compressedIds.has(t.id)).map(t => t.id)
+      );
 
-      setAnimState({ displayTiles: newTiles, enteringIds: new Set(), exitingIds });
+      setAnimState({ displayTiles: currentDisplay, enteringIds: new Set(), exitingIds });
 
       const tDone = setTimeout(() => {
         setCompressedState({
@@ -111,7 +125,8 @@ export function DominoBoard({
     timeouts.push(tCompress);
 
     return () => timeouts.forEach(clearTimeout);
-    // Only re-run when prevOrderedTiles identity changes (set after End Turn)
+    // Only re-run when prevOrderedTiles identity changes (set after End Turn).
+    // compressedState is intentionally read from the render snapshot at effect time.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prevOrderedTiles]);
 
