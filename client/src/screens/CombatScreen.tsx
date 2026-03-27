@@ -4,7 +4,6 @@ import { useViewportScale } from '../hooks/useViewportScale';
 import { DominoStone } from '../components/DominoStone';
 import { DominoBoard } from '../components/DominoBoard';
 import { EnemyHand } from '../components/EnemyHand';
-import { EnemyTurnSequence } from '../components/EnemyTurnSequence';
 import { relicImage } from '../utils/relicImage';
 import type { BoardJSON, BoardTile } from '../../../src/game/board';
 import './CombatScreen.css';
@@ -56,18 +55,6 @@ interface StoneReward {
   element: string;
   leftPip: number;
   rightPip: number;
-}
-
-interface EnemyTurnData {
-  enemyName: string;
-  attack?: {
-    stonesPlayed: { leftPip: number; rightPip: number }[];
-    rawDamage: number;
-    armorBlocked: number;
-    damage: number;
-  };
-  skipReason?: 'stunned' | 'frozen';
-  dotDamage: { burn: number; poison: number };
 }
 
 interface DragState {
@@ -157,7 +144,6 @@ export function CombatScreen({ runId }: Props) {
   const [swapMode, setSwapMode] = useState(false);
   const [showBag, setShowBag] = useState(false);
   const [stoneRewards, setStoneRewards] = useState<StoneReward[]>([]);
-  const [enemyTurnData, setEnemyTurnData] = useState<EnemyTurnData | null>(null);
   const [previewDamage, setPreviewDamage] = useState<number | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [prevBoardTiles, setPrevBoardTiles] = useState<BoardTile[] | null>(null);
@@ -345,19 +331,6 @@ export function CombatScreen({ runId }: Props) {
       } else {
         setEnemyHit(true);
         setTimeout(() => setEnemyHit(false), 450);
-        setEnemyTurnData({
-          enemyName: data.enemy.name,
-          attack: data.enemyAttack
-            ? {
-                stonesPlayed: data.enemyAttack.stonesPlayed ?? [],
-                rawDamage: data.enemyAttack.rawDamage,
-                armorBlocked: data.enemyAttack.armorBlocked,
-                damage: data.enemyAttack.damage,
-              }
-            : undefined,
-          skipReason: data.enemySkipped?.reason,
-          dotDamage: data.dotDamage ?? { burn: 0, poison: 0 },
-        });
         // Freeze HP bar at current (pre-damage) value — it will unfreeze in onAnimationDone.
         setDisplayedPlayerHP(combat.playerState.hp);
         // Update full combat state immediately (playerState now has new HP in state,
@@ -624,15 +597,6 @@ export function CombatScreen({ runId }: Props) {
         </div>
       )}
 
-      {enemyTurnData && (
-        <EnemyTurnSequence
-          enemyName={combat.enemy.name}
-          attack={enemyTurnData.attack}
-          skipReason={enemyTurnData.skipReason}
-          dotDamage={enemyTurnData.dotDamage}
-          onDone={() => setEnemyTurnData(null)}
-        />
-      )}
     </div>
   );
 }
