@@ -1,31 +1,88 @@
-/* ── Scroll container ───────────────────────────────────────────────────────── */
+/* ── Play surface band ──────────────────────────────────────────────────────── */
 .domino-board-scroll {
+  /* Always spans the full width of the board zone */
+  width: 100%;
+  height: 92px; /* 72px tile + 10px padding each side */
+  flex-shrink: 0;
+
   display: flex;
   align-items: center;
-  justify-content: center;
   overflow-x: auto;
   overflow-y: hidden;
-  border-radius: 8px;
-  padding: 8px 12px;
-  background-color: rgba(10, 6, 20, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  /* Hide scrollbar — chain auto-scrolls after End Turn */
+  scrollbar-width: none;
+
+  /* Stone channel: darker at top/bottom edges, slightly lighter center */
+  background: linear-gradient(
+    to bottom,
+    rgba(2, 1, 6, 0.97)  0%,
+    rgba(10, 6, 22, 0.90) 30%,
+    rgba(14, 8, 28, 0.88) 50%,
+    rgba(10, 6, 22, 0.90) 70%,
+    rgba(2, 1, 6, 0.97)  100%
+  );
+
+  /* Groove depth: inset shadows on top and bottom edges */
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.7),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+
+  /* Fade tiles out at left and right edges */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 7%,
+    black 93%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 7%,
+    black 93%,
+    transparent 100%
+  );
 }
 
-/* ── Linear tile chain ──────────────────────────────────────────────────────── */
+.domino-board-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Subtle gold glow on the channel edges when a drag is valid */
+.domino-board-scroll--drag-valid {
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.7),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 200, 0, 0.25),
+    inset 0 -1px 0 rgba(255, 200, 0, 0.25),
+    inset 0 2px 14px rgba(255, 200, 0, 0.08),
+    inset 0 -2px 14px rgba(255, 200, 0, 0.08);
+}
+
+/* ── Tile chain (centered, scrollable when too long) ────────────────────────── */
 .domino-board-chain {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: center;
   gap: 0;
+  /* margin: auto centers the chain when shorter than the band;
+     overflow scrolls naturally when longer */
+  margin: 0 auto;
+  padding: 0 8px;
 }
 
 /* ── Empty state ────────────────────────────────────────────────────────────── */
 .domino-board-empty {
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.15);
   font-style: italic;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
   white-space: nowrap;
+  user-select: none;
 }
 
 /* ── Board tile wrappers ────────────────────────────────────────────────────── */
@@ -33,7 +90,7 @@
   flex-shrink: 0;
 }
 
-/* Seamless chain: remove right border on all but the last tile */
+/* Seamless chain: remove right border on non-last tiles */
 .board-tile--no-right-border .domino-tile {
   border-right: none;
 }
@@ -60,7 +117,7 @@
 
 /* ── Exit animation (compressed tiles shrink out) ───────────────────────────── */
 @keyframes board-tile-exit {
-  from { opacity: 1; transform: scale(1);    max-width: 200px; }
+  from { opacity: 1; transform: scale(1);   max-width: 200px; }
   to   { opacity: 0; transform: scale(0.6); max-width: 0;     }
 }
 
@@ -69,14 +126,10 @@
   animation: board-tile-exit 300ms ease-in forwards;
 }
 
-/* ── Drag-valid highlights ──────────────────────────────────────────────────── */
-.domino-board-scroll--drag-valid {
-  box-shadow: 0 0 0 2px rgba(255, 200, 0, 0.7), 0 0 18px rgba(255, 200, 0, 0.35);
-}
-
+/* ── Drag-valid end highlights (flex siblings) ──────────────────────────────── */
 .drag-valid-end {
   flex-shrink: 0;
-  width: 56px;
+  width: 52px;
   height: 72px;
   border-radius: 6px;
   border: 2px solid rgba(255, 200, 0, 0.8);
