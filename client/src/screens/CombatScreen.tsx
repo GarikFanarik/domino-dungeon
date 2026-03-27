@@ -91,6 +91,25 @@ const ELEMENT_ICONS: Record<string, string> = {
   earth:     '/assets/elements/earth/rock.png',
 };
 
+function damageStyle(dmg: number, type: 'player' | 'enemy'): { color: string; textShadow: string } {
+  if (type === 'enemy') {
+    // Enemy damage — always threatening red/purple
+    const intensity = Math.min(dmg / 30, 1);
+    const r = Math.round(200 + 55 * intensity);
+    const g = Math.round(30 - 20 * intensity);
+    const b = Math.round(120 - 80 * intensity);
+    return {
+      color: `rgb(${r},${g},${b})`,
+      textShadow: `0 0 24px rgba(${r},${g},${b},0.8), 0 0 48px rgba(180,0,80,${0.4 + 0.4 * intensity})`,
+    };
+  }
+  // Player damage — silver → gold → orange → crimson
+  if (dmg <= 5)  return { color: '#d8d8f0', textShadow: '0 0 20px rgba(180,180,255,0.5)' };
+  if (dmg <= 12) return { color: '#ffe14d', textShadow: '0 0 28px rgba(255,210,0,0.75)' };
+  if (dmg <= 22) return { color: '#ff8c00', textShadow: '0 0 32px rgba(255,120,0,0.85), 0 0 10px rgba(255,60,0,0.5)' };
+  return { color: '#ff2211', textShadow: '0 0 36px rgba(255,40,0,0.95), 0 0 14px rgba(255,80,0,0.7), 0 0 4px #fff' };
+}
+
 function getEnemySprite(enemy: Enemy): string {
   const n = enemy.name.toLowerCase();
   if (n.includes('rat')  || n.includes('tomb'))      return '/assets/combat/enemies/act1/tomb-rat/tomb-rat.png';
@@ -507,11 +526,6 @@ export function CombatScreen({ runId }: Props) {
               Bag ({combat.bag?.length ?? 0})
             </button>
           </div>
-          {previewDamage !== null && previewDamage > 0 && (
-            <div className="combat-preview-damage">
-              ⚔ {previewDamage} dmg
-            </div>
-          )}
           {message && <span className="combat-message">{message}</span>}
           <button
             className="btn-end-turn"
@@ -536,6 +550,26 @@ export function CombatScreen({ runId }: Props) {
                 ))
             }
           </div>
+        </div>
+      )}
+
+      {/* ── Damage counters ── */}
+      {previewDamage !== null && previewDamage > 0 && (
+        <div
+          key={previewDamage}
+          className="damage-counter"
+          style={damageStyle(previewDamage, 'player')}
+        >
+          {previewDamage}
+        </div>
+      )}
+      {enemyTurnData?.attack && enemyTurnData.attack.damage > 0 && (
+        <div
+          key={`enemy-${enemyTurnData.attack.damage}`}
+          className="damage-counter damage-counter--enemy"
+          style={damageStyle(enemyTurnData.attack.damage, 'enemy')}
+        >
+          -{enemyTurnData.attack.damage}
         </div>
       )}
 
