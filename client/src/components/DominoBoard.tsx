@@ -81,8 +81,10 @@ export function DominoBoard({
     // Now reset compression and begin animation
     setCompressedState(null);
 
-    // Enemy tiles that weren't on the board before, in chain order
-    const newEnemyTiles = newTiles.filter(t => !prevIds.has(t.id) && t.playedBy === 'enemy');
+    // Enemy tiles in PLAY ORDER (board.tiles insertion order), not chain order.
+    // This ensures each tile is revealed after its prerequisite is already visible.
+    // (Left-side plays unshift into orderedTiles, so chain order reverses their sequence.)
+    const newEnemyTiles = board.tiles.filter(t => !prevIds.has(t.id) && t.playedBy === 'enemy');
     const totalEnemyTiles = newEnemyTiles.length;
 
     const timeouts: ReturnType<typeof setTimeout>[] = [];

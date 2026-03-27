@@ -377,8 +377,10 @@ export function CombatScreen({ runId }: Props) {
         damageTimerRef.current = [];
         if (numEnemyTiles > 0 && totalDamage > 0) {
           for (let i = 0; i < numEnemyTiles; i++) {
+            const isLast = i === numEnemyTiles - 1;
             const t = setTimeout(() => {
-              setEnemyDamageDisplay(Math.round(totalDamage * (i + 1) / numEnemyTiles));
+              // Last tile always shows the exact total; intermediates show a partial.
+              setEnemyDamageDisplay(isLast ? totalDamage : Math.round(totalDamage * (i + 1) / numEnemyTiles));
             }, 3000 + i * 1200);
             damageTimerRef.current.push(t);
           }
@@ -479,9 +481,12 @@ export function CombatScreen({ runId }: Props) {
               damageTimerRef.current.forEach(clearTimeout);
               damageTimerRef.current = [];
               if (displayedPlayerHP) {
+                const hpDropped = displayedPlayerHP.current > combat.playerState.hp.current;
                 setDisplayedPlayerHP(null);
-                setPlayerHit(true);
-                setTimeout(() => setPlayerHit(false), 450);
+                if (hpDropped) {
+                  setPlayerHit(true);
+                  setTimeout(() => setPlayerHit(false), 450);
+                }
               }
             }}
           />
