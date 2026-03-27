@@ -21,7 +21,20 @@ interface Props {
 interface AnimState {
   displayTiles: BoardTile[];
   enteringIds: Set<string>;
+
   exitingIds: Set<string>;
+}
+
+/**
+ * Tracks which tiles survived the last compression.
+ * survivorIds: tiles kept after compressChain
+ * baseIds:     all tiles that existed when compression ran
+ *
+ * New tiles (not in baseIds) are always shown regardless of survivorIds.
+ */
+interface CompressedState {
+  survivorIds: Set<string>;
+  baseIds: Set<string>;
 }
 
 function displayStone(tile: BoardTile) {
@@ -38,11 +51,15 @@ export function DominoBoard({
   onAnimationDone,
 }: Props) {
   const [animState, setAnimState] = useState<AnimState | null>(null);
+  const [compressedState, setCompressedState] = useState<CompressedState | null>(null);
   const onAnimationDoneRef = useRef(onAnimationDone);
   onAnimationDoneRef.current = onAnimationDone;
 
   useEffect(() => {
     if (!prevOrderedTiles) return;
+
+    // New End Turn starting — reset any previous compression state
+    setCompressedState(null);
 
     const newTiles = board.orderedTiles;
     const prevIds = new Set(prevOrderedTiles.map(t => t.id));
@@ -63,6 +80,11 @@ export function DominoBoard({
       setAnimState({ displayTiles: newTiles, enteringIds: new Set(), exitingIds });
 
       const t2 = setTimeout(() => {
+        // Animation done: store which tiles survived so mid-turn display stays compressed
+        setCompressedState({
+          survivorIds: compressedIds,
+          baseIds: new Set(newTiles.map(t => t.id)),
+        });
         setAnimState(null);
         onAnimationDoneRef.current?.();
       }, 300);
@@ -78,9 +100,18 @@ export function DominoBoard({
   const hasBoard = board.orderedTiles.length > 0;
   const isDragging = !!dragValidEnds;
 
-  const displayTiles = animState
-    ? animState.displayTiles
-    : hasBoard ? compressChain(board.orderedTiles) : [];
+  let displayTiles: BoardTile[];
+  if (animState) {
+    displayTiles = animState.displayTiles;
+  } else if (compressedState) {
+    // Show survivors from compression + any new tiles played since
+    displayTiles = board.orderedTiles.filter(
+      t => compressedState.survivorIds.has(t.id) || !compressedState.baseIds.has(t.id)
+    );
+  } else {
+    // Normal play: show full chain, no compression
+    displayTiles = board.orderedTiles;
+  }
 
   return (
     <div
