@@ -119,6 +119,16 @@ export class Board {
 }
 
 /**
+ * Returns the pip value that a tile used to connect to the board when it was played.
+ * This is the pip that matched the open end at the time of placement.
+ */
+export function tileConnectingPip(tile: BoardTile): number {
+  // (side === 'right') === flipped is true when the right pip is the connecting pip
+  const useRight = (tile.side === 'right') === tile.flipped;
+  return useRight ? tile.stone.rightPip : tile.stone.leftPip;
+}
+
+/**
  * Greedy chain compression: finds the shortest subsequence of tiles that
  * preserves the start and end, by always jumping to the furthest tile whose
  * incoming display pip matches the current tile's outgoing display pip.

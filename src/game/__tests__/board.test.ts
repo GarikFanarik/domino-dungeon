@@ -209,6 +209,82 @@ describe('Board.toChainForTurn', () => {
   });
 });
 
+// ─── tileConnectingPip ────────────────────────────────────────────────────────
+
+import { tileConnectingPip } from '../board';
+
+describe('tileConnectingPip', () => {
+  function makeTile(
+    leftPip: number,
+    rightPip: number,
+    side: 'left' | 'right',
+    flipped: boolean,
+  ): BoardTile {
+    return {
+      id: randomUUID(),
+      stone: { id: randomUUID(), leftPip, rightPip, element: null } as Stone,
+      flipped,
+      side,
+      playedBy: 'player',
+      turnNumber: 1,
+    };
+  }
+
+  it('side=right, flipped=false → leftPip (leftPip connected to rightOpen)', () => {
+    // e.g. stone(4,6) played right when rightOpen=4: leftPip=4 matched, flipped=false
+    expect(tileConnectingPip(makeTile(4, 6, 'right', false))).toBe(4);
+  });
+
+  it('side=right, flipped=true → rightPip (rightPip connected to rightOpen)', () => {
+    // e.g. stone(1,4) played right when rightOpen=4: rightPip=4 matched, flipped=true
+    expect(tileConnectingPip(makeTile(1, 4, 'right', true))).toBe(4);
+  });
+
+  it('side=left, flipped=false → rightPip (rightPip connected to leftOpen)', () => {
+    // e.g. stone(0,2) played left when leftOpen=2: rightPip=2 matched, flipped=false
+    expect(tileConnectingPip(makeTile(0, 2, 'left', false))).toBe(2);
+  });
+
+  it('side=left, flipped=true → leftPip (leftPip connected to leftOpen)', () => {
+    // e.g. stone(2,5) played left when leftOpen=2: leftPip=2 matched, flipped=true
+    expect(tileConnectingPip(makeTile(2, 5, 'left', true))).toBe(2);
+  });
+
+  it('matches actual board flipped values for right-end play', () => {
+    const b = new Board();
+    b.playStone(stone(1, 3), 'right', 'player', 1); // rightOpen=3
+    const t = b.playStone(stone(2, 3), 'right', 'enemy', 1); // rightPip=3 matches → flipped=true
+    expect(tileConnectingPip(t)).toBe(3);
+  });
+
+  it('matches actual board flipped values for left-end play', () => {
+    const b = new Board();
+    b.playStone(stone(5, 3), 'right', 'player', 1); // leftOpen=5
+    const t = b.playStone(stone(5, 1), 'left', 'enemy', 1); // leftPip=5 matches → flipped=true
+    expect(tileConnectingPip(t)).toBe(5);
+  });
+
+  it('two enemy right-side tiles: both pips counted', () => {
+    const b = new Board();
+    b.playStone(stone(1, 3), 'right', 'player', 1); // rightOpen=3
+    b.playStone(stone(3, 5), 'right', 'enemy', 1);  // leftPip=3 matches, flipped=false, pip=3
+    b.playStone(stone(5, 4), 'right', 'enemy', 1);  // leftPip=5 matches, flipped=false, pip=5
+    const tiles = b.getTilesForTurn(1, 'enemy');
+    const damage = tiles.reduce((sum, t) => sum + tileConnectingPip(t) * 2, 0);
+    expect(damage).toBe((3 + 5) * 2); // 16
+  });
+
+  it('enemy right then left: both pips counted', () => {
+    const b = new Board();
+    b.playStone(stone(3, 5), 'right', 'player', 1); // leftOpen=3, rightOpen=5
+    b.playStone(stone(5, 4), 'right', 'enemy', 1);  // leftPip=5 matches rightOpen, pip=5
+    b.playStone(stone(1, 3), 'left', 'enemy', 1);   // rightPip=3 matches leftOpen, pip=3
+    const tiles = b.getTilesForTurn(1, 'enemy');
+    const damage = tiles.reduce((sum, t) => sum + tileConnectingPip(t) * 2, 0);
+    expect(damage).toBe((5 + 3) * 2); // 16
+  });
+});
+
 // ─── compressChain ────────────────────────────────────────────────────────────
 
 import { compressChain } from '../board';

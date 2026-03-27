@@ -6,7 +6,7 @@ import { failRun, startRun } from '../../../src/dungeon/run';
 import { defaultPlayerState } from '../../../src/game/models/player-state';
 import type { DungeonNode } from '../../../src/dungeon/node-types';
 import { Bag } from '../../../src/game/bag';
-import { Board } from '../../../src/game/board';
+import { Board, tileConnectingPip } from '../../../src/game/board';
 import { EnemyBoardAI } from '../../../src/game/ai/enemy-board-ai';
 import { analyzeChain, applyChainEffects } from '../../../src/game/elements/element-engine';
 import { calculateDamage, applyArmor } from '../../../src/game/damage';
@@ -449,9 +449,11 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     session.enemyHand = ai.playTurn(board, (session.enemyHand ?? []) as any[], current) as any[];
 
     enemyTilesPlayed = board.getTilesForTurn(current, 'enemy');
-    const enemyChain = board.toChainForTurn(current, 'enemy');
-    const enemyDamageResult = calculateDamage(enemyChain, {} as any);
-    rawEnemyDamage = enemyDamageResult.finalDamage;
+    // Each tile the enemy plays connects to an open end; sum all connecting pips × 2.
+    rawEnemyDamage = enemyTilesPlayed.reduce(
+      (sum, tile) => sum + tileConnectingPip(tile) * 2,
+      0
+    );
 
     // FrostbiteRing: each slow stack reduces enemy damage by 30% instead of 20%
     const slowPct = relics.includes(RelicType.FrostbiteRing) ? 0.3 : 0.2;
