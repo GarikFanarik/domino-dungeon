@@ -83,7 +83,7 @@ export function DominoBoard({
     const revealedIds = new Set<string>();
     setAnimState({ displayTiles: currentDisplay, enteringIds: new Set(), exitingIds: new Set() });
 
-    // Reveal each enemy tile one at a time, 1200ms apart
+    // 3s pause before first tile, then 1200ms between each subsequent tile
     newEnemyTiles.forEach((tile, i) => {
       const t = setTimeout(() => {
         revealedIds.add(tile.id);
@@ -95,12 +95,12 @@ export function DominoBoard({
           enteringIds: new Set([tile.id]),
           exitingIds: new Set(),
         });
-      }, i * 1200);
+      }, 3000 + i * 1200);
       timeouts.push(t);
     });
 
     // After all enemy tiles have appeared (+400ms for last fade-in), run compression
-    const revealDone = newEnemyTiles.length * 1200 + 400;
+    const revealDone = 3000 + newEnemyTiles.length * 1200 + 400;
 
     const tCompress = setTimeout(() => {
       const compressed = compressChain(newTiles);

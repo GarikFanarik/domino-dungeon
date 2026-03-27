@@ -161,6 +161,7 @@ export function CombatScreen({ runId }: Props) {
   const [previewDamage, setPreviewDamage] = useState<number | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [prevBoardTiles, setPrevBoardTiles] = useState<BoardTile[] | null>(null);
+  const [enemyDamageDisplay, setEnemyDamageDisplay] = useState<number | null>(null);
 
   const dragRef = useRef<DragState | null>(null);
   const combatRef = useRef<CombatState | null>(null);
@@ -364,6 +365,7 @@ export function CombatScreen({ runId }: Props) {
           playerHand: data.hand ?? prev.playerHand,
         } : prev);
         setPrevBoardTiles(prevTiles);
+        if (data.enemyAttack?.damage > 0) setEnemyDamageDisplay(data.enemyAttack.damage);
         setPreviewDamage(null);
       }
     } finally {
@@ -453,7 +455,7 @@ export function CombatScreen({ runId }: Props) {
             isPlayerTurn={isPlayerTurn}
             dragValidEnds={dragValidEnds}
             prevOrderedTiles={prevBoardTiles ?? undefined}
-            onAnimationDone={() => setPrevBoardTiles(null)}
+            onAnimationDone={() => { setPrevBoardTiles(null); setEnemyDamageDisplay(null); }}
           />
         </div>
         <div className="combat-enemy-zone">
@@ -563,13 +565,13 @@ export function CombatScreen({ runId }: Props) {
           {previewDamage}
         </div>
       )}
-      {enemyTurnData?.attack && enemyTurnData.attack.damage > 0 && (
+      {enemyDamageDisplay !== null && enemyDamageDisplay > 0 && (
         <div
-          key={`enemy-${enemyTurnData.attack.damage}`}
+          key={`enemy-${enemyDamageDisplay}`}
           className="damage-counter damage-counter--enemy"
-          style={damageStyle(enemyTurnData.attack.damage, 'enemy')}
+          style={damageStyle(enemyDamageDisplay, 'enemy')}
         >
-          -{enemyTurnData.attack.damage}
+          -{enemyDamageDisplay}
         </div>
       )}
 
