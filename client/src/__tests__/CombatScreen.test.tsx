@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { vi } from 'vitest';
 import { CombatScreen } from '../screens/CombatScreen';
 import { GameProvider } from '../context/GameContext';
@@ -11,9 +11,6 @@ const mockBoard = {
   orderedTiles: [],
   leftOpen: null,
   rightOpen: null,
-  rightHead: { x: 12, y: 4, dir: 'right' as const },
-  leftHead: { x: 8, y: 4, dir: 'left' as const },
-  maxCol: 20,
 };
 
 const mockCombatState = {
@@ -94,7 +91,7 @@ describe('CombatScreen', () => {
     // so stone IS playable on first play (right side). Let's use a board with tiles and mismatched pips.
     const boardWithMismatch = {
       ...mockBoard,
-      tiles: [{ id: 't1', stone: { id: 's0', leftPip: 6, rightPip: 6, element: null }, x: 10, y: 4, orientation: 'h', flipped: false, side: 'right', playedBy: 'player', turnNumber: 1 }],
+      tiles: [{ id: 't1', stone: { id: 's0', leftPip: 6, rightPip: 6, element: null }, flipped: false, side: 'right', playedBy: 'player', turnNumber: 1 }],
       orderedTiles: [],
       leftOpen: 6,
       rightOpen: 6,
@@ -143,33 +140,61 @@ describe('CombatScreen', () => {
     });
   });
 
-  it('choose-end mode: clicking a stone that matches both ends enters choosing state', async () => {
-    const boardBothEnds = {
+  it('drag-drop: stone that only matches left end plays on left without requiring flip', async () => {
+    const boardLeftOnly = {
       ...mockBoard,
-      tiles: [{ id: 't1', stone: { id: 's0', leftPip: 3, rightPip: 3, element: null }, x: 10, y: 4, orientation: 'h', flipped: false, side: 'right', playedBy: 'player', turnNumber: 1 }],
-      orderedTiles: [{ id: 't1', stone: { id: 's0', leftPip: 3, rightPip: 3, element: null }, x: 10, y: 4, orientation: 'h' as const, flipped: false, side: 'right' as const, playedBy: 'player' as const, turnNumber: 1 }],
-      leftOpen: 3,
-      rightOpen: 3,
+      tiles: [{ id: 't1', stone: { id: 's0', leftPip: 2, rightPip: 4, element: null }, flipped: false, side: 'right' as const, playedBy: 'player' as const, turnNumber: 1 }],
+      orderedTiles: [],
+      leftOpen: 2,
+      rightOpen: 4,
     };
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue({
-        ...mockCombatState,
-        board: boardBothEnds,
-        playerHand: [{ id: 's1', leftPip: 3, rightPip: 1, element: null }],
-      }),
-    });
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValue({
+          ...mockCombatState,
+          board: boardLeftOnly,
+          playerHand: [{ id: 's1', leftPip: 2, rightPip: 2, element: null }],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ board: boardLeftOnly, hand: [], playerState: mockCombatState.playerState }),
+      });
 
     renderCombat();
-    await waitFor(() => screen.getByText(/3\|1/));
+    await waitFor(() => screen.getByTitle('Stone (2|2)'));
 
-    // Click the stone — both ends match (leftPip=3 matches leftOpen=3, leftPip=3 matches rightOpen=3)
-    fireEvent.click(screen.getByText(/3\|1/));
+    // Make getBoundingClientRect return a full-screen rect so overBoard check passes
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockReturnValue({
+      left: 0, right: 9999, top: 0, bottom: 9999,
+      width: 9999, height: 9999, x: 0, y: 0, toJSON: () => ({}),
+    } as DOMRect);
 
-    // Open-end buttons should appear
+    // Start drag on the 2|2 hand tile (flipped=false → prefers right side, invalid for 2|2)
+    const stoneTile = screen.getByTitle('Stone (2|2)');
+    fireEvent.pointerDown(stoneTile, { clientX: 200, clientY: 200 });
+
+    // Wait for drag overlay label to appear (confirms state update ran)
     await waitFor(() => {
-      expect(screen.getByTestId('open-end-left')).toBeInTheDocument();
-      expect(screen.getByTestId('open-end-right')).toBeInTheDocument();
+      const overlay = document.querySelector('.drag-overlay');
+      if (!overlay) throw new Error('drag overlay not yet rendered');
+    });
+
+    // Flush pending effects (ensures the useEffect registering pointerup listener has run)
+    await act(async () => {});
+
+    // Drop inside board zone without pressing R (no flip) — auto-selects valid side
+    await act(async () => {
+      window.dispatchEvent(new PointerEvent('pointerup', { clientX: 300, clientY: 300, bubbles: true }));
+    });
+
+    await waitFor(() => {
+      const calls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls;
+      const playCall = calls.find(c => typeof c[0] === 'string' && c[0].includes('/combat/play'));
+      expect(playCall).toBeDefined();
+      const body = JSON.parse((playCall![1] as RequestInit).body as string);
+      expect(body.side).toBe('left');
     });
   });
 

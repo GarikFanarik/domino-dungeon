@@ -6,7 +6,7 @@ import { DominoBoard } from '../components/DominoBoard';
 import { EnemyHand } from '../components/EnemyHand';
 import { EnemyTurnSequence } from '../components/EnemyTurnSequence';
 import { relicImage } from '../utils/relicImage';
-import type { BoardJSON } from '../../../src/game/board';
+import type { BoardJSON, BoardTile } from '../../../src/game/board';
 import './CombatScreen.css';
 
 interface Stone {
@@ -141,6 +141,7 @@ export function CombatScreen({ runId }: Props) {
   const [enemyTurnData, setEnemyTurnData] = useState<EnemyTurnData | null>(null);
   const [previewDamage, setPreviewDamage] = useState<number | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
+  const [prevBoardTiles, setPrevBoardTiles] = useState<BoardTile[] | null>(null);
 
   const dragRef = useRef<DragState | null>(null);
   const combatRef = useRef<CombatState | null>(null);
@@ -189,11 +190,13 @@ export function CombatScreen({ runId }: Props) {
         return;
       }
 
-      const side: 'left' | 'right' = ds.flipped ? 'left' : 'right';
+      const preferred: 'left' | 'right' = ds.flipped ? 'left' : 'right';
+      const other: 'left' | 'right' = preferred === 'left' ? 'right' : 'left';
       const board = combatRef.current?.board;
-      const valid = board ? canStonePlay(ds.stone, board)[side] : false;
+      const canPlay = board ? canStonePlay(ds.stone, board) : { left: false, right: false };
+      const side = canPlay[preferred] ? preferred : canPlay[other] ? other : null;
 
-      if (!valid) {
+      if (!side) {
         const invalidState = { ...ds, invalid: true };
         dragRef.current = invalidState;
         setDragState(invalidState);
@@ -292,6 +295,7 @@ export function CombatScreen({ runId }: Props) {
 
   async function handleEndTurn() {
     if (!combat || combat.phase !== 'player-turn') return;
+    const prevTiles = combat.board.orderedTiles;
     setLoading(true);
     setMessage('');
     try {
@@ -340,6 +344,7 @@ export function CombatScreen({ runId }: Props) {
           swapsUsed: 0,
           playerHand: data.hand ?? prev.playerHand,
         } : prev);
+        setPrevBoardTiles(prevTiles);
         setPreviewDamage(null);
       }
     } finally {
@@ -428,6 +433,8 @@ export function CombatScreen({ runId }: Props) {
             board={combat.board}
             isPlayerTurn={isPlayerTurn}
             dragValidEnds={dragValidEnds}
+            prevOrderedTiles={prevBoardTiles ?? undefined}
+            onAnimationDone={() => setPrevBoardTiles(null)}
           />
         </div>
         <div className="combat-enemy-zone">

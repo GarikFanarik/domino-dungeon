@@ -34,15 +34,17 @@ describe('DungeonMapScreen', () => {
   it('available nodes are not disabled', async () => {
     renderMap();
     await waitFor(() => screen.getAllByTestId('map-node'));
-    expect(screen.getAllByTestId('map-node')[0]).not.toBeDisabled();
+    const n1 = document.querySelector('[data-node-id="n1"]') as HTMLElement;
+    expect(n1).not.toBeDisabled();
   });
 
   it('unavailable nodes are disabled', async () => {
     renderMap();
     await waitFor(() => screen.getAllByTestId('map-node'));
-    const nodes = screen.getAllByTestId('map-node');
-    expect(nodes[1]).toBeDisabled();
-    expect(nodes[2]).toBeDisabled();
+    const n2 = document.querySelector('[data-node-id="n2"]') as HTMLElement;
+    const n3 = document.querySelector('[data-node-id="n3"]') as HTMLElement;
+    expect(n2).toBeDisabled();
+    expect(n3).toBeDisabled();
   });
 
   it('shows act number via background attribute', async () => {
@@ -81,8 +83,8 @@ describe('DungeonMapScreen', () => {
     });
     renderMap();
     await waitFor(() => screen.getAllByTestId('map-node'));
-    const nodes = screen.getAllByTestId('map-node');
-    expect(nodes[0]).toHaveClass('map-node--current');
+    const n1 = document.querySelector('[data-node-id="n1"]') as HTMLElement;
+    expect(n1).toHaveClass('map-node--current');
   });
 
   it('does not mark other nodes as current', async () => {

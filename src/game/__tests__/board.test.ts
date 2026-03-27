@@ -209,83 +209,102 @@ describe('Board.toChainForTurn', () => {
   });
 });
 
-// ─── snake layout ─────────────────────────────────────────────────────────────
+// ─── compressChain ────────────────────────────────────────────────────────────
 
-describe('Board — snake layout positions', () => {
-  it('first tile placed at (10, 4)', () => {
-    const b = new Board();
-    const tile = b.playStone(stone(2, 4), 'right', 'player', 1);
-    expect(tile.x).toBe(10);
-    expect(tile.y).toBe(4);
+import { compressChain } from '../board';
+
+function tile(leftPip: number, rightPip: number, flipped = false): import('../board').BoardTile {
+  return {
+    id: randomUUID(),
+    stone: { id: randomUUID(), leftPip, rightPip, element: null } as import('../models/stone').Stone,
+    flipped,
+    side: 'right',
+    playedBy: 'player',
+    turnNumber: 1,
+  };
+}
+
+describe('compressChain', () => {
+  it('returns chain unchanged when length <= 2', () => {
+    const t1 = tile(5, 4);
+    const t2 = tile(4, 1);
+    expect(compressChain([t1])).toEqual([t1]);
+    expect(compressChain([t1, t2])).toEqual([t1, t2]);
+    expect(compressChain([])).toEqual([]);
   });
 
-  it('second right-end tile placed at (12, 4)', () => {
-    const b = new Board();
-    b.playStone(stone(1, 3), 'right', 'player', 1);
-    const tile = b.playStone(stone(3, 5), 'right', 'player', 1);
-    expect(tile.x).toBe(12);
-    expect(tile.y).toBe(4);
+  it('compresses 8-tile chain to 3 tiles (spec example)', () => {
+    // [5|4]-[4|1]-[1|3]-[3|5]-[5|2]-[2|4]-[4|6]-[6|1]
+    // [5|4] outgoing=4 → furthest match: [4|6] at index 6
+    // [4|6] outgoing=6 → furthest match: [6|1] at index 7
+    // Result: [5|4]-[4|6]-[6|1]
+    const t0 = tile(5, 4); // outgoing=4
+    const t1 = tile(4, 1);
+    const t2 = tile(1, 3);
+    const t3 = tile(3, 5);
+    const t4 = tile(5, 2);
+    const t5 = tile(2, 4);
+    const t6 = tile(4, 6); // outgoing=6
+    const t7 = tile(6, 1);
+    const result = compressChain([t0, t1, t2, t3, t4, t5, t6, t7]);
+    expect(result).toHaveLength(3);
+    expect(result[0].id).toBe(t0.id);
+    expect(result[1].id).toBe(t6.id);
+    expect(result[2].id).toBe(t7.id);
   });
 
-  it('first left-end tile placed at (8, 4)', () => {
-    const b = new Board();
-    b.playStone(stone(2, 4), 'right', 'player', 1); // leftOpen=2
-    const tile = b.playStone(stone(0, 2), 'left', 'player', 1);
-    expect(tile.x).toBe(8);
-    expect(tile.y).toBe(4);
+  it('returns chain unchanged when no shortcut exists', () => {
+    // [1|2]-[2|3]-[3|4] — each only matches the next, no skipping possible
+    const t0 = tile(1, 2);
+    const t1 = tile(2, 3);
+    const t2 = tile(3, 4);
+    const result = compressChain([t0, t1, t2]);
+    expect(result).toHaveLength(3);
+    expect(result[0].id).toBe(t0.id);
+    expect(result[1].id).toBe(t1.id);
+    expect(result[2].id).toBe(t2.id);
   });
 
-  it('rightHead wraps to next row at maxCol', () => {
-    let b2 = new Board();
-    let s = stone(1, 3);
-    b2.playStone(s, 'right', 'player', 1); // (10,4), rightOpen=3
-    for (let i = 0; i < 3; i++) {
-      s = stone(3, 3); // double 3 keeps rightOpen=3
-      b2.playStone(s, 'right', 'player', 1);
-    }
-    // 5th additional right tile → should be at (18, 4)
-    const t5 = b2.playStone(stone(3, 3), 'right', 'player', 1);
-    expect(t5.x).toBe(18);
-    expect(t5.y).toBe(4);
-    // 6th: rightHead wrapped to (20, 5, left); tile placed at (20, 5)
-    const t6 = b2.playStone(stone(3, 3), 'right', 'player', 1);
-    expect(t6.x).toBe(20);
-    expect(t6.y).toBe(5);
+  it('always takes the furthest match when multiple shortcuts exist', () => {
+    // [2|4]-[4|1]-[4|3]-[4|6]
+    // [2|4] outgoing=4 → matches t1(4|1), t2(4|3), t3(4|6) → furthest is t3
+    // t3 is last → done
+    // Result: [2|4]-[4|6]
+    const t0 = tile(2, 4);
+    const t1 = tile(4, 1);
+    const t2 = tile(4, 3);
+    const t3 = tile(4, 6);
+    const result = compressChain([t0, t1, t2, t3]);
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe(t0.id);
+    expect(result[1].id).toBe(t3.id);
   });
 
-  it('leftHead advances mirroring rightHead (left direction, wraps down)', () => {
-    const b = new Board();
-    b.playStone(stone(2, 4), 'right', 'player', 1); // first tile (10,4); leftOpen=2
-    b.playStone(stone(0, 2), 'left', 'player', 1); // (8,4); leftOpen=0
-    b.playStone(stone(3, 0), 'left', 'player', 1); // (6,4); leftOpen=3
-    b.playStone(stone(1, 3), 'left', 'player', 1); // (4,4); leftOpen=1
-    const t5 = b.playStone(stone(5, 1), 'left', 'player', 1); // (2,4); leftOpen=5
-    expect(t5.x).toBe(2);
-    expect(t5.y).toBe(4);
-    const t6 = b.playStone(stone(3, 5), 'left', 'player', 1); // (0,4); leftOpen=3
-    expect(t6.x).toBe(0);
-    expect(t6.y).toBe(4);
-    const t7 = b.playStone(stone(1, 3), 'left', 'player', 1); // leftHead wrapped; tile at row 5
-    expect(t7.y).toBe(5);
-  });
-
-  it('collision extends maxCol by 4', () => {
-    const b = new Board();
-    b.playStone(stone(1, 1), 'right', 'player', 1); // (10,4); rightOpen=1
-    for (let i = 0; i < 10; i++) {
-      b.playStone(stone(1, 1), 'right', 'player', 1);
-    }
-    const json = b.toJSON();
-    const positions = json.tiles.map((t: any) => `${t.x},${t.y}`);
-    const unique = new Set(positions);
-    expect(unique.size).toBe(positions.length); // no two tiles share the same grid cell
+  it('uses display pips correctly for flipped tiles', () => {
+    // t0: [3|5] not flipped → outgoing=5
+    // t1: [6|5] flipped=true → left display pip = stone.rightPip=5, right display pip = stone.leftPip=6
+    //     incoming=5 (matches outgoing of t0), outgoing=6
+    // t2: [4|2] not flipped → incoming=4, no match with 6
+    // t3: [1|6] not flipped → incoming=1, no match
+    // t4: [6|2] not flipped → incoming=6 (matches outgoing of t1) → furthest match
+    // Result: [3|5]-[6|5 flipped]-[6|2]
+    const t0 = tile(3, 5);
+    const t1 = tile(6, 5, true); // flipped: left display=5, right display=6
+    const t2 = tile(4, 2);
+    const t3 = tile(1, 6);
+    const t4 = tile(6, 2);
+    const result = compressChain([t0, t1, t2, t3, t4]);
+    expect(result).toHaveLength(3);
+    expect(result[0].id).toBe(t0.id);
+    expect(result[1].id).toBe(t1.id);
+    expect(result[2].id).toBe(t4.id);
   });
 });
 
 // ─── toJSON / fromJSON ────────────────────────────────────────────────────────
 
 describe('Board — serialization round-trip', () => {
-  it('restores tiles, opens, and head state from JSON', () => {
+  it('restores tiles, opens, and orderedTiles from JSON', () => {
     const b = new Board();
     b.playStone(stone(2, 4), 'right', 'player', 1);
     b.playStone(stone(0, 2), 'left', 'player', 1);
@@ -294,9 +313,7 @@ describe('Board — serialization round-trip', () => {
     expect(b2.leftOpen).toBe(b.leftOpen);
     expect(b2.rightOpen).toBe(b.rightOpen);
     const json2 = b2.toJSON();
-    expect(json2.rightHead).toEqual(json.rightHead);
-    expect(json2.leftHead).toEqual(json.leftHead);
-    expect(json2.maxCol).toBe(json.maxCol);
     expect(json2.tiles).toHaveLength(json.tiles.length);
+    expect(json2.orderedTiles).toHaveLength(json.orderedTiles.length);
   });
 });

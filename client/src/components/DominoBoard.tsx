@@ -1,4 +1,6 @@
-import type { BoardJSON } from '../../../src/game/board';
+import { useEffect, useRef, useState } from 'react';
+import type { BoardJSON, BoardTile } from '../../../src/game/board';
+import { compressChain } from '../../../src/game/board';
 import { DominoStone } from './DominoStone';
 import './DominoBoard.css';
 
@@ -6,26 +8,79 @@ interface Props {
   board: BoardJSON;
   isPlayerTurn: boolean;
   dragValidEnds?: { left: boolean; right: boolean };
+  /**
+   * Set to the board's orderedTiles from BEFORE the End Turn to trigger the
+   * two-phase animation: enemy tiles fade in, then removed tiles compress out.
+   * Leave undefined when not animating.
+   */
+  prevOrderedTiles?: BoardTile[];
+  /** Called when the animation sequence finishes. */
+  onAnimationDone?: () => void;
 }
 
-// Each tile occupies 2 x-cells wide, 1 y-cell tall
-// Placed horizontal tile: height 72px, two halves at aspect-ratio 1 = 72px each,
-// + padding 8*2 + gap 2*2 + divider 2 + border 2 = 132px wide → 66px per x-cell
-const CELL_W = 66; // px per x-grid-unit (tile spans 2 → 132px)
-const CELL_H = 76; // px per y-grid-unit (matches placed tile height ~72px + 4px gap)
+interface AnimState {
+  displayTiles: BoardTile[];
+  enteringIds: Set<string>;
+  exitingIds: Set<string>;
+}
 
-export function DominoBoard({ board, isPlayerTurn: _isPlayerTurn, dragValidEnds }: Props) {
-  const hasBoard = board.tiles.length > 0;
+function displayStone(tile: BoardTile) {
+  return tile.flipped
+    ? { ...tile.stone, leftPip: tile.stone.rightPip, rightPip: tile.stone.leftPip }
+    : tile.stone;
+}
 
-  // Show the area from 2 cells before leftHead to maxCol+2, y=2 to y=10
-  const offsetX = Math.max(0, board.leftHead.x - 2);
-  const offsetY = 2;
-  const cols = Math.max(board.maxCol, board.rightHead.x + 4) - offsetX;
-  const rows = 8;
-  const gridW = cols * CELL_W;
-  const gridH = rows * CELL_H;
+export function DominoBoard({
+  board,
+  isPlayerTurn: _isPlayerTurn,
+  dragValidEnds,
+  prevOrderedTiles,
+  onAnimationDone,
+}: Props) {
+  const [animState, setAnimState] = useState<AnimState | null>(null);
+  const onAnimationDoneRef = useRef(onAnimationDone);
+  onAnimationDoneRef.current = onAnimationDone;
 
+  useEffect(() => {
+    if (!prevOrderedTiles) return;
+
+    const newTiles = board.orderedTiles;
+    const prevIds = new Set(prevOrderedTiles.map(t => t.id));
+
+    // Phase 1: fade in new enemy tiles
+    const enteringIds = new Set(
+      newTiles.filter(t => !prevIds.has(t.id) && t.playedBy === 'enemy').map(t => t.id)
+    );
+
+    setAnimState({ displayTiles: newTiles, enteringIds, exitingIds: new Set() });
+
+    const t1 = setTimeout(() => {
+      // Phase 2: compress — fade out removed tiles
+      const compressed = compressChain(newTiles);
+      const compressedIds = new Set(compressed.map(t => t.id));
+      const exitingIds = new Set(newTiles.filter(t => !compressedIds.has(t.id)).map(t => t.id));
+
+      setAnimState({ displayTiles: newTiles, enteringIds: new Set(), exitingIds });
+
+      const t2 = setTimeout(() => {
+        setAnimState(null);
+        onAnimationDoneRef.current?.();
+      }, 300);
+
+      return () => clearTimeout(t2);
+    }, 400);
+
+    return () => clearTimeout(t1);
+    // Only re-run when prevOrderedTiles identity changes (set after End Turn)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prevOrderedTiles]);
+
+  const hasBoard = board.orderedTiles.length > 0;
   const isDragging = !!dragValidEnds;
+
+  const displayTiles = animState
+    ? animState.displayTiles
+    : hasBoard ? compressChain(board.orderedTiles) : [];
 
   return (
     <div
@@ -33,61 +88,38 @@ export function DominoBoard({ board, isPlayerTurn: _isPlayerTurn, dragValidEnds 
       data-drop-zone="board"
       data-testid="domino-board"
     >
-      <div
-        className="domino-board-grid"
-        style={{
-          width: gridW,
-          height: gridH,
-          position: 'relative',
-          backgroundSize: `${CELL_W}px ${CELL_H}px`,
-        }}
-      >
+      <div className="domino-board-chain">
         {!hasBoard && (
           <div className="domino-board-empty">Play a tile to start the chain</div>
         )}
 
-        {board.tiles.map(tile => {
-          const displayStone = tile.flipped
-            ? { ...tile.stone, leftPip: tile.stone.rightPip, rightPip: tile.stone.leftPip }
-            : tile.stone;
+        {/* Left drag-valid-end sibling */}
+        {hasBoard && isDragging && dragValidEnds!.left && (
+          <div className="drag-valid-end drag-valid-end--left" />
+        )}
+
+        {displayTiles.map((tile, i) => {
+          const isLast = i === displayTiles.length - 1;
           const isEnemy = tile.playedBy === 'enemy';
-          const px = (tile.x - offsetX) * CELL_W;
-          const py = (tile.y - offsetY) * CELL_H;
+          const isEntering = animState?.enteringIds.has(tile.id);
+          const isExiting = animState?.exitingIds.has(tile.id);
+
+          let cls = 'board-tile';
+          cls += isEnemy ? ' board-tile--enemy' : ' board-tile--player';
+          if (isEntering) cls += ' board-tile--entering';
+          if (isExiting) cls += ' board-tile--exiting';
+          if (!isLast) cls += ' board-tile--no-right-border';
+
           return (
-            <div
-              key={tile.id}
-              className={`board-tile ${isEnemy ? 'board-tile--enemy' : 'board-tile--player'}`}
-              style={{ position: 'absolute', left: px, top: py }}
-            >
-              <DominoStone stone={displayStone} horizontal placed />
+            <div key={tile.id} className={cls}>
+              <DominoStone stone={displayStone(tile)} horizontal placed />
             </div>
           );
         })}
 
-        {/* Valid end zone highlights during drag */}
-        {hasBoard && isDragging && dragValidEnds!.left && (
-          <div
-            className="drag-valid-end drag-valid-end--left"
-            style={{
-              position: 'absolute',
-              left: (board.leftHead.x - offsetX - 1) * CELL_W,
-              top: (board.leftHead.y - offsetY) * CELL_H,
-              width: CELL_W * 2,
-              height: CELL_H,
-            }}
-          />
-        )}
+        {/* Right drag-valid-end sibling */}
         {hasBoard && isDragging && dragValidEnds!.right && (
-          <div
-            className="drag-valid-end drag-valid-end--right"
-            style={{
-              position: 'absolute',
-              left: (board.rightHead.x - offsetX) * CELL_W,
-              top: (board.rightHead.y - offsetY) * CELL_H,
-              width: CELL_W * 2,
-              height: CELL_H,
-            }}
-          />
+          <div className="drag-valid-end drag-valid-end--right" />
         )}
       </div>
     </div>

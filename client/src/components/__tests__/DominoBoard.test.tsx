@@ -8,18 +8,13 @@ function emptyBoard(): BoardJSON {
     orderedTiles: [],
     leftOpen: null,
     rightOpen: null,
-    rightHead: { x: 12, y: 4, dir: 'right' },
-    leftHead: { x: 8, y: 4, dir: 'left' },
-    maxCol: 20,
   };
 }
 
-function tileAt(x: number, y: number, leftPip: number, rightPip: number): BoardJSON['tiles'][number] {
+function makeTile(leftPip: number, rightPip: number, id = 't1'): BoardJSON['tiles'][number] {
   return {
-    id: `t-${x}-${y}`,
+    id,
     stone: { id: 's1', leftPip, rightPip, element: null },
-    x, y,
-    orientation: 'h',
     flipped: false,
     side: 'right',
     playedBy: 'player',
@@ -29,53 +24,51 @@ function tileAt(x: number, y: number, leftPip: number, rightPip: number): BoardJ
 
 describe('DominoBoard', () => {
   it('renders without crashing on empty board', () => {
-    render(<DominoBoard board={emptyBoard()} isPlayerTurn={true} onEndSelect={() => {}} choosingEnd={null} />);
+    render(<DominoBoard board={emptyBoard()} isPlayerTurn={true} />);
     expect(screen.getByTestId('domino-board')).toBeInTheDocument();
-  });
-
-  it('renders a tile when board has one tile', () => {
-    const board = emptyBoard();
-    board.tiles = [tileAt(10, 4, 2, 4)];
-    board.orderedTiles = board.tiles;
-    board.leftOpen = 2;
-    board.rightOpen = 4;
-    render(<DominoBoard board={board} isPlayerTurn={true} onEndSelect={() => {}} choosingEnd={null} />);
-    expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByText('4')).toBeInTheDocument();
-  });
-
-  it('highlights open ends when isPlayerTurn is true', () => {
-    const board = emptyBoard();
-    board.tiles = [tileAt(10, 4, 2, 4)];
-    board.orderedTiles = board.tiles;
-    board.leftOpen = 2;
-    board.rightOpen = 4;
-    render(<DominoBoard board={board} isPlayerTurn={true} onEndSelect={() => {}} choosingEnd={null} />);
-    expect(screen.getByTestId('open-end-left')).toBeInTheDocument();
-    expect(screen.getByTestId('open-end-right')).toBeInTheDocument();
   });
 
   it('does not highlight open ends during enemy turn', () => {
     const board = emptyBoard();
-    board.tiles = [tileAt(10, 4, 2, 4)];
+    board.tiles = [makeTile(2, 4)];
     board.orderedTiles = board.tiles;
     board.leftOpen = 2;
     board.rightOpen = 4;
-    render(<DominoBoard board={board} isPlayerTurn={false} onEndSelect={() => {}} choosingEnd={null} />);
+    render(<DominoBoard board={board} isPlayerTurn={false} />);
     expect(screen.queryByTestId('open-end-left')).not.toBeInTheDocument();
   });
 
-  it('calls onEndSelect with side when an open end is clicked', async () => {
+  it('shows drag-valid-end--left when dragValidEnds.left is true', () => {
     const board = emptyBoard();
-    board.tiles = [tileAt(10, 4, 2, 4)];
+    board.tiles = [makeTile(2, 4)];
     board.orderedTiles = board.tiles;
     board.leftOpen = 2;
     board.rightOpen = 4;
-    const onEndSelect = vi.fn();
-    const { getByTestId } = render(
-      <DominoBoard board={board} isPlayerTurn={true} onEndSelect={onEndSelect} choosingEnd="both" />
-    );
-    getByTestId('open-end-right').click();
-    expect(onEndSelect).toHaveBeenCalledWith('right');
+    render(<DominoBoard board={board} isPlayerTurn={true} dragValidEnds={{ left: true, right: false }} />);
+    expect(document.querySelector('.drag-valid-end--left')).toBeInTheDocument();
+    expect(document.querySelector('.drag-valid-end--right')).not.toBeInTheDocument();
   });
+
+  it('shows drag-valid-end--right when dragValidEnds.right is true', () => {
+    const board = emptyBoard();
+    board.tiles = [makeTile(2, 4)];
+    board.orderedTiles = board.tiles;
+    board.leftOpen = 2;
+    board.rightOpen = 4;
+    render(<DominoBoard board={board} isPlayerTurn={true} dragValidEnds={{ left: false, right: true }} />);
+    expect(document.querySelector('.drag-valid-end--right')).toBeInTheDocument();
+    expect(document.querySelector('.drag-valid-end--left')).not.toBeInTheDocument();
+  });
+
+  it('shows neither drag-valid-end when dragValidEnds is undefined', () => {
+    const board = emptyBoard();
+    board.tiles = [makeTile(2, 4)];
+    board.orderedTiles = board.tiles;
+    board.leftOpen = 2;
+    board.rightOpen = 4;
+    render(<DominoBoard board={board} isPlayerTurn={true} />);
+    expect(document.querySelector('.drag-valid-end--left')).not.toBeInTheDocument();
+    expect(document.querySelector('.drag-valid-end--right')).not.toBeInTheDocument();
+  });
+
 });
