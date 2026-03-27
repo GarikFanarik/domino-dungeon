@@ -64,23 +64,41 @@ export function DominoBoard({
     const newTiles = board.orderedTiles;
     const prevIds = new Set(prevOrderedTiles.map(t => t.id));
 
-    // Phase 1: fade in new enemy tiles
-    const enteringIds = new Set(
-      newTiles.filter(t => !prevIds.has(t.id) && t.playedBy === 'enemy').map(t => t.id)
-    );
+    // Enemy tiles that weren't on the board before, in chain order
+    const newEnemyTiles = newTiles.filter(t => !prevIds.has(t.id) && t.playedBy === 'enemy');
 
-    setAnimState({ displayTiles: newTiles, enteringIds, exitingIds: new Set() });
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
 
-    const t1 = setTimeout(() => {
-      // Phase 2: compress — fade out removed tiles
+    // Start: display only what was there before (no new enemy tiles yet)
+    let currentDisplay = [...prevOrderedTiles];
+    const revealedIds = new Set<string>();
+    setAnimState({ displayTiles: currentDisplay, enteringIds: new Set(), exitingIds: new Set() });
+
+    // Reveal each enemy tile one at a time, 1200ms apart
+    newEnemyTiles.forEach((tile, i) => {
+      const t = setTimeout(() => {
+        revealedIds.add(tile.id);
+        currentDisplay = newTiles.filter(t => prevIds.has(t.id) || revealedIds.has(t.id));
+        setAnimState({
+          displayTiles: currentDisplay,
+          enteringIds: new Set([tile.id]),
+          exitingIds: new Set(),
+        });
+      }, i * 1200);
+      timeouts.push(t);
+    });
+
+    // After all enemy tiles have appeared (+400ms for last fade-in), run compression
+    const revealDone = newEnemyTiles.length * 1200 + 400;
+
+    const tCompress = setTimeout(() => {
       const compressed = compressChain(newTiles);
       const compressedIds = new Set(compressed.map(t => t.id));
       const exitingIds = new Set(newTiles.filter(t => !compressedIds.has(t.id)).map(t => t.id));
 
       setAnimState({ displayTiles: newTiles, enteringIds: new Set(), exitingIds });
 
-      const t2 = setTimeout(() => {
-        // Animation done: store which tiles survived so mid-turn display stays compressed
+      const tDone = setTimeout(() => {
         setCompressedState({
           survivorIds: compressedIds,
           baseIds: new Set(newTiles.map(t => t.id)),
@@ -88,11 +106,11 @@ export function DominoBoard({
         setAnimState(null);
         onAnimationDoneRef.current?.();
       }, 300);
+      timeouts.push(tDone);
+    }, revealDone);
+    timeouts.push(tCompress);
 
-      return () => clearTimeout(t2);
-    }, 400);
-
-    return () => clearTimeout(t1);
+    return () => timeouts.forEach(clearTimeout);
     // Only re-run when prevOrderedTiles identity changes (set after End Turn)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prevOrderedTiles]);
