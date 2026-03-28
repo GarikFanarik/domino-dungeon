@@ -31,7 +31,13 @@ export function RelicSelectionScreen({ runId }: Props) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ relicId }),
     });
-    navigate('dungeon-map');
+    const runRes = await fetch(`/api/run/${runId}`);
+    const runData = await runRes.json();
+    if (runData.status === 'WON') {
+      navigate('run-summary');
+    } else {
+      navigate('dungeon-map');
+    }
   }
 
   if (offer.length === 0) {

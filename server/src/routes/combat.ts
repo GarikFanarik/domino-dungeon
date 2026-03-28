@@ -2,7 +2,8 @@ import { randomUUID } from 'crypto';
 import { Router, Request, Response } from 'express';
 import { getCombatSession, saveCombatSession, CombatSession } from '../../../src/session/combat-session';
 import redis from '../../../src/lib/redis';
-import { failRun, startRun } from '../../../src/dungeon/run';
+import { failRun, startRun, completeRun } from '../../../src/dungeon/run';
+import { generateActMap } from '../../../src/dungeon/map-generator';
 import { defaultPlayerState } from '../../../src/game/models/player-state';
 import type { DungeonNode } from '../../../src/dungeon/node-types';
 import { Bag } from '../../../src/game/bag';
@@ -387,6 +388,21 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
         runState.playerState.hp.current = session.playerHp ?? runState.playerState.hp.current;
         runState.playerState.armor = session.playerArmor ?? runState.playerState.armor;
         runState.playerState.gold = session.playerGold;
+
+        // Act advancement on boss defeat
+        if (nodeType === 'boss') {
+          if (runState.run.currentAct < 3) {
+            runState.run.currentAct += 1;
+            runState.map = generateActMap(runState.run.currentAct, `${runState.run.seed}-act${runState.run.currentAct}`);
+            runState.currentNodeId = null;
+          } else {
+            // Act 3 complete — the run is won
+            completeRun(runState.run);
+            runState.run.currentAct += 1; // becomes 4; actsCleared (= currentAct - 1) = 3
+            try { await redis.del(activeRunKey(runState.run.userId)); } catch { /* non-fatal */ }
+          }
+        }
+
         await saveRunState(session.runId, runState);
 
         // Generate stone reward options for elite/boss

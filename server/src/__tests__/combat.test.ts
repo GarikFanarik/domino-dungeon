@@ -302,6 +302,128 @@ describe('Combat API', () => {
     });
   });
 
+  describe('Boss defeat — act advancement', () => {
+    const BOSS_RUN = 'test-boss-run';
+
+    function makeBossRunState(act: number) {
+      return {
+        run: {
+          id: BOSS_RUN,
+          userId: 'user-boss',
+          seed: 'boss-seed',
+          currentAct: act,
+          currentNodeId: 'boss-node-1',
+          status: 'ACTIVE',
+          hp: 80,
+          maxHp: 80,
+          gold: 0,
+          relics: [],
+          completedAt: null,
+          createdAt: new Date().toISOString(),
+        },
+        playerState: { hp: { current: 80, max: 80 }, armor: 0, armorFortified: false, gold: 0, relics: [] },
+        map: [{ id: 'boss-node-1', type: 'boss', row: 6, col: 0, connections: [], completed: false }],
+        currentNodeId: 'boss-node-1',
+        stones: [],
+      };
+    }
+
+    function makeBossSession(act: number) {
+      // Two player stones at turn 1 forming a pip-1 junction → 2 damage (kills enemyHp=1)
+      const board = new Board();
+      board.playStone({ id: 'p1', leftPip: 2, rightPip: 1, element: null }, 'right', 'player', 1);
+      board.playStone({ id: 'p2', leftPip: 1, rightPip: 3, element: null }, 'right', 'player', 1);
+      return {
+        userId: BOSS_RUN,
+        runId: BOSS_RUN,
+        enemyId: `Act ${act} Boss`,
+        enemyHp: 1,
+        enemyMaxHp: 100,
+        enemyStatus: { burn: 0, slow: 0, frozen: false, stunned: false, poison: 0 },
+        hand: [],
+        bag: [],
+        board: board.toJSON(),
+        enemyHand: [],
+        enemyHandSize: 5,
+        turnNumber: 1,
+        swapsUsed: 0,
+        swapsPerTurn: 1,
+        playerHp: 80,
+        playerMaxHp: 80,
+        playerArmor: 0,
+        playerGold: 0,
+        relics: [],
+        stonesPlayedTotal: 0,
+      };
+    }
+
+    beforeEach(() => redisStore.clear());
+
+    it('act 1 boss defeat advances run to act 2 with a fresh map and null currentNodeId', async () => {
+      redisStore.set(`combat:${BOSS_RUN}`, JSON.stringify(makeBossSession(1)));
+      redisStore.set(`run:${BOSS_RUN}`, JSON.stringify(makeBossRunState(1)));
+
+      const res = await request(app).post(`/api/run/${BOSS_RUN}/combat/end-turn`).send({});
+      expect(res.status).toBe(200);
+      expect(res.body.combatResult).toBe('player-won');
+
+      const saved = JSON.parse(redisStore.get(`run:${BOSS_RUN}`) ?? '{}');
+      expect(saved.run.currentAct).toBe(2);
+      expect(saved.run.status).toBe('ACTIVE');
+      expect(saved.currentNodeId).toBeNull();
+      expect(saved.map.length).toBeGreaterThan(1);
+      expect(saved.map.some((n: any) => n.type === 'boss')).toBe(true);
+    });
+
+    it('act 2 boss defeat advances run to act 3 with a fresh map', async () => {
+      redisStore.set(`combat:${BOSS_RUN}`, JSON.stringify(makeBossSession(2)));
+      redisStore.set(`run:${BOSS_RUN}`, JSON.stringify(makeBossRunState(2)));
+
+      const res = await request(app).post(`/api/run/${BOSS_RUN}/combat/end-turn`).send({});
+      expect(res.status).toBe(200);
+
+      const saved = JSON.parse(redisStore.get(`run:${BOSS_RUN}`) ?? '{}');
+      expect(saved.run.currentAct).toBe(3);
+      expect(saved.run.status).toBe('ACTIVE');
+      expect(saved.currentNodeId).toBeNull();
+      expect(saved.map.length).toBeGreaterThan(1);
+    });
+
+    it('act 3 boss defeat marks run as WON', async () => {
+      redisStore.set(`combat:${BOSS_RUN}`, JSON.stringify(makeBossSession(3)));
+      redisStore.set(`run:${BOSS_RUN}`, JSON.stringify(makeBossRunState(3)));
+
+      const res = await request(app).post(`/api/run/${BOSS_RUN}/combat/end-turn`).send({});
+      expect(res.status).toBe(200);
+      expect(res.body.combatResult).toBe('player-won');
+
+      const saved = JSON.parse(redisStore.get(`run:${BOSS_RUN}`) ?? '{}');
+      expect(saved.run.status).toBe('WON');
+    });
+
+    it('non-boss combat win does not change currentAct', async () => {
+      const combatRunState = {
+        run: { id: BOSS_RUN, userId: 'user-boss', seed: 'boss-seed', currentAct: 1,
+               status: 'ACTIVE', hp: 80, maxHp: 80, gold: 0, relics: [], completedAt: null, createdAt: new Date().toISOString() },
+        playerState: { hp: { current: 80, max: 80 }, armor: 0, armorFortified: false, gold: 0, relics: [] },
+        map: [{ id: 'combat-node-1', type: 'combat', row: 0, col: 0, connections: [], completed: false }],
+        currentNodeId: 'combat-node-1',
+        stones: [],
+      };
+      const board = new Board();
+      board.playStone({ id: 'p1', leftPip: 2, rightPip: 1, element: null }, 'right', 'player', 1);
+      board.playStone({ id: 'p2', leftPip: 1, rightPip: 3, element: null }, 'right', 'player', 1);
+      const session = { ...makeBossSession(1), board: board.toJSON(), enemyId: 'Skeleton' };
+      redisStore.set(`combat:${BOSS_RUN}`, JSON.stringify(session));
+      redisStore.set(`run:${BOSS_RUN}`, JSON.stringify(combatRunState));
+
+      await request(app).post(`/api/run/${BOSS_RUN}/combat/end-turn`).send({});
+
+      const saved = JSON.parse(redisStore.get(`run:${BOSS_RUN}`) ?? '{}');
+      expect(saved.run.currentAct).toBe(1);
+    });
+  });
+
   describe('POST /api/run/:runId/combat/play', () => {
     beforeEach(() => redisStore.clear());
 
