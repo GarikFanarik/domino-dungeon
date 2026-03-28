@@ -586,22 +586,14 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     // non-fatal in tests
   }
 
-  // Build enemyAttack with stonesPlayed[] (orderedTiles order for chain display)
-  // and perTileDamage[] (insertion/play order, matching the reveal animation).
+  // Build enemyAttack with stonesPlayed[] (chain order for display)
+  // and perTileDamage[] (play order, matching the reveal animation).
   const stonesPlayed = enemyTilesPlayed.map(t => ({ leftPip: t.stone.leftPip, rightPip: t.stone.rightPip }));
-  // Junction contributions per tile: stones[0] = 0, stones[i>0] = leftDisplayPip × 2.
-  // enemyTilesPlayed is in chain order (orderedTiles); map to play order by tile ID.
-  const junctionByTileId = new Map<string, number>();
-  if (enemyTilesPlayed.length > 0) junctionByTileId.set(enemyTilesPlayed[0].id, 0);
-  for (let i = 1; i < enemyTilesPlayed.length; i++) {
-    const t = enemyTilesPlayed[i];
-    const leftDisplayPip = t.flipped ? t.stone.rightPip : t.stone.leftPip;
-    junctionByTileId.set(t.id, leftDisplayPip * 2);
-  }
+
   const enemyTilesInPlayOrder = board.toJSON().tiles.filter(
     t => t.turnNumber === current && t.playedBy === 'enemy'
   );
-  const perTileDamage = enemyTilesInPlayOrder.map(t => junctionByTileId.get(t.id) ?? 0);
+  const perTileDamage = board.perTileDamageForTurn(current, 'enemy');
 
   const response: EndTurnResponse = {
     playerState,

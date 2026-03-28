@@ -123,6 +123,47 @@ export class Board {
     return sum;
   }
 
+  /**
+   * Per-tile damage contribution in **play order** (insertion order), suitable for
+   * driving a progressive damage counter during the reveal animation.
+   *
+   * Each tile is credited with the junction it CREATED at the moment it was placed:
+   *   right-side: tile.leftDisplayPip × 2  (connected to whatever was on its left)
+   *               → 0 if the left-chain-neighbor is a later-placed tile from this turn
+   *                 (means the board was empty/left-open was filled afterwards)
+   *   left-side:  rightNeighbor.leftDisplayPip × 2  (old leftmost tile shifted right)
+   */
+  perTileDamageForTurn(turnNumber: number, playedBy: 'player' | 'enemy'): number[] {
+    const playOrderTiles = this._tiles.filter(
+      t => t.turnNumber === turnNumber && t.playedBy === playedBy
+    );
+    if (playOrderTiles.length === 0) return [];
+
+    const playOrderIdx = new Map<string, number>();
+    playOrderTiles.forEach((t, i) => playOrderIdx.set(t.id, i));
+
+    const chainIdxMap = new Map<string, number>();
+    this._orderedTiles.forEach((t, i) => {
+      if (playOrderIdx.has(t.id)) chainIdxMap.set(t.id, i);
+    });
+
+    const ldp = (t: BoardTile) => (t.flipped ? t.stone.rightPip : t.stone.leftPip);
+
+    return playOrderTiles.map(t => {
+      const ci = chainIdxMap.get(t.id)!;
+      if (t.side === 'right') {
+        const left = this._orderedTiles[ci - 1];
+        if (!left) return 0;
+        // Left neighbor is a later-placed tile from this turn → board was empty at placement.
+        if (playOrderIdx.has(left.id) && playOrderIdx.get(left.id)! > playOrderIdx.get(t.id)!) return 0;
+        return ldp(t) * 2;
+      } else {
+        const right = this._orderedTiles[ci + 1];
+        return right ? ldp(right) * 2 : 0;
+      }
+    });
+  }
+
   /** Build a Chain from every tile on the board (all turns, all players, in chain order). */
   toChain(): Chain {
     const placed: PlacedStone[] = this._orderedTiles.map(tile => ({

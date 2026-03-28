@@ -40,6 +40,50 @@ describe('Damage scenario: active junctions (cross-turn connections count)', () 
   });
 });
 
+describe('perTileDamageForTurn: progressive damage display weights', () => {
+  it('two right-side tiles: first tile 0, second tile gets the junction', () => {
+    const b = new Board();
+    b.playStone(stone(2, 4), 'right', 'enemy', 1);
+    b.playStone(stone(4, 1), 'right', 'enemy', 1);
+    // Chain: [2|4]-[4|1]. Junction at pip 4 → [4|1].leftDisplayPip × 2 = 4×2=8
+    expect(b.perTileDamageForTurn(1, 'enemy')).toEqual([0, 8]);
+  });
+
+  it('right then left: RIGHT tile gets 0 (was first on empty board), LEFT tile gets the junction', () => {
+    // This was the bug: old code gave [8, 0] (showed full dmg at first reveal)
+    const b = new Board();
+    b.playStone(stone(2, 4), 'right', 'enemy', 1); // play order 0
+    b.playStone(stone(2, 3), 'left', 'enemy', 1);  // play order 1 — connects at leftPip=2
+    // Chain order: [[2|3], [2|4]]. rightNeighbor of [2|3] = [2|4], ldp([2|4])=2 (flipped=false,leftPip=2)
+    // Play order: [[2|4], [2|3]]
+    // [2|4] (right, play=0): left neighbor in chain = [2|3] which was placed AFTER → 0
+    // [2|3] (left, play=1): right neighbor = [2|4]. ldp([2|4])=2. contrib = 2×2=4
+    expect(b.perTileDamageForTurn(1, 'enemy')).toEqual([0, 4]);
+  });
+
+  it('left then right: LEFT tile connects to pre-existing, RIGHT tile connects to pre-existing too', () => {
+    // Pre-existing player tile [3|5] from turn 1
+    const b = new Board();
+    b.playStone(stone(3, 5), 'right', 'player', 1);
+    // Enemy turn 2: play [5|2] right, then [3|1] left
+    b.playStone(stone(5, 2), 'right', 'enemy', 2); // connects at pip 5 → ldp=5 → contrib=10
+    b.playStone(stone(3, 1), 'left', 'enemy', 2);  // connects at pre-existing [3|5].ldp=3 → contrib=6
+    // play order: [[5|2], [3|1]]
+    expect(b.perTileDamageForTurn(2, 'enemy')).toEqual([10, 6]);
+  });
+
+  it('sum of perTileDamage equals activeDamageForTurn', () => {
+    const b = new Board();
+    b.playStone(stone(3, 5), 'right', 'player', 1);
+    b.playStone(stone(5, 2), 'right', 'enemy', 2);
+    b.playStone(stone(2, 6), 'right', 'enemy', 2);
+    b.playStone(stone(3, 1), 'left', 'enemy', 2);
+    const perTile = b.perTileDamageForTurn(2, 'enemy');
+    const sum = perTile.reduce((a, v) => a + v, 0);
+    expect(sum).toBe(b.activeDamageForTurn(2, 'enemy'));
+  });
+});
+
 describe('Damage scenario: N-1 junction formula', () => {
   it('enemy [2|4]-[4|1]: one junction at pip 4 → rawDamage = 8', () => {
     const b = new Board();
