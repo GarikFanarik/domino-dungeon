@@ -11,7 +11,6 @@ import { RelicSelectionScreen } from './screens/RelicSelectionScreen';
 import { RunSummaryScreen } from './screens/RunSummaryScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { RelicBar } from './components/RelicBar';
-import { useViewportScale } from './hooks/useViewportScale';
 import './App.css';
 
 const RELIC_BAR_SCREENS = new Set(['dungeon-map', 'combat', 'shop', 'rest', 'event', 'relic-selection']);
@@ -43,26 +42,12 @@ function AppContent() {
   );
 }
 
-const DESIGN_W = 1920;
-const DESIGN_H = 1080;
-
 export default function App() {
   const canvasRef = useRef<HTMLDivElement>(null);
-  const scale = useViewportScale();
-  const offsetX = (window.innerWidth - DESIGN_W * scale) / 2;
-  const offsetY = (window.innerHeight - DESIGN_H * scale) / 2;
 
   return (
     <GameProvider>
-      <div
-        ref={canvasRef}
-        className="game-canvas"
-        style={{
-          zoom: scale,
-          left: `${offsetX}px`,
-          top: `${offsetY}px`,
-        }}
-      >
+      <div ref={canvasRef} className="game-canvas">
         <AppContent />
       </div>
     </GameProvider>

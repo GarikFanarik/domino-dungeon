@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGame } from '../context/GameContext';
-import { useViewportScale } from '../hooks/useViewportScale';
 import { DominoStone } from '../components/DominoStone';
 import { DominoBoard } from '../components/DominoBoard';
 import { EnemyHand } from '../components/EnemyHand';
@@ -135,7 +134,6 @@ function StatusBadges({ status }: { status: EnemyStatus }) {
 
 export function CombatScreen({ runId }: Props) {
   const { navigate, flashRelics } = useGame();
-  const scale = useViewportScale();
   const [combat, setCombat] = useState<CombatState | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -619,8 +617,8 @@ export function CombatScreen({ runId }: Props) {
         <div
           className={`drag-overlay${dragState.invalid ? ' drag-overlay--invalid' : ''}`}
           style={{
-            left: (dragState.x - dragState.offsetX) / scale,
-            top:  (dragState.y - dragState.offsetY) / scale,
+            left: dragState.x - dragState.offsetX,
+            top:  dragState.y - dragState.offsetY,
           }}
         >
           <DominoStone stone={dragDisplayStone} horizontal />
