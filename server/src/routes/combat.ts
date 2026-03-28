@@ -571,8 +571,13 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     // non-fatal in tests
   }
 
-  // Build enemyAttack with stonesPlayed[]
+  // Build enemyAttack with stonesPlayed[] (orderedTiles order for chain display)
+  // and perTileDamage[] (insertion/play order, matching the reveal animation).
   const stonesPlayed = enemyTilesPlayed.map(t => ({ leftPip: t.stone.leftPip, rightPip: t.stone.rightPip }));
+  const enemyTilesInPlayOrder = board.toJSON().tiles.filter(
+    t => t.turnNumber === current && t.playedBy === 'enemy'
+  );
+  const perTileDamage = enemyTilesInPlayOrder.map(t => tileConnectingPip(t) * 2);
 
   const response: EndTurnResponse = {
     playerState,
@@ -583,7 +588,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
       ? { enemySkipped: { reason: enemySkipReason } }
       : {
           enemyAttack: enemyTilesPlayed.length > 0
-            ? { stonesPlayed, rawDamage: rawEnemyDamage, armorBlocked, damage: netEnemyDamage, effects: [] }
+            ? { stonesPlayed, perTileDamage, rawDamage: rawEnemyDamage, armorBlocked, damage: netEnemyDamage, effects: [] }
             : undefined,
         }),
     dotDamage: { burn: burnDamage, poison: poisonDamage },

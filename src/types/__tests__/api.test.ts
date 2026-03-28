@@ -94,6 +94,7 @@ describe('API types', () => {
       dotDamage: { burn: 0, poison: 0 },
       enemyAttack: {
         stonesPlayed: [{ leftPip: 2, rightPip: 3 }],
+        perTileDamage: [10],
         rawDamage: 5,
         armorBlocked: 0,
         damage: 5,

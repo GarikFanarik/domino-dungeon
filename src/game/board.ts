@@ -90,10 +90,12 @@ export class Board {
 
   toChainForTurn(turnNumber: number, playedBy: 'player' | 'enemy'): Chain {
     const tiles = this.getTilesForTurn(turnNumber, playedBy);
+    // tile.flipped already encodes the display orientation (flipped ? rightPip : leftPip is
+    // the left-face pip), so junctionValues correctly gets each stone's left-display pip.
     const placed: PlacedStone[] = tiles.map(tile => ({
       stone: tile.stone,
       side: 'right' as const,
-      flipped: tile.side === 'right' ? tile.flipped : !tile.flipped,
+      flipped: tile.flipped,
     }));
     return Chain.fromPlacedStones(placed);
   }

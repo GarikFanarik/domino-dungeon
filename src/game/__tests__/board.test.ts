@@ -168,14 +168,14 @@ describe('Board.toChainForTurn', () => {
     expect(chain.stones[1].flipped).toBe(true);
   });
 
-  it('left-end tile: chainFlipped = !tile.flipped (inverted)', () => {
+  it('left-end tile: chainFlipped = tile.flipped (same as right, no inversion)', () => {
     const b = new Board();
     b.playStone(stone(2, 4), 'right', 'player', 1); // leftOpen=2
     b.playStone(stone(0, 2), 'left', 'player', 1);  // rightPip=2 matches → flipped=false
     const chain = b.toChainForTurn(1, 'player');
-    // Left tile: tile.flipped=false → chainFlipped=true (inverted)
-    // junction pip = rightPip of stone(0,2) = 2 (via chain.flipped=true → rightPip)
-    expect(chain.stones[0].flipped).toBe(true);
+    // Left tile: tile.flipped=false → chainFlipped=false (direct copy)
+    // left display pip = leftPip=0; junction with stones[1] is at tile[1].leftDisplayPip=2
+    expect(chain.stones[0].flipped).toBe(false);
   });
 
   it('produces correct junction damage for right-end play', () => {
@@ -206,6 +206,32 @@ describe('Board.toChainForTurn', () => {
     const chain = b.toChainForTurn(1, 'player');
     expect(chain.leftOpen).toBeNull();
     expect(chain.rightOpen).toBeNull();
+  });
+
+  it('left-end tile: chainFlipped = tile.flipped (direct copy, same as right)', () => {
+    const b = new Board();
+    b.playStone(stone(2, 4), 'right', 'player', 1); // leftOpen=2
+    b.playStone(stone(0, 2), 'left', 'player', 1);  // rightPip=2 matches → flipped=false
+    const chain = b.toChainForTurn(1, 'player');
+    // Left tile at stones[0]: flipped=false, left display=leftPip=0, right display=rightPip=2
+    expect(chain.stones[0].flipped).toBe(false);
+  });
+
+  it('3-tile mixed: right then two left — all junctions counted correctly', () => {
+    // tile1[4|5] right, tile2[5|4] left (rightPip=4 matches leftOpen=4, flipped=false),
+    // tile3[4|5] left (rightPip=5 matches new leftOpen=5, flipped=false)
+    // orderedTiles: [tile3, tile2, tile1]
+    // junction tile3↔tile2 = pip 5 (tile3 rightDisplay=5, tile2 leftDisplay=5)
+    // junction tile2↔tile1 = pip 4 (tile2 rightDisplay=4, tile1 leftDisplay=4)
+    // expected damage = (5+4)*2 = 18
+    const { calculateDamage } = require('../damage');
+    const b = new Board();
+    b.playStone(stone(4, 5), 'right', 'player', 1);
+    b.playStone(stone(5, 4), 'left', 'player', 1);
+    b.playStone(stone(4, 5), 'left', 'player', 1);
+    const chain = b.toChainForTurn(1, 'player');
+    const dmg = calculateDamage(chain, {});
+    expect(dmg.finalDamage).toBe(18);
   });
 });
 

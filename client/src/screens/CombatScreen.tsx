@@ -344,16 +344,21 @@ export function CombatScreen({ runId }: Props) {
           playerHand: data.hand ?? prev.playerHand,
         } : prev);
         // Progressive damage counter — same timing as DominoBoard tile reveal.
+        // Use per-tile raw contributions to show accurate incremental damage.
         const totalDamage = data.enemyAttack?.damage ?? 0;
-        const numEnemyTiles = data.enemyAttack?.stonesPlayed?.length ?? 0;
+        const perTile: number[] = data.enemyAttack?.perTileDamage ?? [];
+        const numEnemyTiles = perTile.length || (data.enemyAttack?.stonesPlayed?.length ?? 0);
         damageTimerRef.current.forEach(clearTimeout);
         damageTimerRef.current = [];
         if (numEnemyTiles > 0 && totalDamage > 0) {
+          const totalRaw = perTile.reduce((s, d) => s + d, 0) || numEnemyTiles;
+          let cumRaw = 0;
           for (let i = 0; i < numEnemyTiles; i++) {
+            cumRaw += perTile[i] ?? (totalRaw / numEnemyTiles);
             const isLast = i === numEnemyTiles - 1;
+            const display = isLast ? totalDamage : Math.round(totalDamage * cumRaw / totalRaw);
             const t = setTimeout(() => {
-              // Last tile always shows the exact total; intermediates show a partial.
-              setEnemyDamageDisplay(isLast ? totalDamage : Math.round(totalDamage * (i + 1) / numEnemyTiles));
+              setEnemyDamageDisplay(display);
             }, 3000 + i * 1200);
             damageTimerRef.current.push(t);
           }

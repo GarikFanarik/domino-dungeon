@@ -48,6 +48,7 @@ export interface EndTurnResponse {
   combatResult: 'ongoing' | 'player-won' | 'player-died';
   enemyAttack?: {
     stonesPlayed: { leftPip: number; rightPip: number }[];
+    perTileDamage: number[];   // raw (pre-armor) damage contribution per tile, in play order
     rawDamage: number;
     armorBlocked: number;
     damage: number;
