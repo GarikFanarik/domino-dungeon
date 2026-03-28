@@ -10,6 +10,36 @@ function stone(l: number, r: number) {
   return { id: `${l}-${r}-${Math.random()}`, leftPip: l, rightPip: r, element: null };
 }
 
+describe('Damage scenario: active junctions (cross-turn connections count)', () => {
+  it('enemy [2|2] turn 1, player [2|3] turn 2: junction at pip 2 → 4 dmg', () => {
+    const b = new Board();
+    b.playStone(stone(2, 2), 'right', 'enemy', 1);
+    b.playStone(stone(2, 3), 'right', 'player', 2);
+    expect(b.activeDamageForTurn(2, 'player')).toBe(4); // junction pip=2, 2×2=4
+  });
+
+  it('enemy [3|5] turn 1, player [5|4] turn 2 connecting both sides: two junctions (5, 4) → 18 dmg', () => {
+    const b = new Board();
+    b.playStone(stone(3, 5), 'right', 'enemy', 1);
+    b.playStone(stone(5, 4), 'right', 'player', 2);
+    b.playStone(stone(4, 2), 'right', 'enemy', 2);
+    // active junctions for player turn 2: (5,4)→5×2=10 and (4,2)→4×2=8 but [4|2] is enemy not player
+    // junction pip 5 (enemy-t1 / player-t2): active; junction pip 4 (player-t2 / enemy-t2): active (player tile on left)
+    expect(b.activeDamageForTurn(2, 'player')).toBe(18); // (5+4)×2=18
+  });
+
+  it('pre-existing enemy junctions do NOT carry over to player active damage', () => {
+    const b = new Board();
+    // Two enemy tiles on turn 1 create a junction at pip 5
+    b.playStone(stone(3, 5), 'right', 'enemy', 1);
+    b.playStone(stone(5, 2), 'right', 'enemy', 1);
+    // Player plays one tile on turn 2 connecting at pip 2
+    b.playStone(stone(2, 6), 'right', 'player', 2);
+    // Player's active damage = only junction at pip 2 (NOT the existing pip-5 junction)
+    expect(b.activeDamageForTurn(2, 'player')).toBe(4); // only 2×2=4
+  });
+});
+
 describe('Damage scenario: N-1 junction formula', () => {
   it('enemy [2|4]-[4|1]: one junction at pip 4 → rawDamage = 8', () => {
     const b = new Board();

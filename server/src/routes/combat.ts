@@ -174,8 +174,7 @@ router.post('/:runId/combat/play', async (req: Request, res: Response) => {
     // non-fatal in tests
   }
 
-  const playerChain = board.toChainForTurn(session.turnNumber, 'player');
-  const previewDamage = calculateDamage(playerChain, {} as any).finalDamage;
+  const previewDamage = board.activeDamageForTurn(session.turnNumber, 'player');
 
   const response: PlayStoneResponse = {
     board: board.toJSON(),
@@ -284,6 +283,9 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
   const relics = session.relics ?? [];
 
   // Steps 1-4: player damage
+  // Element analysis uses only current-turn player tiles (elements come from stones played this turn).
+  // Base damage uses active junctions: cross-turn connections to pre-existing tiles count,
+  // but pre-existing junctions between other tiles do not (prevents runaway escalation).
   const playerChain = board.toChainForTurn(current, 'player');
 
   // 1. Analyse chain for element effects
@@ -292,8 +294,8 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
   // 2. Apply chain effects (PebbleCharm, IronSkin, StormAmulet wired inside)
   const effects = applyChainEffects(analysis, playerState, enemy, relics);
 
-  // 3. Calculate player's damage from chain
-  let chainDamage = calculateDamage(playerChain, {} as any, effects.lightningBonus).finalDamage;
+  // 3. Calculate player's damage from active junctions (cross-turn connections included)
+  let chainDamage = Math.floor(board.activeDamageForTurn(current, 'player') + (effects.lightningBonus ?? 0));
 
   // Steps 5-10: relic bonuses
   const gloveTiles = board.getTilesForTurn(current, 'player');
@@ -449,9 +451,8 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     session.enemyHand = ai.playTurn(board, (session.enemyHand ?? []) as any[], current) as any[];
 
     enemyTilesPlayed = board.getTilesForTurn(current, 'enemy');
-    // Use the same N-1 junction formula as player damage.
-    const enemyChain = board.toChainForTurn(current, 'enemy');
-    rawEnemyDamage = calculateDamage(enemyChain, {} as any).finalDamage;
+    // Active junctions: cross-turn connections to player tiles count, prior-turn junctions don't.
+    rawEnemyDamage = board.activeDamageForTurn(current, 'enemy');
 
     // FrostbiteRing: each slow stack reduces enemy damage by 30% instead of 20%
     const slowPct = relics.includes(RelicType.FrostbiteRing) ? 0.3 : 0.2;

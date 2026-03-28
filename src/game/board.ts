@@ -100,6 +100,39 @@ export class Board {
     return Chain.fromPlacedStones(placed);
   }
 
+  /**
+   * Sum the junction damage for all junctions where at least one of the two adjacent tiles
+   * was played by `playedBy` on `turnNumber`. This counts cross-turn connections (e.g. a
+   * player tile that extends an enemy tile from a prior turn) without accumulating all
+   * historical junctions (which would cause runaway damage escalation).
+   *
+   * Junction damage formula: leftDisplayPip of the right tile × 2  (same as calculateDamage).
+   */
+  activeDamageForTurn(turnNumber: number, playedBy: 'player' | 'enemy'): number {
+    let sum = 0;
+    for (let i = 0; i < this._orderedTiles.length - 1; i++) {
+      const a = this._orderedTiles[i];
+      const b = this._orderedTiles[i + 1];
+      const aIsActive = a.turnNumber === turnNumber && a.playedBy === playedBy;
+      const bIsActive = b.turnNumber === turnNumber && b.playedBy === playedBy;
+      if (aIsActive || bIsActive) {
+        const pip = b.flipped ? b.stone.rightPip : b.stone.leftPip;
+        sum += pip * 2;
+      }
+    }
+    return sum;
+  }
+
+  /** Build a Chain from every tile on the board (all turns, all players, in chain order). */
+  toChain(): Chain {
+    const placed: PlacedStone[] = this._orderedTiles.map(tile => ({
+      stone: tile.stone,
+      side: 'right' as const,
+      flipped: tile.flipped,
+    }));
+    return Chain.fromPlacedStones(placed);
+  }
+
   toJSON(): BoardJSON {
     return {
       tiles: [...this._tiles],
