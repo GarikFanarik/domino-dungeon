@@ -1,20 +1,25 @@
+import { DominoStone } from './DominoStone';
 import './EnemyHand.css';
 
-interface Props {
-  count: number;
+interface Stone {
+  id: string;
+  leftPip: number;
+  rightPip: number;
+  element: string | null;
 }
 
-export function EnemyHand({ count }: Props) {
+interface Props {
+  tiles: Stone[];
+}
+
+export function EnemyHand({ tiles }: Props) {
+  if (tiles.length === 0) return null;
   return (
     <div className="enemy-hand">
-      <div className="enemy-hand-label">Enemy Hand <span className="enemy-hand-count">{count}</span></div>
+      <div className="enemy-hand-label">Enemy Hand <span className="enemy-hand-count">{tiles.length}</span></div>
       <div className="enemy-hand-tiles">
-        {Array.from({ length: count }).map((_, i) => (
-          <div key={i} className="enemy-hand-tile" aria-label="hidden enemy tile">
-            <div className="enemy-hand-tile-half" />
-            <div className="enemy-hand-tile-divider" />
-            <div className="enemy-hand-tile-half" />
-          </div>
+        {tiles.map((stone) => (
+          <DominoStone key={stone.id} stone={stone} horizontal disabled />
         ))}
       </div>
     </div>

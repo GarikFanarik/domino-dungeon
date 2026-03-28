@@ -3,7 +3,6 @@ import { useGame } from '../context/GameContext';
 import { DominoStone } from '../components/DominoStone';
 import { DominoBoard } from '../components/DominoBoard';
 import { EnemyHand } from '../components/EnemyHand';
-import { relicImage } from '../utils/relicImage';
 import type { BoardJSON, BoardTile } from '../../../src/game/board';
 import './CombatScreen.css';
 
@@ -40,7 +39,7 @@ interface CombatState {
   enemy: Enemy;
   playerHand: Stone[];
   board: BoardJSON;
-  enemyHandCount: number;
+  enemyHand: Stone[];
   playerState: PlayerState;
   turnNumber: number;
   phase: 'player-turn' | 'enemy-turn' | 'resolving';
@@ -432,23 +431,8 @@ export function CombatScreen({ runId }: Props) {
         </div>
       )}
 
-      {/* ── Relic bar (centered top) ── */}
-      {combat.playerState.relics && combat.playerState.relics.length > 0 && (
-        <div className="combat-relic-bar">
-          {combat.playerState.relics.map(id => {
-            const img = relicImage(id);
-            return img
-              ? <img key={id} src={img} alt={id} className="combat-relic-icon" title={id} />
-              : <span key={id} className="combat-relic-icon combat-relic-icon--fallback">✨</span>;
-          })}
-        </div>
-      )}
-
       {/* ── Main area: board (centered) + enemy box (absolute right) ── */}
       <div className="combat-main">
-        <div className="combat-enemy-hand-zone">
-          <EnemyHand count={combat.enemyHandCount} />
-        </div>
         <div className="combat-board-zone" ref={boardZoneRef}>
           <DominoBoard
             board={combat.board}
@@ -485,6 +469,7 @@ export function CombatScreen({ runId }: Props) {
             </div>
             <div className="hud-hp-label">{combat.enemy.hp.current} / {combat.enemy.hp.max} HP</div>
             <StatusBadges status={combat.enemy.status} />
+            <EnemyHand tiles={combat.enemyHand} />
             <div className="sprite-wrapper">
               <img
                 className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}

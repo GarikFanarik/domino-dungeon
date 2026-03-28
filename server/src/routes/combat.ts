@@ -89,7 +89,7 @@ router.get('/:runId/combat', async (req: Request, res: Response) => {
     },
     playerHand: session.hand.map(toGameStone),
     board: session.board,
-    enemyHandCount: (session.enemyHand ?? []).length,
+    enemyHand: (session.enemyHand ?? []).map(toGameStone),
     playerState: {
       hp: { current: session.playerHp ?? 80, max: session.playerMaxHp ?? 80 },
       armor: session.playerArmor ?? 0,

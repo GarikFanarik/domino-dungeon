@@ -26,7 +26,7 @@ export interface CombatStateResponse {
   enemy: Enemy;
   playerHand: Stone[];
   board: BoardJSON;
-  enemyHandCount: number;
+  enemyHand: Stone[];
   playerState: PlayerState;
   turnNumber: number;
   phase: 'player-turn' | 'enemy-turn' | 'resolving';

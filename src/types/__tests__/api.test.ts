@@ -39,7 +39,7 @@ describe('API types', () => {
       enemy: {} as any,
       playerHand: [],
       board: {} as any,
-      enemyHandCount: 0,
+      enemyHand: [],
       playerState: {} as any,
       turnNumber: 1,
       phase: 'player-turn',
