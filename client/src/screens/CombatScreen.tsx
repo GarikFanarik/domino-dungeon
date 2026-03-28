@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { HeroSprite, type HeroAnim } from '../components/HeroSprite';
 import { useViewportScale } from '../hooks/useViewportScale';
 import { DominoStone } from '../components/DominoStone';
 import { DominoBoard } from '../components/DominoBoard';
@@ -134,7 +135,7 @@ function StatusBadges({ status }: { status: EnemyStatus }) {
 }
 
 export function CombatScreen({ runId }: Props) {
-  const { navigate, flashRelics } = useGame();
+  const { navigate, flashRelics, triggeredRelics } = useGame();
   const scale = useViewportScale();
   const [combat, setCombat] = useState<CombatState | null>(null);
   const [message, setMessage] = useState('');
@@ -397,6 +398,7 @@ export function CombatScreen({ runId }: Props) {
 
   const isPlayerTurn = combat.phase === 'player-turn';
   const swapsLeft = combat.swapsPerTurn - combat.swapsUsed;
+  const heroAnim: HeroAnim = loading ? 'attack' : triggeredRelics.length > 0 ? 'magic-cast' : 'idle';
 
   const bgImage = `/assets/combat/background/arena-act${combat.act}.jpg`;
 
@@ -499,11 +501,7 @@ export function CombatScreen({ runId }: Props) {
       {/* ── Bottom: hero + hand ── */}
       <div className="combat-bottom">
         <div className="combat-player-zone">
-          <img
-            className={`hero-sprite${playerHit ? ' hero-sprite--hit' : ''}`}
-            src="/assets/combat/hero/hero.png"
-            alt="Hero"
-          />
+          <HeroSprite anim={heroAnim} hit={playerHit} />
           <div className="hud-hp-track hud-hp-track--player">
             <div
               className="hud-hp-fill"
