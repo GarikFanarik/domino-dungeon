@@ -148,6 +148,7 @@ export function CombatScreen({ runId }: Props) {
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [prevBoardTiles, setPrevBoardTiles] = useState<BoardTile[] | null>(null);
   const [enemyDamageDisplay, setEnemyDamageDisplay] = useState<number | null>(null);
+  const [turnBanner, setTurnBanner] = useState<'player' | 'enemy' | null>(null);
   /** HP to show during the board animation — freezes at the pre-damage value until onAnimationDone. */
   const [displayedPlayerHP, setDisplayedPlayerHP] = useState<PlayerState['hp'] | null>(null);
 
@@ -331,6 +332,9 @@ export function CombatScreen({ runId }: Props) {
       } else {
         setEnemyHit(true);
         setTimeout(() => setEnemyHit(false), 450);
+        // Show "Enemy Turn" banner, dismiss after 1.8s
+        setTurnBanner('enemy');
+        setTimeout(() => setTurnBanner(null), 1800);
         // Freeze HP bar at current (pre-damage) value — it will unfreeze in onAnimationDone.
         setDisplayedPlayerHP(combat.playerState.hp);
         // Update full combat state immediately (playerState now has new HP in state,
@@ -466,6 +470,9 @@ export function CombatScreen({ runId }: Props) {
                   setTimeout(() => setPlayerHit(false), 450);
                 }
               }
+              // Show "Your Turn" banner after enemy sequence ends
+              setTurnBanner('player');
+              setTimeout(() => setTurnBanner(null), 1800);
             }}
           />
         </div>
@@ -583,6 +590,13 @@ export function CombatScreen({ runId }: Props) {
           style={damageStyle(enemyDamageDisplay, 'enemy')}
         >
           -{enemyDamageDisplay}
+        </div>
+      )}
+
+      {/* ── Turn banner ── */}
+      {turnBanner && (
+        <div key={turnBanner} className={`turn-banner turn-banner--${turnBanner}`}>
+          {turnBanner === 'player' ? 'Your Turn' : 'Enemy Turn'}
         </div>
       )}
 

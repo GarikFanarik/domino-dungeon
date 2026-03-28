@@ -357,6 +357,49 @@
   100% { opacity: 0; }
 }
 
+/* ── Turn banner ── */
+.turn-banner {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 50;
+
+  font-family: 'Cinzel Decorative', Georgia, serif;
+  font-weight: 900;
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+
+  animation: turn-banner-anim 1.8s ease forwards;
+}
+
+.turn-banner--player {
+  color: #ffe87a;
+  text-shadow:
+    0 0 30px rgba(255, 210, 60, 0.9),
+    0 0 60px rgba(255, 180, 20, 0.6),
+    0 0 4px #fff8;
+}
+
+.turn-banner--enemy {
+  color: #d88aff;
+  text-shadow:
+    0 0 30px rgba(180, 60, 255, 0.9),
+    0 0 60px rgba(140, 30, 220, 0.6),
+    0 0 4px #fff5;
+}
+
+@keyframes turn-banner-anim {
+  0%   { opacity: 0; transform: scale(0.75) translateY(18px); }
+  18%  { opacity: 1; transform: scale(1.04) translateY(-3px); }
+  30%  { transform: scale(1) translateY(0); }
+  65%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(0.92) translateY(-10px); }
+}
+
 .drag-label {
   font-size: 0.75rem;
   font-weight: 700;
