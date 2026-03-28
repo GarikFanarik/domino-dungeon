@@ -95,14 +95,14 @@
 }
 
 .map-node {
-  width: 104px;
-  height: 104px;
+  width: clamp(60px, 9vmin, 104px);
+  height: clamp(60px, 9vmin, 104px);
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 48px;
+  font-size: clamp(28px, 4.5vmin, 48px);
   line-height: 1;
   border: 3px solid;
   background: rgba(8, 6, 4, 0.8);
@@ -114,7 +114,7 @@
 }
 
 .map-node-label {
-  font-size: 16px;
+  font-size: clamp(9px, 1.6vmin, 16px);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
