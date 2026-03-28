@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGame } from '../context/GameContext';
-import { HeroSprite, type HeroAnim } from '../components/HeroSprite';
 import { useViewportScale } from '../hooks/useViewportScale';
 import { DominoStone } from '../components/DominoStone';
 import { DominoBoard } from '../components/DominoBoard';
@@ -135,7 +134,7 @@ function StatusBadges({ status }: { status: EnemyStatus }) {
 }
 
 export function CombatScreen({ runId }: Props) {
-  const { navigate, flashRelics, triggeredRelics } = useGame();
+  const { navigate, flashRelics } = useGame();
   const scale = useViewportScale();
   const [combat, setCombat] = useState<CombatState | null>(null);
   const [message, setMessage] = useState('');
@@ -398,7 +397,6 @@ export function CombatScreen({ runId }: Props) {
 
   const isPlayerTurn = combat.phase === 'player-turn';
   const swapsLeft = combat.swapsPerTurn - combat.swapsUsed;
-  const heroAnim: HeroAnim = loading ? 'attack' : triggeredRelics.length > 0 ? 'magic-cast' : 'idle';
 
   const bgImage = `/assets/combat/background/arena-act${combat.act}.jpg`;
 
@@ -489,11 +487,18 @@ export function CombatScreen({ runId }: Props) {
             </div>
             <div className="hud-hp-label">{combat.enemy.hp.current} / {combat.enemy.hp.max} HP</div>
             <StatusBadges status={combat.enemy.status} />
-            <img
-              className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
-              src={getEnemySprite(combat.enemy)}
-              alt={combat.enemy.name}
-            />
+            <div className="sprite-wrapper">
+              <img
+                className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
+                src={getEnemySprite(combat.enemy)}
+                alt={combat.enemy.name}
+              />
+              {enemyHit && (
+                <div className="slash-overlay slash-overlay--player">
+                  <span /><span /><span />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -501,7 +506,18 @@ export function CombatScreen({ runId }: Props) {
       {/* ── Bottom: hero + hand ── */}
       <div className="combat-bottom">
         <div className="combat-player-zone">
-          <HeroSprite anim={heroAnim} hit={playerHit} />
+          <div className="sprite-wrapper">
+            <img
+            className={`hero-sprite${playerHit ? ' hero-sprite--hit' : ''}`}
+            src="/assets/combat/hero/hero.png"
+            alt="Hero"
+          />
+            {playerHit && (
+              <div className="slash-overlay slash-overlay--enemy">
+                <span /><span /><span />
+              </div>
+            )}
+          </div>
           <div className="hud-hp-track hud-hp-track--player">
             <div
               className="hud-hp-fill"

@@ -188,9 +188,11 @@
 }
 
 .hero-sprite {
-  display: block;
   width: 300px;
   height: 300px;
+  object-fit: contain;
+  animation: sprite-breathe 3.3s ease-in-out infinite;
+  animation-delay: -1.6s;
 }
 
 .hero-sprite--hit {
