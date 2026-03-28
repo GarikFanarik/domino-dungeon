@@ -57,6 +57,7 @@ export interface EndTurnResponse {
   enemySkipped?: { reason: 'stunned' | 'frozen' };
   dotDamage: { burn: number; poison: number };   // required; defaults { burn:0, poison:0 }
   hand?: Stone[];
+  enemyHand?: Stone[];
   board?: BoardJSON;
   goldEarned?: number;
   stoneRewards?: Array<{ element: string; leftPip: number; rightPip: number }>;

@@ -609,6 +609,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
         }),
     dotDamage: { burn: burnDamage, poison: poisonDamage },
     hand: session.hand.map(toGameStone),
+    enemyHand: session.enemyHand.map(toGameStone),
   };
 
   res.json(response);

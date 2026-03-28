@@ -343,6 +343,7 @@ export function CombatScreen({ runId }: Props) {
           board: data.board ?? prev.board,
           swapsUsed: 0,
           playerHand: data.hand ?? prev.playerHand,
+          enemyHand: data.enemyHand ?? prev.enemyHand,
         } : prev);
         // Progressive damage counter — same timing as DominoBoard tile reveal.
         // Use per-tile raw contributions to show accurate incremental damage.
