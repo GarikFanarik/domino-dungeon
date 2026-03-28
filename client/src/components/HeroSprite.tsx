@@ -41,13 +41,19 @@ export function HeroSprite({ anim, hit }: Props) {
   return (
     <div
       className={`hero-sprite${hit ? ' hero-sprite--hit' : ''}`}
-      style={{
-        width: FRAME_PX,
-        height: FRAME_PX,
-        backgroundImage: `url(${SHEET[anim]})`,
-        backgroundSize: `${sheetPx}px ${sheetPx}px`,
-        backgroundPosition: `-${col * FRAME_PX}px -${row * FRAME_PX}px`,
-      }}
-    />
+      style={{ width: FRAME_PX, height: FRAME_PX, overflow: 'hidden', position: 'relative' }}
+    >
+      <img
+        src={SHEET[anim]}
+        alt=""
+        style={{
+          position: 'absolute',
+          left: -(col * FRAME_PX),
+          top: -(row * FRAME_PX),
+          width: sheetPx,
+          height: sheetPx,
+        }}
+      />
+    </div>
   );
 }
