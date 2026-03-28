@@ -34,6 +34,13 @@ describe('Relic acquisition', () => {
     expect(run.relics).toContain(offer[2].id);
   });
 
+  test('different relicOfferCount seeds produce different offers', () => {
+    const seed = 'run-seed-abc';
+    const o1 = generateRelicOffer(1, `${seed}-relic-0`);
+    const o2 = generateRelicOffer(1, `${seed}-relic-1`);
+    expect(o1.map(r => r.id)).not.toEqual(o2.map(r => r.id));
+  });
+
   test('act 2+ boss offer has at least 1 Rare+ relic', () => {
     // Run multiple seeds to check the guarantee
     let foundRarePlus = false;

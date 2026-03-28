@@ -17,6 +17,7 @@ export interface Run {
   maxHp: number;
   gold: number;
   relics: string[];
+  relicOfferCount: number;
   completedAt: Date | null;
   createdAt: Date;
 }
@@ -33,6 +34,7 @@ export function startRun(userId: string, seed: string): Run {
     maxHp: 80,
     gold: 0,
     relics: [],
+    relicOfferCount: 0,
     completedAt: null,
     createdAt: new Date(),
   };

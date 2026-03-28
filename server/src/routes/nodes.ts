@@ -266,7 +266,12 @@ router.get('/:runId/relic-offer', async (req: Request, res: Response) => {
     return;
   }
 
-  const offer = generateRelicOffer(state.run.currentAct, state.run.seed);
+  const offerCount = state.run.relicOfferCount ?? 0;
+  state.run.relicOfferCount = offerCount + 1;
+  await saveRunState(runId, state);
+
+  const offerSeed = `${state.run.seed}-relic-${offerCount}`;
+  const offer = generateRelicOffer(state.run.currentAct, offerSeed);
   res.json(offer.map(r => ({ relicId: r.id, name: r.name, rarity: r.rarity, description: r.description })));
 });
 
