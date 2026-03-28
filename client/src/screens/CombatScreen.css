@@ -125,6 +125,49 @@
 }
 
 /* ── Sprites ── */
+.sprite-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.slash-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.slash-overlay span {
+  position: absolute;
+  width: 140%;
+  height: 3px;
+  border-radius: 2px;
+  left: -20%;
+  transform: rotate(-45deg) scaleX(0);
+  transform-origin: left center;
+}
+
+.slash-overlay span:nth-child(1) { top: 30%; animation: slash-draw 0.42s ease-out 0ms   forwards; }
+.slash-overlay span:nth-child(2) { top: 48%; animation: slash-draw 0.42s ease-out 55ms  forwards; }
+.slash-overlay span:nth-child(3) { top: 66%; animation: slash-draw 0.42s ease-out 110ms forwards; }
+
+.slash-overlay--player span {
+  background: linear-gradient(to right, transparent, rgba(255, 230, 100, 0.9), #fff);
+  box-shadow: 0 0 10px rgba(255, 220, 60, 0.9), 0 0 20px rgba(255, 200, 0, 0.5);
+}
+
+.slash-overlay--enemy span {
+  background: linear-gradient(to right, transparent, rgba(255, 80, 50, 0.9), #ff3010);
+  box-shadow: 0 0 10px rgba(255, 40, 0, 0.9), 0 0 20px rgba(220, 0, 0, 0.5);
+}
+
+@keyframes slash-draw {
+  0%   { opacity: 0;   transform: rotate(-45deg) scaleX(0); }
+  20%  { opacity: 1;   transform: rotate(-45deg) scaleX(1); }
+  65%  { opacity: 0.9; transform: rotate(-45deg) scaleX(1); }
+  100% { opacity: 0;   transform: rotate(-45deg) scaleX(1); }
+}
+
 @keyframes sprite-breathe {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-7px); }
@@ -134,6 +177,9 @@
   width: 300px;
   height: 300px;
   object-fit: contain;
+}
+
+.combat-entity-box .sprite-wrapper {
   animation: sprite-breathe 3s ease-in-out infinite;
 }
 
@@ -142,6 +188,7 @@
 }
 
 .hero-sprite {
+  display: block;
   width: 300px;
   height: 300px;
 }
