@@ -153,6 +153,7 @@ export function CombatScreen({ runId }: Props) {
   const combatRef = useRef<CombatState | null>(null);
   const boardZoneRef = useRef<HTMLDivElement>(null);
   const damageTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const pendingEnemyHandRef = useRef<Stone[] | null>(null);
 
   useEffect(() => { combatRef.current = combat; }, [combat]);
 
@@ -343,8 +344,8 @@ export function CombatScreen({ runId }: Props) {
           board: data.board ?? prev.board,
           swapsUsed: 0,
           playerHand: data.hand ?? prev.playerHand,
-          enemyHand: data.enemyHand ?? prev.enemyHand,
         } : prev);
+        if (data.enemyHand) pendingEnemyHandRef.current = data.enemyHand;
         // Progressive damage counter — same timing as DominoBoard tile reveal.
         // Use per-tile raw contributions to show accurate incremental damage.
         const totalDamage = data.enemyAttack?.damage ?? 0;
@@ -457,6 +458,12 @@ export function CombatScreen({ runId }: Props) {
                   setPlayerHit(true);
                   setTimeout(() => setPlayerHit(false), 450);
                 }
+              }
+              // Apply enemy hand update now that animations are done
+              if (pendingEnemyHandRef.current) {
+                const newHand = pendingEnemyHandRef.current;
+                pendingEnemyHandRef.current = null;
+                setCombat(prev => prev ? { ...prev, enemyHand: newHand } : prev);
               }
               // Show "Your Turn" banner after enemy sequence ends
               setTurnBanner('player');
