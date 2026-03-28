@@ -142,14 +142,14 @@
   width: 140%;
   height: 3px;
   border-radius: 2px;
-  left: -5%;
+  left: 10%;
   transform: rotate(-45deg) scaleX(0);
   transform-origin: left center;
 }
 
-.slash-overlay span:nth-child(1) { top: 40%; animation: slash-draw 0.42s ease-out 0ms   forwards; }
-.slash-overlay span:nth-child(2) { top: 55%; animation: slash-draw 0.42s ease-out 55ms  forwards; }
-.slash-overlay span:nth-child(3) { top: 70%; animation: slash-draw 0.42s ease-out 110ms forwards; }
+.slash-overlay span:nth-child(1) { top: 50%; animation: slash-draw 0.42s ease-out 0ms   forwards; }
+.slash-overlay span:nth-child(2) { top: 63%; animation: slash-draw 0.42s ease-out 55ms  forwards; }
+.slash-overlay span:nth-child(3) { top: 76%; animation: slash-draw 0.42s ease-out 110ms forwards; }
 
 .slash-overlay--player span {
   background: linear-gradient(to right, transparent, rgba(255, 230, 100, 0.9), #fff);
