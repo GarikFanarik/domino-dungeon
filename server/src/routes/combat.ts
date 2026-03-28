@@ -6,7 +6,7 @@ import { failRun, startRun } from '../../../src/dungeon/run';
 import { defaultPlayerState } from '../../../src/game/models/player-state';
 import type { DungeonNode } from '../../../src/dungeon/node-types';
 import { Bag } from '../../../src/game/bag';
-import { Board, tileConnectingPip } from '../../../src/game/board';
+import { Board } from '../../../src/game/board';
 import { EnemyBoardAI } from '../../../src/game/ai/enemy-board-ai';
 import { analyzeChain, applyChainEffects } from '../../../src/game/elements/element-engine';
 import { calculateDamage, applyArmor } from '../../../src/game/damage';
@@ -449,11 +449,9 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     session.enemyHand = ai.playTurn(board, (session.enemyHand ?? []) as any[], current) as any[];
 
     enemyTilesPlayed = board.getTilesForTurn(current, 'enemy');
-    // Each tile the enemy plays connects to an open end; sum all connecting pips × 2.
-    rawEnemyDamage = enemyTilesPlayed.reduce(
-      (sum, tile) => sum + tileConnectingPip(tile) * 2,
-      0
-    );
+    // Use the same N-1 junction formula as player damage.
+    const enemyChain = board.toChainForTurn(current, 'enemy');
+    rawEnemyDamage = calculateDamage(enemyChain, {} as any).finalDamage;
 
     // FrostbiteRing: each slow stack reduces enemy damage by 30% instead of 20%
     const slowPct = relics.includes(RelicType.FrostbiteRing) ? 0.3 : 0.2;
@@ -574,10 +572,19 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
   // Build enemyAttack with stonesPlayed[] (orderedTiles order for chain display)
   // and perTileDamage[] (insertion/play order, matching the reveal animation).
   const stonesPlayed = enemyTilesPlayed.map(t => ({ leftPip: t.stone.leftPip, rightPip: t.stone.rightPip }));
+  // Junction contributions per tile: stones[0] = 0, stones[i>0] = leftDisplayPip × 2.
+  // enemyTilesPlayed is in chain order (orderedTiles); map to play order by tile ID.
+  const junctionByTileId = new Map<string, number>();
+  if (enemyTilesPlayed.length > 0) junctionByTileId.set(enemyTilesPlayed[0].id, 0);
+  for (let i = 1; i < enemyTilesPlayed.length; i++) {
+    const t = enemyTilesPlayed[i];
+    const leftDisplayPip = t.flipped ? t.stone.rightPip : t.stone.leftPip;
+    junctionByTileId.set(t.id, leftDisplayPip * 2);
+  }
   const enemyTilesInPlayOrder = board.toJSON().tiles.filter(
     t => t.turnNumber === current && t.playedBy === 'enemy'
   );
-  const perTileDamage = enemyTilesInPlayOrder.map(t => tileConnectingPip(t) * 2);
+  const perTileDamage = enemyTilesInPlayOrder.map(t => junctionByTileId.get(t.id) ?? 0);
 
   const response: EndTurnResponse = {
     playerState,
