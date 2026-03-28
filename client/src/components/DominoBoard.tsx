@@ -64,6 +64,36 @@ export function DominoBoard({
   const onEnemyTileRevealedRef = useRef(onEnemyTileRevealed);
   onEnemyTileRevealedRef.current = onEnemyTileRevealed;
 
+  // Track newly placed player tiles so we can play the fall animation.
+  const knownTileIdsRef = useRef<Set<string> | null>(null);
+  const [enteringPlayerIds, setEnteringPlayerIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (knownTileIdsRef.current === null) {
+      // First run: register all existing tiles without animating them.
+      knownTileIdsRef.current = new Set(board.tiles.map(t => t.id));
+      return;
+    }
+    const newIds: string[] = [];
+    for (const tile of board.tiles) {
+      if (tile.playedBy === 'player' && !knownTileIdsRef.current.has(tile.id)) {
+        newIds.push(tile.id);
+        knownTileIdsRef.current.add(tile.id);
+      }
+    }
+    if (newIds.length === 0) return;
+    setEnteringPlayerIds(prev => new Set([...prev, ...newIds]));
+    const t = setTimeout(() => {
+      setEnteringPlayerIds(prev => {
+        const next = new Set(prev);
+        newIds.forEach(id => next.delete(id));
+        return next;
+      });
+    }, 600);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board.tiles]);
+
   useEffect(() => {
     if (!prevOrderedTiles) return;
 
@@ -180,16 +210,20 @@ export function DominoBoard({
           const isEnemy = tile.playedBy === 'enemy';
           const isEntering = animState?.enteringIds.has(tile.id);
           const isExiting = animState?.exitingIds.has(tile.id);
+          const isPlayerEntering = !isEnemy && enteringPlayerIds.has(tile.id);
+          const showDust = isEntering || isPlayerEntering;
 
           let cls = 'board-tile';
           cls += isEnemy ? ' board-tile--enemy' : ' board-tile--player';
           if (isEntering) cls += ' board-tile--entering';
+          if (isPlayerEntering) cls += ' board-tile--player-entering';
           if (isExiting) cls += ' board-tile--exiting';
           if (!isLast) cls += ' board-tile--no-right-border';
 
           return (
             <div key={tile.id} className={cls}>
               <DominoStone stone={displayStone(tile)} horizontal placed />
+              {showDust && <div className="board-tile-dust" />}
             </div>
           );
         })}

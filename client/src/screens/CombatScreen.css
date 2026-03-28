@@ -125,10 +125,16 @@
 }
 
 /* ── Sprites ── */
+@keyframes sprite-breathe {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-7px); }
+}
+
 .enemy-sprite {
   width: 300px;
   height: 300px;
   object-fit: contain;
+  animation: sprite-breathe 3s ease-in-out infinite;
 }
 
 .enemy-sprite--hit {
@@ -139,6 +145,8 @@
   width: 300px;
   height: 300px;
   object-fit: contain;
+  animation: sprite-breathe 3.3s ease-in-out infinite;
+  animation-delay: -1.6s; /* slightly out of phase with enemy */
 }
 
 .hero-sprite--hit {
