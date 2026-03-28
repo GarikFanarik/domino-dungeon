@@ -18,7 +18,9 @@
 
 .enemy-hand-tiles {
   display: flex;
-  gap: 5px;
+  gap: 4px;
   flex-wrap: wrap;
-  max-width: 320px;
+  justify-content: center;
+  /* Scale tiles down to fit the top bar */
+  zoom: 0.65;
 }

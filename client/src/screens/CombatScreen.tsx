@@ -431,6 +431,11 @@ export function CombatScreen({ runId }: Props) {
         </div>
       )}
 
+      {/* ── Enemy hand (top center) ── */}
+      <div className="combat-enemy-hand-zone">
+        <EnemyHand tiles={combat.enemyHand} />
+      </div>
+
       {/* ── Main area: board (centered) + enemy box (absolute right) ── */}
       <div className="combat-main">
         <div className="combat-board-zone" ref={boardZoneRef}>
@@ -469,7 +474,6 @@ export function CombatScreen({ runId }: Props) {
             </div>
             <div className="hud-hp-label">{combat.enemy.hp.current} / {combat.enemy.hp.max} HP</div>
             <StatusBadges status={combat.enemy.status} />
-            <EnemyHand tiles={combat.enemyHand} />
             <div className="sprite-wrapper">
               <img
                 className={`enemy-sprite${enemyHit ? ' enemy-sprite--hit' : ''}`}
