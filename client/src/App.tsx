@@ -11,6 +11,7 @@ import { RelicSelectionScreen } from './screens/RelicSelectionScreen';
 import { RunSummaryScreen } from './screens/RunSummaryScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { RelicBar } from './components/RelicBar';
+import { useViewportScale } from './hooks/useViewportScale';
 import './App.css';
 
 const RELIC_BAR_SCREENS = new Set(['dungeon-map', 'combat', 'shop', 'rest', 'event', 'relic-selection']);
@@ -44,10 +45,15 @@ function AppContent() {
 
 export default function App() {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const scale = useViewportScale();
 
   return (
     <GameProvider>
-      <div ref={canvasRef} className="game-canvas">
+      <div
+        ref={canvasRef}
+        className="game-canvas"
+        style={{ '--ui-scale': scale } as React.CSSProperties}
+      >
         <AppContent />
       </div>
     </GameProvider>

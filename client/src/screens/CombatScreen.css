@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 100dvh;
+  min-height: 100%;
   background-color: #1a0f2e;
   background-size: cover;
   background-position: center top;
@@ -16,7 +16,7 @@
 
 /* ── Enemy hand (top center, between relic bar and enemy box) ── */
 .combat-enemy-hand-zone {
-  position: fixed;
+  position: absolute;
   top: 1rem;
   left: 50%;
   transform: translateX(-50%);
@@ -33,7 +33,7 @@
 }
 
 .combat-board-zone {
-  position: fixed;
+  position: absolute;
   top: 50%;
   transform: translateY(-50%);
   left: 0;
@@ -283,7 +283,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100dvh;
+  height: 100%;
   font-size: 1.2rem;
   color: #e8d8b0;
 }
@@ -294,7 +294,7 @@
 }
 
 .damage-counter {
-  position: fixed;
+  position: absolute;
   /* Sits just above the board band (band top edge = 50vh - 46px) */
   bottom: calc(50% + 46px + 12px);
   left: 50%;
@@ -359,7 +359,7 @@
 
 /* ── Drag overlay ── */
 .drag-overlay {
-  position: fixed;
+  position: absolute;
   pointer-events: none;
   z-index: 1000;
   transform: scale(1.08);
@@ -384,7 +384,7 @@
 /* Board band: 92px tall, centered at 50vh → top edge at calc(50% - 46px) from top
    We anchor the banner's bottom to 20px above that top edge.               */
 .turn-banner {
-  position: fixed;
+  position: absolute;
   bottom: calc(50% + 46px + 20px);
   left: 50%;
   pointer-events: none;

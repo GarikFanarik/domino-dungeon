@@ -3,6 +3,7 @@ import { useGame } from '../context/GameContext';
 import { DominoStone } from '../components/DominoStone';
 import { DominoBoard } from '../components/DominoBoard';
 import { EnemyHand } from '../components/EnemyHand';
+import { useViewportScale } from '../hooks/useViewportScale';
 import type { BoardJSON, BoardTile } from '../../../src/game/board';
 import './CombatScreen.css';
 
@@ -133,6 +134,7 @@ function StatusBadges({ status }: { status: EnemyStatus }) {
 
 export function CombatScreen({ runId }: Props) {
   const { navigate, flashRelics } = useGame();
+  const scale = useViewportScale();
   const [combat, setCombat] = useState<CombatState | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -416,7 +418,7 @@ export function CombatScreen({ runId }: Props) {
     >
       {/* Stone reward overlay */}
       {stoneRewards.length > 0 && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
           <h2 style={{ color: '#e8d8b0', marginBottom: '1.5rem', fontSize: '1.5rem' }}>Choose a Stone Reward</h2>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             {stoneRewards.map((reward, i) => (
@@ -614,8 +616,8 @@ export function CombatScreen({ runId }: Props) {
         <div
           className={`drag-overlay${dragState.invalid ? ' drag-overlay--invalid' : ''}`}
           style={{
-            left: dragState.x - dragState.offsetX,
-            top:  dragState.y - dragState.offsetY,
+            left: (dragState.x - dragState.offsetX) / scale,
+            top:  (dragState.y - dragState.offsetY) / scale,
           }}
         >
           <DominoStone stone={dragDisplayStone} horizontal />

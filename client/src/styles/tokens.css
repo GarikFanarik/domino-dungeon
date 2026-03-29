@@ -1,4 +1,7 @@
 :root {
+  /* Viewport scale (set dynamically by useViewportScale) */
+  --ui-scale: 1;
+
   /* Base */
   --bg-primary: #1a1a2e;
   --bg-surface: #16213e;
