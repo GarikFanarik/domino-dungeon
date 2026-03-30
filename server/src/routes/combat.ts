@@ -563,7 +563,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
   }
 
   // Refill both hands from bag
-  const HAND_SIZE = session.handSize ?? 14;
+  const HAND_SIZE = session.handSize ?? 7;
   const bag = new Bag(session.bag as any[]);
   const playerNeeded = Math.max(0, HAND_SIZE - session.hand.length);
   if (playerNeeded > 0) {
