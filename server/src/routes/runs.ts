@@ -48,14 +48,10 @@ function hashStr(s: string): number {
   return Math.abs(h);
 }
 
-function pickEnemyName(type: NodeType, nodeId: string, act: number): string {
-  if (type === NodeType.Boss) return `Act ${act} Boss`;
-  if (type === NodeType.Elite) {
-    const elites = ['Crypt Sentinel', 'Stonewarden'];
-    return elites[hashStr(nodeId) % elites.length];
-  }
-  const normals = ['Tomb Rat', 'Crypt Sentinel', 'Stonewarden'];
-  return normals[hashStr(nodeId) % normals.length];
+function pickEnemyName(type: NodeType, _nodeId: string, act: number): string {
+  if (type === NodeType.Boss) return `Stonewarden`;
+  if (type === NodeType.Elite) return 'Crypt Sentinel';
+  return `Tomb Rat`;
 }
 
 function pickEnemyHp(type: NodeType, act: number): number {
