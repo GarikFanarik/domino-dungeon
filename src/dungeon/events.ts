@@ -1,5 +1,6 @@
 import seedrandom from 'seedrandom';
 import { Run } from './run';
+import { ALL_RELICS } from './relic-offer';
 
 export interface EventChoice {
   label: string;
@@ -19,6 +20,7 @@ export interface EventResult {
   goldChanged?: number;
   hpChanged?: number;
   stoneReward?: { element: string };
+  relicReward?: string;
 }
 
 const EVENT_POOL: Event[] = [
@@ -36,7 +38,7 @@ const EVENT_POOL: Event[] = [
     title: 'Wounded Traveler',
     description: 'A wounded traveler begs for help.',
     choices: [
-      { label: 'Give 10 HP', description: 'Sacrifice HP for a relic', effect: (run) => { run.hp = Math.max(1, run.hp - 10); return { description: 'You heal the traveler and receive a gift.', hpChanged: -10 }; } },
+      { label: 'Give 10 HP', description: 'Sacrifice HP for a relic', effect: (run) => { run.hp = Math.max(1, run.hp - 10); const relic = ALL_RELICS[Math.floor(Math.random() * ALL_RELICS.length)]; return { description: `You heal the traveler and receive a ${relic.name}.`, hpChanged: -10, relicReward: relic.id }; } },
       { label: 'Ignore', description: 'Pass by', effect: (_run) => ({ description: 'You walk past.' }) },
     ],
   },
@@ -45,7 +47,7 @@ const EVENT_POOL: Event[] = [
     title: 'Ancient Altar',
     description: 'An ancient altar glows with power.',
     choices: [
-      { label: 'Sacrifice HP', description: 'Lose 20% HP for 2 extra swaps', effect: (run) => { const cost = Math.floor(run.maxHp * 0.2); run.hp = Math.max(1, run.hp - cost); return { description: 'The altar grants you power.', hpChanged: -cost }; } },
+      { label: 'Sacrifice HP', description: 'Lose 20% HP for a random relic', effect: (run) => { const cost = Math.floor(run.maxHp * 0.2); run.hp = Math.max(1, run.hp - cost); const relic = ALL_RELICS[Math.floor(Math.random() * ALL_RELICS.length)]; return { description: `The altar grants you a ${relic.name}.`, hpChanged: -cost, relicReward: relic.id }; } },
       { label: 'Leave', description: 'Walk away', effect: (_run) => ({ description: 'You leave the altar.' }) },
     ],
   },
@@ -63,7 +65,7 @@ const EVENT_POOL: Event[] = [
     title: 'Mysterious Merchant',
     description: 'A hooded merchant offers rare wares.',
     choices: [
-      { label: 'Pay 20g', description: 'Buy a random relic', effect: (run) => { if (run.gold >= 20) { run.gold -= 20; return { description: 'You acquire a rare relic.', goldChanged: -20 }; } return { description: 'Not enough gold.' }; } },
+      { label: 'Pay 20g', description: 'Buy a random relic', effect: (run) => { if (run.gold >= 20) { run.gold -= 20; const relic = ALL_RELICS[Math.floor(Math.random() * ALL_RELICS.length)]; return { description: `You acquire a ${relic.name}.`, goldChanged: -20, relicReward: relic.id }; } return { description: 'Not enough gold.' }; } },
       { label: 'Refuse', description: 'Walk away', effect: (_run) => ({ description: 'You decline.' }) },
     ],
   },
