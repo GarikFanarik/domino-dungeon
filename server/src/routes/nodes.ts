@@ -239,6 +239,19 @@ router.post('/:runId/event/resolve', async (req: Request, res: Response) => {
   const event = getRandomEvent(state.run.currentAct, state.run.seed);
   const result = resolveEventChoice(state.run, event, choiceIndex);
 
+  // Sync run.hp/gold changes into playerState (the authoritative source for combat/display)
+  if (result.hpChanged) {
+    state.playerState.hp.current = Math.max(1, Math.min(
+      state.playerState.hp.max,
+      state.playerState.hp.current + result.hpChanged,
+    ));
+    state.run.hp = state.playerState.hp.current;
+  }
+  if (result.goldChanged) {
+    state.playerState.gold = Math.max(0, state.playerState.gold + result.goldChanged);
+    state.run.gold = state.playerState.gold;
+  }
+
   if (result.stoneReward) {
     const newStone = createElementalStone(result.stoneReward.element as any);
     if (!state.stones) {
