@@ -3,7 +3,6 @@ import { useGame } from '../context/GameContext';
 import { DominoStone } from '../components/DominoStone';
 import { DominoBoard } from '../components/DominoBoard';
 import { EnemyHand } from '../components/EnemyHand';
-import { useViewportScale } from '../hooks/useViewportScale';
 import type { BoardJSON, BoardTile } from '../../../src/game/board';
 import './CombatScreen.css';
 
@@ -54,17 +53,6 @@ interface StoneReward {
   element: string;
   leftPip: number;
   rightPip: number;
-}
-
-interface DragState {
-  stoneIndex: number;
-  stone: Stone;
-  flipped: boolean;
-  x: number;       // cursor x (viewport)
-  y: number;       // cursor y (viewport)
-  offsetX: number; // cursor offset from tile's left edge at grab time
-  offsetY: number; // cursor offset from tile's top edge at grab time
-  invalid: boolean;
 }
 
 interface Props { runId: string; }
@@ -134,7 +122,6 @@ function StatusBadges({ status }: { status: EnemyStatus }) {
 
 export function CombatScreen({ runId }: Props) {
   const { navigate, flashRelics } = useGame();
-  const scale = useViewportScale();
   const [combat, setCombat] = useState<CombatState | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -144,16 +131,15 @@ export function CombatScreen({ runId }: Props) {
   const [showBag, setShowBag] = useState(false);
   const [stoneRewards, setStoneRewards] = useState<StoneReward[]>([]);
   const [previewDamage, setPreviewDamage] = useState<number | null>(null);
-  const [dragState, setDragState] = useState<DragState | null>(null);
+  const [selectedTile, setSelectedTile] = useState<number | null>(null);
   const [prevBoardTiles, setPrevBoardTiles] = useState<BoardTile[] | null>(null);
   const [enemyDamageDisplay, setEnemyDamageDisplay] = useState<number | null>(null);
   const [turnBanner, setTurnBanner] = useState<'player' | 'enemy' | null>(null);
   /** HP to show during the board animation — freezes at the pre-damage value until onAnimationDone. */
   const [displayedPlayerHP, setDisplayedPlayerHP] = useState<PlayerState['hp'] | null>(null);
 
-  const dragRef = useRef<DragState | null>(null);
   const combatRef = useRef<CombatState | null>(null);
-  const boardZoneRef = useRef<HTMLDivElement>(null);
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const damageTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const pendingEnemyHandRef = useRef<Stone[] | null>(null);
 
@@ -174,79 +160,6 @@ export function CombatScreen({ runId }: Props) {
       .catch(() => setMessage('Failed to load combat'));
   }, [runId]);
 
-  // Attach drag listeners only while a drag is active
-  useEffect(() => {
-    if (!dragState) return;
-
-    function onMove(e: PointerEvent) {
-      if (!dragRef.current) return;
-      const updated = { ...dragRef.current, x: e.clientX, y: e.clientY };
-      dragRef.current = updated;
-      setDragState(updated);
-    }
-
-    async function onUp(e: PointerEvent) {
-      const ds = dragRef.current;
-      if (!ds) return;
-
-      const boardEl = boardZoneRef.current;
-      let overBoard = false;
-      if (boardEl) {
-        const rect = boardEl.getBoundingClientRect();
-        overBoard = e.clientX >= rect.left && e.clientX <= rect.right &&
-                    e.clientY >= rect.top  && e.clientY <= rect.bottom;
-      }
-
-      if (!overBoard) {
-        dragRef.current = null;
-        setDragState(null);
-        return;
-      }
-
-      const preferred: 'left' | 'right' = ds.flipped ? 'left' : 'right';
-      const other: 'left' | 'right' = preferred === 'left' ? 'right' : 'left';
-      const board = combatRef.current?.board;
-      const canPlay = board ? canStonePlay(ds.stone, board) : { left: false, right: false };
-      const side = canPlay[preferred] ? preferred : canPlay[other] ? other : null;
-
-      if (!side) {
-        const invalidState = { ...ds, invalid: true };
-        dragRef.current = invalidState;
-        setDragState(invalidState);
-        setTimeout(() => { dragRef.current = null; setDragState(null); }, 400);
-        return;
-      }
-
-      const stoneIndex = ds.stoneIndex;
-      dragRef.current = null;
-      setDragState(null);
-      await playStone(stoneIndex, side);
-    }
-
-    function onKey(e: KeyboardEvent) {
-      const ds = dragRef.current;
-      if (!ds) return;
-      if (e.key === 'r' || e.key === 'R') {
-        const updated = { ...ds, flipped: !ds.flipped };
-        dragRef.current = updated;
-        setDragState(updated);
-      }
-      if (e.key === 'Escape') {
-        dragRef.current = null;
-        setDragState(null);
-      }
-    }
-
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-      window.removeEventListener('keydown', onKey);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!dragState]);
 
   async function handleSwapStone(index: number) {
     if (!combat || combat.phase !== 'player-turn') return;
@@ -285,25 +198,25 @@ export function CombatScreen({ runId }: Props) {
     }
   }
 
-  function handlePointerDown(index: number, stone: Stone, e: React.PointerEvent) {
+  function handleTileClick(index: number, stone: Stone) {
     if (!combat || combat.phase !== 'player-turn') return;
     if (swapMode) { handleSwapStone(index); return; }
-    const { left, right } = canStonePlay(stone, combat.board);
-    if (!left && !right) return;
-    e.preventDefault();
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const newState: DragState = {
-      stoneIndex: index,
-      stone,
-      flipped: false,
-      x: e.clientX,
-      y: e.clientY,
-      offsetX: e.clientX - rect.left,
-      offsetY: e.clientY - rect.top,
-      invalid: false,
-    };
-    dragRef.current = newState;
-    setDragState(newState);
+
+    if (clickTimerRef.current !== null) {
+      // Second click within threshold → treat as double-click: play the stone
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+      setSelectedTile(null);
+      const { left, right } = canStonePlay(stone, combat.board);
+      const side = right ? 'right' : left ? 'left' : null;
+      if (side) playStone(index, side);
+    } else {
+      // First click → select the tile and wait for possible second click
+      setSelectedTile(index);
+      clickTimerRef.current = setTimeout(() => {
+        clickTimerRef.current = null;
+      }, 280);
+    }
   }
 
   async function handleEndTurn() {
@@ -401,15 +314,9 @@ export function CombatScreen({ runId }: Props) {
 
   const bgImage = `/assets/combat/background/arena-act${combat.act}.jpg`;
 
-  const dragValidEnds = dragState
-    ? canStonePlay(dragState.stone, combat.board)
+  const dragValidEnds = selectedTile !== null
+    ? canStonePlay(combat.playerHand[selectedTile], combat.board)
     : undefined;
-
-  const dragDisplayStone = dragState
-    ? (dragState.flipped
-        ? { ...dragState.stone, leftPip: dragState.stone.rightPip, rightPip: dragState.stone.leftPip }
-        : dragState.stone)
-    : null;
 
   return (
     <div
@@ -442,7 +349,7 @@ export function CombatScreen({ runId }: Props) {
 
       {/* ── Main area: board (centered) + enemy box (absolute right) ── */}
       <div className="combat-main">
-        <div className="combat-board-zone" ref={boardZoneRef}>
+        <div className="combat-board-zone">
           <DominoBoard
             board={combat.board}
             isPlayerTurn={isPlayerTurn}
@@ -528,15 +435,14 @@ export function CombatScreen({ runId }: Props) {
           {combat.playerHand.map((stone, i) => {
             const { left, right } = canStonePlay(stone, combat.board);
             const playable = isPlayerTurn && (left || right);
-            const isDraggingThis = dragState?.stoneIndex === i;
             return (
-              <div key={stone.id} className={isDraggingThis ? 'hand-tile--dragging' : undefined}>
+              <div key={stone.id}>
                 <DominoStone
                   stone={stone}
                   horizontal
-                  onPointerDown={(e) => handlePointerDown(i, stone, e)}
+                  onClick={() => handleTileClick(i, stone)}
                   disabled={!isPlayerTurn || (!swapMode && !playable)}
-                  selected={swapMode}
+                  selected={swapMode || selectedTile === i}
                 />
               </div>
             );
@@ -611,21 +517,6 @@ export function CombatScreen({ runId }: Props) {
         </div>
       )}
 
-      {/* ── Drag overlay ── */}
-      {dragState && dragDisplayStone && (
-        <div
-          className={`drag-overlay${dragState.invalid ? ' drag-overlay--invalid' : ''}`}
-          style={{
-            left: (dragState.x - dragState.offsetX) / scale,
-            top:  (dragState.y - dragState.offsetY) / scale,
-          }}
-        >
-          <DominoStone stone={dragDisplayStone} horizontal />
-          <div className="drag-label">
-            {dragState.flipped ? '← L' : 'R →'}
-          </div>
-        </div>
-      )}
 
     </div>
   );

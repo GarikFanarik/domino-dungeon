@@ -10,6 +10,7 @@ interface Stone {
 interface Props {
   stone: Stone;
   onClick?: () => void;
+  onDoubleClick?: () => void;
   onPointerDown?: (e: React.PointerEvent) => void;
   disabled?: boolean;
   selected?: boolean;
@@ -47,7 +48,7 @@ function PipGrid({ count }: { count: number }) {
   );
 }
 
-export function DominoStone({ stone, onClick, onPointerDown, disabled, selected, placed, horizontal }: Props) {
+export function DominoStone({ stone, onClick, onDoubleClick, onPointerDown, disabled, selected, placed, horizontal }: Props) {
   const el = stone.element?.toLowerCase() ?? null;
   const classes = [
     'domino-tile',
@@ -62,6 +63,7 @@ export function DominoStone({ stone, onClick, onPointerDown, disabled, selected,
     <div
       className={classes}
       onClick={!disabled ? onClick : undefined}
+      onDoubleClick={!disabled ? onDoubleClick : undefined}
       onPointerDown={!disabled ? onPointerDown : undefined}
       data-testid="domino-stone"
       title={el ? `${el} stone (${stone.leftPip}|${stone.rightPip})` : `Stone (${stone.leftPip}|${stone.rightPip})`}
