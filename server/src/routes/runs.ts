@@ -49,9 +49,14 @@ function hashStr(s: string): number {
 }
 
 function pickEnemyName(type: NodeType, _nodeId: string, act: number): string {
-  if (type === NodeType.Boss) return `Stonewarden`;
+  if (act === 2) {
+    if (type === NodeType.Boss)  return 'Abyssal Lord';
+    if (type === NodeType.Elite) return 'Abyssal Warrior';
+    return 'Abyssal Crystal';
+  }
+  if (type === NodeType.Boss)  return 'Stonewarden';
   if (type === NodeType.Elite) return 'Crypt Sentinel';
-  return `Tomb Rat`;
+  return 'Tomb Rat';
 }
 
 function pickEnemyHp(type: NodeType, act: number): number {

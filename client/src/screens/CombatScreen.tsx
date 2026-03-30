@@ -86,6 +86,9 @@ function damageStyle(dmg: number, type: 'player' | 'enemy'): { color: string; te
 
 function getEnemySprite(enemy: Enemy): string {
   const n = enemy.name.toLowerCase();
+  if (n.includes('abyssal crystal'))  return '/assets/combat/enemies/act2/Abysal-Crystal.png';
+  if (n.includes('abyssal warrior'))  return '/assets/combat/enemies/act2/Abysal-Warrior.png';
+  if (n.includes('abyssal lord'))     return '/assets/combat/enemies/act2/Abysal-Lord.png';
   if (n.includes('rat')  || n.includes('tomb'))      return '/assets/combat/enemies/act1/tomb-rat/tomb-rat.png';
   if (n.includes('crypt') || n.includes('sentinel')) return '/assets/combat/enemies/act1/crypt-sentinel/crypt-sentinel.png';
   return '/assets/combat/enemies/act1/stonewarden/stonewarden.png';
