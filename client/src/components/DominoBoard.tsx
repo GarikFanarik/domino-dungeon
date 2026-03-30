@@ -8,6 +8,7 @@ interface Props {
   board: BoardJSON;
   isPlayerTurn: boolean;
   dragValidEnds?: { left: boolean; right: boolean };
+  onEndClick?: (side: 'left' | 'right') => void;
   /**
    * Set to the board's orderedTiles from BEFORE the End Turn to trigger the
    * two-phase animation: enemy tiles fade in, then removed tiles compress out.
@@ -53,6 +54,7 @@ export function DominoBoard({
   board,
   isPlayerTurn: _isPlayerTurn,
   dragValidEnds,
+  onEndClick,
   prevOrderedTiles,
   onAnimationDone,
   onEnemyTileRevealed,
@@ -197,12 +199,15 @@ export function DominoBoard({
     >
       <div className="domino-board-chain">
         {!hasBoard && (
-          <div className="domino-board-empty">Play a tile to start the chain</div>
+          <div
+            className={`domino-board-empty${isDragging ? ' domino-board-empty--clickable' : ''}`}
+            onClick={isDragging ? () => onEndClick?.('right') : undefined}
+          >Play a tile to start the chain</div>
         )}
 
-        {/* Left drag-valid-end sibling */}
+        {/* Left drop zone */}
         {hasBoard && isDragging && dragValidEnds!.left && (
-          <div className="drag-valid-end drag-valid-end--left" />
+          <div className="drag-valid-end drag-valid-end--left" onClick={() => onEndClick?.('left')} />
         )}
 
         {displayTiles.map((tile, i) => {
@@ -228,9 +233,9 @@ export function DominoBoard({
           );
         })}
 
-        {/* Right drag-valid-end sibling */}
+        {/* Right drop zone */}
         {hasBoard && isDragging && dragValidEnds!.right && (
-          <div className="drag-valid-end drag-valid-end--right" />
+          <div className="drag-valid-end drag-valid-end--right" onClick={() => onEndClick?.('right')} />
         )}
       </div>
     </div>

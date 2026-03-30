@@ -104,14 +104,15 @@ function canStonePlay(stone: Stone, board: BoardJSON): { left: boolean; right: b
 }
 
 /** Returns which board side to play on given the tile's current visual orientation.
- *  rightDisplay pip connects to the right board end; leftDisplay pip to the left end.
- *  Returns null if neither display pip matches any open end in the current orientation. */
+ *  The LEFT face of the tile connects to the RIGHT board end (tiles extend outward).
+ *  The RIGHT face of the tile connects to the LEFT board end.
+ *  Returns null if neither orientation matches. */
 function getPlaySide(stone: Stone, flipped: boolean, board: BoardJSON): 'left' | 'right' | null {
   if (!board || board.tiles.length === 0) return 'right';
   const leftDisplay  = flipped ? stone.rightPip : stone.leftPip;
   const rightDisplay = flipped ? stone.leftPip  : stone.rightPip;
-  if (board.rightOpen !== null && rightDisplay === board.rightOpen) return 'right';
-  if (board.leftOpen  !== null && leftDisplay  === board.leftOpen)  return 'left';
+  if (board.rightOpen !== null && leftDisplay  === board.rightOpen) return 'right';
+  if (board.leftOpen  !== null && rightDisplay === board.leftOpen)  return 'left';
   return null;
 }
 
@@ -156,7 +157,6 @@ export function CombatScreen({ runId }: Props) {
   const [displayedPlayerHP, setDisplayedPlayerHP] = useState<PlayerState['hp'] | null>(null);
 
   const combatRef = useRef<CombatState | null>(null);
-  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const damageTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const pendingEnemyHandRef = useRef<Stone[] | null>(null);
 
@@ -236,22 +236,18 @@ export function CombatScreen({ runId }: Props) {
   function handleTileClick(index: number, stone: Stone) {
     if (!combat || combat.phase !== 'player-turn') return;
     if (swapMode) { handleSwapStone(index); return; }
+    setSelectedTile(prev => (prev === index ? null : index));
+    // suppress unused warning
+    void stone;
+  }
 
-    if (clickTimerRef.current !== null) {
-      // Second click within threshold → treat as double-click: play the stone
-      clearTimeout(clickTimerRef.current);
-      clickTimerRef.current = null;
-      setSelectedTile(null);
-      const flipped = flippedStoneIds.has(stone.id);
-      const side = getPlaySide(stone, flipped, combat.board);
-      if (side) playStone(index, side);
-    } else {
-      // First click → select the tile and wait for possible second click
-      setSelectedTile(index);
-      clickTimerRef.current = setTimeout(() => {
-        clickTimerRef.current = null;
-      }, 280);
-    }
+  function handleBoardEndClick(side: 'left' | 'right') {
+    if (selectedTile === null || !combat) return;
+    const stone = combat.playerHand[selectedTile];
+    if (!stone) return;
+    const index = selectedTile;
+    setSelectedTile(null);
+    playStone(index, side);
   }
 
   async function handleEndTurn() {
@@ -391,6 +387,7 @@ export function CombatScreen({ runId }: Props) {
             board={combat.board}
             isPlayerTurn={isPlayerTurn}
             dragValidEnds={dragValidEnds}
+            onEndClick={handleBoardEndClick}
             prevOrderedTiles={prevBoardTiles ?? undefined}
             onAnimationDone={() => {
               setPrevBoardTiles(null);

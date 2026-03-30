@@ -84,6 +84,13 @@
   white-space: nowrap;
   user-select: none;
 }
+.domino-board-empty--clickable {
+  color: rgba(255, 200, 0, 0.7);
+  cursor: pointer;
+  border: 2px dashed rgba(255, 200, 0, 0.5);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+}
 
 /* ── Board tile wrappers ────────────────────────────────────────────────────── */
 .board-tile {
@@ -163,5 +170,10 @@
   border-radius: 6px;
   border: 2px solid rgba(255, 200, 0, 0.8);
   box-shadow: 0 0 14px rgba(255, 200, 0, 0.5);
-  pointer-events: none;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.drag-valid-end:hover {
+  background: rgba(255, 200, 0, 0.15);
+  box-shadow: 0 0 22px rgba(255, 200, 0, 0.8);
 }
