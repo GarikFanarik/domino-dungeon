@@ -17,8 +17,8 @@ h1, h2, p {
 
 .game-canvas {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: calc((100vh - 1080px * var(--ui-scale)) / 2);
+  left: calc((100vw - 1920px * var(--ui-scale)) / 2);
   width: 1920px;
   height: 1080px;
   overflow: hidden;
