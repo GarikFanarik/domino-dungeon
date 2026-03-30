@@ -391,6 +391,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
         runState.playerState.hp.current = session.playerHp ?? runState.playerState.hp.current;
         runState.playerState.armor = session.playerArmor ?? runState.playerState.armor;
         runState.playerState.gold = session.playerGold;
+        runState.run.gold = session.playerGold ?? 0;
 
         // Act advancement on boss defeat
         if (nodeType === 'boss') {

@@ -21,23 +21,23 @@ export function generateShopInventory(act: number, seed: string): ShopItem[] {
   const items: ShopItem[] = [];
   const elements = [ElementType.Fire, ElementType.Ice, ElementType.Lightning, ElementType.Poison, ElementType.Earth];
 
-  // 3 stones (50-80g)
+  // 3 stones (10-16g)
   for (let i = 0; i < 3; i++) {
-    const price = Math.floor(rng() * 31) + 50;
+    const price = Math.floor(rng() * 7) + 10;
     const element = elements[Math.floor(rng() * elements.length)];
     items.push({ id: `shop-stone-${act}-${i}-${seed}`, type: 'stone', price, payload: { element } });
   }
 
-  // 1 relic (100-150g) — pick a specific relic deterministically from seed
-  const relicPrice = Math.floor(rng() * 51) + 100;
+  // 1 relic (20-30g) — pick a specific relic deterministically from seed
+  const relicPrice = Math.floor(rng() * 11) + 20;
   const shopRelic = ALL_RELICS[Math.floor(rng() * ALL_RELICS.length)];
   items.push({ id: `shop-relic-${act}-${seed}`, type: 'relic', price: relicPrice, payload: { relicId: shopRelic.id } });
 
-  // 1 potion (30g)
-  items.push({ id: `shop-potion-${act}-${seed}`, type: 'potion', price: 30, payload: null });
+  // 1 potion (6g)
+  items.push({ id: `shop-potion-${act}-${seed}`, type: 'potion', price: 6, payload: null });
 
-  // 1 stone removal (75g)
-  items.push({ id: `shop-removal-${act}-${seed}`, type: 'removal', price: 75, payload: null });
+  // 1 stone removal (15g)
+  items.push({ id: `shop-removal-${act}-${seed}`, type: 'removal', price: 15, payload: null });
 
   return items;
 }
