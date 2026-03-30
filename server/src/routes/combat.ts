@@ -162,12 +162,14 @@ router.post('/:runId/combat/play', async (req: Request, res: Response) => {
   // Play the stone
   board.playStone(stone, side, 'player', session.turnNumber);
 
-  // Remove stone from hand
+  // Remove stone from hand and return it to the bag
   const newHand = [...hand.slice(0, stoneIndex), ...hand.slice(stoneIndex + 1)];
+  const playedSessionStone = hand[stoneIndex];
 
   // Persist updated session
   session.board = board.toJSON();
   session.hand = newHand;
+  session.bag = [...session.bag, playedSessionStone];
 
   try {
     await saveCombatSession(session);
@@ -345,6 +347,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     let goldEarned = 0;
     let stoneRewards: Array<{ element: string; leftPip: number; rightPip: number }> | null = null;
     const triggeredRelics: string[] = [];
+    let nodeType: string | undefined;
 
     // Sync player state back to run
     try {
@@ -354,7 +357,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
         if (node) node.completed = true;
 
         // Award gold based on node type
-        const nodeType = node?.type;
+        nodeType = node?.type;
         if (nodeType === 'boss') goldEarned = 40 + Math.floor(Math.random() * 11); // 40-50g
         else if (nodeType === 'elite') goldEarned = 20 + Math.floor(Math.random() * 6); // 20-25g
         else goldEarned = 10 + Math.floor(Math.random() * 6); // 10-15g
@@ -405,8 +408,8 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
 
         await saveRunState(session.runId, runState);
 
-        // Generate stone reward options for elite/boss
-        if (nodeType === 'elite' || nodeType === 'boss') {
+        // Generate stone reward options for every battle
+        {
           const allElements = ['fire', 'ice', 'lightning', 'poison', 'earth'];
           const seedStr = session.runId + session.turnNumber;
           let seedHash = 0;
@@ -449,6 +452,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
       goldEarned,
       stoneRewards: stoneRewards ?? undefined,
       triggeredRelics,
+      relicReward: nodeType === 'elite' || nodeType === 'boss',
     };
     res.json(response);
     return;
@@ -559,7 +563,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
   }
 
   // Refill both hands from bag
-  const HAND_SIZE = session.handSize ?? 7;
+  const HAND_SIZE = session.handSize ?? 14;
   const bag = new Bag(session.bag as any[]);
   const playerNeeded = Math.max(0, HAND_SIZE - session.hand.length);
   if (playerNeeded > 0) {

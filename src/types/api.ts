@@ -62,6 +62,7 @@ export interface EndTurnResponse {
   goldEarned?: number;
   stoneRewards?: Array<{ element: string; leftPip: number; rightPip: number }>;
   triggeredRelics?: string[];
+  relicReward?: boolean;
 }
 
 export interface MapNode {

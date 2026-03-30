@@ -306,8 +306,8 @@ router.post('/:runId/travel/:nodeId', async (req: Request, res: Response) => {
 
     const relics: string[] = state.run.relics ?? [];
 
-    // WornPouch: draw 8 stones instead of 7
-    const handSize = relics.includes(RelicType.WornPouch) ? applyWornPouch(7) : 7;
+    // WornPouch: draw 15 stones instead of 14
+    const handSize = relics.includes(RelicType.WornPouch) ? applyWornPouch(14) : 14;
     const hand = bag.draw(handSize);
 
     const enemyStatus = { burn: 0, slow: 0, frozen: false, stunned: false, poison: 0 };

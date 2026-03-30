@@ -142,6 +142,7 @@ export function CombatScreen({ runId }: Props) {
   const [swapMode, setSwapMode] = useState(false);
   const [showBag, setShowBag] = useState(false);
   const [stoneRewards, setStoneRewards] = useState<StoneReward[]>([]);
+  const [relicReward, setRelicReward] = useState(false);
   const [previewDamage, setPreviewDamage] = useState<number | null>(null);
   const [selectedTile, setSelectedTile] = useState<number | null>(null);
   const [flippedStoneIds, setFlippedStoneIds] = useState<Set<string>>(new Set());
@@ -266,10 +267,12 @@ export function CombatScreen({ runId }: Props) {
       if (data.combatResult === 'player-won') {
         if (data.triggeredRelics?.length > 0) flashRelics(data.triggeredRelics);
         if (data.goldEarned > 0) setMessage(`Victory! +${data.goldEarned}g`);
+        setRelicReward(!!data.relicReward);
         if (data.stoneRewards && data.stoneRewards.length > 0) {
           setStoneRewards(data.stoneRewards);
         } else {
-          setTimeout(() => navigate('relic-selection'), data.goldEarned > 0 ? 1200 : 0);
+          const dest = data.relicReward ? 'relic-selection' : 'dungeon-map';
+          setTimeout(() => navigate(dest), data.goldEarned > 0 ? 1200 : 0);
         }
       } else if (data.combatResult === 'player-died') {
         navigate('run-summary');
@@ -327,7 +330,7 @@ export function CombatScreen({ runId }: Props) {
       body: JSON.stringify({ element: reward.element }),
     });
     setStoneRewards([]);
-    navigate('relic-selection');
+    navigate(relicReward ? 'relic-selection' : 'dungeon-map');
   }
 
   const STONE_REWARD_COLORS: Record<string, string> = {
