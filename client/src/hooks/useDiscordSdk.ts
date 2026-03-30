@@ -33,7 +33,8 @@ export function useDiscordSdk() {
         const { code } = await sdk.commands.authorize({
           client_id: clientId,
           response_type: 'code',
-          scope: ['identify', 'guilds'],
+          scope: ['identify'],
+          prompt: 'none',
         } as any);
 
         const tokenResponse = await fetch('/api/auth/token', {
