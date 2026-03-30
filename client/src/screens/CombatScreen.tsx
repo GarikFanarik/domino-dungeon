@@ -103,18 +103,6 @@ function canStonePlay(stone: Stone, board: BoardJSON): { left: boolean; right: b
   return { left, right };
 }
 
-/** Returns which board side to play on given the tile's current visual orientation.
- *  The LEFT face of the tile connects to the RIGHT board end (tiles extend outward).
- *  The RIGHT face of the tile connects to the LEFT board end.
- *  Returns null if neither orientation matches. */
-function getPlaySide(stone: Stone, flipped: boolean, board: BoardJSON): 'left' | 'right' | null {
-  if (!board || board.tiles.length === 0) return 'right';
-  const leftDisplay  = flipped ? stone.rightPip : stone.leftPip;
-  const rightDisplay = flipped ? stone.leftPip  : stone.rightPip;
-  if (board.rightOpen !== null && leftDisplay  === board.rightOpen) return 'right';
-  if (board.leftOpen  !== null && rightDisplay === board.leftOpen)  return 'left';
-  return null;
-}
 
 function StatusBadges({ status }: { status: EnemyStatus }) {
   const badges: { key: string; label: string; value: string; cls: string }[] = [];
@@ -233,12 +221,10 @@ export function CombatScreen({ runId }: Props) {
     }
   }
 
-  function handleTileClick(index: number, stone: Stone) {
+  function handleTileClick(index: number, _stone: Stone) {
     if (!combat || combat.phase !== 'player-turn') return;
     if (swapMode) { handleSwapStone(index); return; }
     setSelectedTile(prev => (prev === index ? null : index));
-    // suppress unused warning
-    void stone;
   }
 
   function handleBoardEndClick(side: 'left' | 'right') {
