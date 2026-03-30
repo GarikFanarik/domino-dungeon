@@ -100,6 +100,18 @@ function canStonePlay(stone: Stone, board: BoardJSON): { left: boolean; right: b
   return { left, right };
 }
 
+/** Returns which board side to play on given the tile's current visual orientation.
+ *  rightDisplay pip connects to the right board end; leftDisplay pip to the left end.
+ *  Returns null if neither display pip matches any open end in the current orientation. */
+function getPlaySide(stone: Stone, flipped: boolean, board: BoardJSON): 'left' | 'right' | null {
+  if (!board || board.tiles.length === 0) return 'right';
+  const leftDisplay  = flipped ? stone.rightPip : stone.leftPip;
+  const rightDisplay = flipped ? stone.leftPip  : stone.rightPip;
+  if (board.rightOpen !== null && rightDisplay === board.rightOpen) return 'right';
+  if (board.leftOpen  !== null && leftDisplay  === board.leftOpen)  return 'left';
+  return null;
+}
+
 function StatusBadges({ status }: { status: EnemyStatus }) {
   const badges: { key: string; label: string; value: string; cls: string }[] = [];
   if (status.burn   > 0) badges.push({ key: 'burn',   label: 'fire',      value: `🔥 ${status.burn}`,   cls: 'status-badge--burn' });
@@ -132,6 +144,7 @@ export function CombatScreen({ runId }: Props) {
   const [stoneRewards, setStoneRewards] = useState<StoneReward[]>([]);
   const [previewDamage, setPreviewDamage] = useState<number | null>(null);
   const [selectedTile, setSelectedTile] = useState<number | null>(null);
+  const [flippedStoneIds, setFlippedStoneIds] = useState<Set<string>>(new Set());
   const [prevBoardTiles, setPrevBoardTiles] = useState<BoardTile[] | null>(null);
   const [enemyDamageDisplay, setEnemyDamageDisplay] = useState<number | null>(null);
   const [turnBanner, setTurnBanner] = useState<'player' | 'enemy' | null>(null);
@@ -147,6 +160,24 @@ export function CombatScreen({ runId }: Props) {
 
   // Clear damage counter timers on unmount
   useEffect(() => () => { damageTimerRef.current.forEach(clearTimeout); }, []);
+
+  // R key: flip selected tile orientation; Escape: deselect
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { setSelectedTile(null); return; }
+      if ((e.key === 'r' || e.key === 'R') && selectedTile !== null) {
+        const stone = combatRef.current?.playerHand[selectedTile];
+        if (!stone) return;
+        setFlippedStoneIds(prev => {
+          const next = new Set(prev);
+          if (next.has(stone.id)) next.delete(stone.id); else next.add(stone.id);
+          return next;
+        });
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selectedTile]);
 
   useEffect(() => {
     fetch(`/api/run/${runId}/combat`)
@@ -207,8 +238,8 @@ export function CombatScreen({ runId }: Props) {
       clearTimeout(clickTimerRef.current);
       clickTimerRef.current = null;
       setSelectedTile(null);
-      const { left, right } = canStonePlay(stone, combat.board);
-      const side = right ? 'right' : left ? 'left' : null;
+      const flipped = flippedStoneIds.has(stone.id);
+      const side = getPlaySide(stone, flipped, combat.board);
       if (side) playStone(index, side);
     } else {
       // First click → select the tile and wait for possible second click
@@ -435,10 +466,14 @@ export function CombatScreen({ runId }: Props) {
           {combat.playerHand.map((stone, i) => {
             const { left, right } = canStonePlay(stone, combat.board);
             const playable = isPlayerTurn && (left || right);
+            const isFlipped = flippedStoneIds.has(stone.id);
+            const displayStone = isFlipped
+              ? { ...stone, leftPip: stone.rightPip, rightPip: stone.leftPip }
+              : stone;
             return (
               <div key={stone.id}>
                 <DominoStone
-                  stone={stone}
+                  stone={displayStone}
                   horizontal
                   onClick={() => handleTileClick(i, stone)}
                   disabled={!isPlayerTurn || (!swapMode && !playable)}
