@@ -157,3 +157,57 @@
   height: 100%;
   background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.6) 20%, rgba(80,55,25,0.7) 50%, rgba(0,0,0,0.6) 80%, transparent);
 }
+
+/* ── Element tooltip ── */
+.domino-tooltip {
+  pointer-events: none;
+  position: absolute;
+  bottom: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px;
+  background: rgba(10, 8, 5, 0.95);
+  border: 1px solid rgba(255, 200, 100, 0.25);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 100;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+}
+
+.domino-tile:hover:not(.domino-tile--disabled) .domino-tooltip {
+  opacity: 1;
+}
+
+.domino-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(255, 200, 100, 0.25);
+}
+
+.domino-tooltip__title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.domino-tooltip__title--fire      { color: #ef4444; }
+.domino-tooltip__title--ice       { color: #38bdf8; }
+.domino-tooltip__title--lightning { color: #fbbf24; }
+.domino-tooltip__title--poison    { color: #4ade80; }
+.domino-tooltip__title--earth     { color: #a16207; }
+
+.domino-tooltip__line {
+  font-size: 11px;
+  color: rgba(220, 200, 170, 0.9);
+  line-height: 1.4;
+}

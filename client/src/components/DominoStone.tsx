@@ -37,6 +37,14 @@ const ELEMENT_ICONS: Record<string, string> = {
   earth:     '/assets/elements/earth/rock.png',
 };
 
+const ELEMENT_TOOLTIPS: Record<string, { title: string; lines: string[] }> = {
+  fire:      { title: 'Fire',      lines: ['Applies burn — deals damage each turn.', '3+ Fire stones: Inferno (double burn)'] },
+  ice:       { title: 'Ice',       lines: ['Slows enemy — reduces their next play.', '2+ Ice stones: Freeze (skip their turn)'] },
+  lightning: { title: 'Lightning', lines: ['+3 damage per lightning stone.', '4+ Lightning stones: Overload (stun)'] },
+  poison:    { title: 'Poison',    lines: ['Poisons enemy — stacks & deals damage each turn.'] },
+  earth:     { title: 'Earth',     lines: ['+3 armor per earth stone.', '3+ Earth stones: Fortify (armor persists)'] },
+};
+
 function PipGrid({ count }: { count: number }) {
   const pips = PIP_MAP[Math.min(count, 6)] ?? PIP_MAP[0];
   return (
@@ -78,6 +86,16 @@ export function DominoStone({ stone, onClick, onDoubleClick, onPointerDown, disa
           src={ELEMENT_ICONS[el]}
           alt={el}
         />
+      )}
+      {el && ELEMENT_TOOLTIPS[el] && (
+        <div className="domino-tooltip">
+          <span className={`domino-tooltip__title domino-tooltip__title--${el}`}>
+            {ELEMENT_TOOLTIPS[el].title}
+          </span>
+          {ELEMENT_TOOLTIPS[el].lines.map((line, i) => (
+            <span key={i} className="domino-tooltip__line">{line}</span>
+          ))}
+        </div>
       )}
     </div>
   );
