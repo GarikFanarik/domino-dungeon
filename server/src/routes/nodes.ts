@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import redis from '../../../src/lib/redis';
 import { generateShopInventory, buyItem, ShopState } from '../../../src/dungeon/shop';
-import { restHeal } from '../../../src/dungeon/rest-node';
+import { restHeal, upgradeStone } from '../../../src/dungeon/rest-node';
 import { getRandomEvent, resolveEventChoice } from '../../../src/dungeon/events';
 import { generateRelicOffer, pickRelic } from '../../../src/dungeon/relic-offer';
 import { RelicType } from '../../../src/game/relics/common';
@@ -165,6 +165,15 @@ router.post('/:runId/shop/leave', async (req: Request, res: Response) => {
 
 // ── Rest ──────────────────────────────────────────────────────────────────────
 
+// GET /:runId/rest/stones — return the player's full stone collection for the upgrade picker
+router.get('/:runId/rest/stones', async (req: Request, res: Response) => {
+  const runId = req.params['runId'] as string;
+  const state = await getRunState(runId);
+  if (!state) { res.status(404).json({ error: 'Run not found' }); return; }
+  const stones = state.stones ?? [];
+  res.json({ stones });
+});
+
 // POST /:runId/rest/heal
 router.post('/:runId/rest/heal', async (req: Request, res: Response) => {
   const runId = req.params['runId'] as string;
@@ -175,27 +184,45 @@ router.post('/:runId/rest/heal', async (req: Request, res: Response) => {
   }
 
   const healed = restHeal(state.run);
+  // Sync to playerState (the authoritative HP used in combat/display)
+  state.playerState.hp.current = Math.min(
+    state.playerState.hp.max,
+    state.playerState.hp.current + healed,
+  );
+  state.run.hp = state.playerState.hp.current;
+
   const healNode = state.map.find(n => n.id === state.currentNodeId);
   if (healNode) healNode.completed = true;
   await saveRunState(runId, state);
-  res.json({ newHp: state.run.hp, healed });
+  res.json({ newHp: state.playerState.hp.current, healed });
 });
 
 // POST /:runId/rest/upgrade
 router.post('/:runId/rest/upgrade', async (req: Request, res: Response) => {
   const runId = req.params['runId'] as string;
+  const { stoneId, side } = req.body as { stoneId?: unknown; side?: unknown };
 
-  const state = await getRunState(runId);
-  if (!state) {
-    res.status(404).json({ error: 'Run not found' });
+  if (!stoneId || typeof stoneId !== 'string') {
+    res.status(400).json({ error: 'stoneId is required' });
+    return;
+  }
+  if (side !== 'left' && side !== 'right') {
+    res.status(400).json({ error: 'side must be "left" or "right"' });
     return;
   }
 
-  // Mark node complete and return success
+  const state = await getRunState(runId);
+  if (!state) { res.status(404).json({ error: 'Run not found' }); return; }
+
+  const bag = new Bag(state.stones ?? []);
+  const result = upgradeStone(bag, stoneId, side);
+  if (!result.success) { res.status(400).json({ error: result.reason }); return; }
+
+  state.stones = bag.stones;
   const node = state.map.find(n => n.id === state.currentNodeId);
   if (node) node.completed = true;
   await saveRunState(runId, state);
-  res.json({ success: true, message: 'Stone upgraded!' });
+  res.json({ success: true });
 });
 
 // ── Event ─────────────────────────────────────────────────────────────────────

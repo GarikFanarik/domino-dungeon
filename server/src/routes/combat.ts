@@ -411,7 +411,7 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
 
         // Generate stone reward options for every battle
         {
-          const allElements = ['fire', 'ice', 'lightning', 'poison', 'earth'];
+          const allElements = ['Fire', 'Ice', 'Lightning', 'Poison', 'Earth'];
           const seedStr = session.runId + session.turnNumber;
           let seedHash = 0;
           for (let i = 0; i < seedStr.length; i++) {
@@ -563,18 +563,22 @@ router.post('/:runId/combat/end-turn', async (req: Request, res: Response) => {
     }
   }
 
-  // Refill both hands from bag
+  // Refill player hand from player bag
   const HAND_SIZE = session.handSize ?? 7;
   const bag = new Bag(session.bag as any[]);
   const playerNeeded = Math.max(0, HAND_SIZE - session.hand.length);
   if (playerNeeded > 0) {
     session.hand = [...session.hand, ...bag.draw(playerNeeded)];
   }
+  session.bag = bag.stones;
+
+  // Refill enemy hand from enemy's own separate bag
+  const enemyBagForRefill = new Bag((session.enemyBag ?? []) as any[]);
   const enemyNeeded = Math.max(0, session.enemyHandSize - session.enemyHand.length);
   if (enemyNeeded > 0) {
-    session.enemyHand = [...session.enemyHand, ...bag.draw(enemyNeeded)];
+    session.enemyHand = [...session.enemyHand, ...enemyBagForRefill.draw(enemyNeeded)];
   }
-  session.bag = bag.stones;
+  session.enemyBag = enemyBagForRefill.stones;
 
   // Steps 18-19: save board state, increment turn
   session.board = board.toJSON();

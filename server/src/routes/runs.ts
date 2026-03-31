@@ -152,7 +152,7 @@ router.get('/:runId', async (req: Request, res: Response) => {
   const elementCounts = { fire: 0, ice: 0, lightning: 0, poison: 0, earth: 0, neutral: 0 };
   if (state.stones) {
     for (const s of state.stones) {
-      const el = s.element as string | null;
+      const el = s.element ? s.element.toLowerCase() : null;
       if (el && el in elementCounts) (elementCounts as any)[el]++;
       else elementCounts.neutral++;
     }
@@ -333,7 +333,9 @@ router.post('/:runId/travel/:nodeId', async (req: Request, res: Response) => {
     }
 
     const enemyHandSize = 5;
-    const enemyHand = bag.draw(enemyHandSize);
+    const enemyBag = new Bag();
+    enemyBag.shuffle();
+    const enemyHand = enemyBag.draw(enemyHandSize);
 
     const session: CombatSession = {
       userId: runId,
@@ -347,6 +349,7 @@ router.post('/:runId/travel/:nodeId', async (req: Request, res: Response) => {
       board: new Board().toJSON(),
       enemyHand,
       enemyHandSize,
+      enemyBag: enemyBag.stones,
       turnNumber: 1,
       swapsUsed: 0,
       swapsPerTurn,

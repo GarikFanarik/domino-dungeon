@@ -38,6 +38,7 @@ export interface CombatSession {
   handSize?: number;
   stonesPlayedTotal?: number;
   pendingStoneRewards?: Array<{ element: string; leftPip: number; rightPip: number }>;
+  enemyBag?: Stone[];
 }
 
 const SESSION_TTL = 86400; // 24 hours in seconds

@@ -29,7 +29,7 @@ const EVENT_POOL: Event[] = [
     title: 'Cursed Stone',
     description: 'A cursed stone lies in your path.',
     choices: [
-      { label: 'Take it', description: 'Accept the curse', effect: (_run) => ({ description: 'You take the cursed stone.', hpChanged: 0, stoneReward: { element: 'poison' } }) },
+      { label: 'Take it', description: 'Accept the curse', effect: (_run) => ({ description: 'You take the cursed stone.', hpChanged: 0, stoneReward: { element: 'Poison' } }) },
       { label: 'Destroy it', description: 'Smash the stone', effect: (_run) => ({ description: 'You destroy the stone.' }) },
     ],
   },
@@ -56,7 +56,7 @@ const EVENT_POOL: Event[] = [
     title: 'Domino Shrine',
     description: 'A shrine dedicated to the art of dominoes.',
     choices: [
-      { label: 'Pray', description: 'Receive a free elemental stone', effect: (_run) => ({ description: 'A stone appears in your bag.', stoneReward: { element: 'earth' } }) },
+      { label: 'Pray', description: 'Receive a free elemental stone', effect: (_run) => ({ description: 'A stone appears in your bag.', stoneReward: { element: 'Earth' } }) },
       { label: 'Ignore', description: 'Continue on', effect: (_run) => ({ description: 'You pass the shrine.' }) },
     ],
   },
