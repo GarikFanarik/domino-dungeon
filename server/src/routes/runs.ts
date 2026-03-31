@@ -82,9 +82,7 @@ router.post('/start', async (req: Request, res: Response) => {
   const firstNode = map.find((n) => n.row === 0) ?? map[0];
   const currentNodeId = firstNode?.id ?? null;
 
-  const defaultBag = new Bag();
-  defaultBag.shuffle();
-  const initialStones = [...defaultBag.stones];
+  const initialStones = new Bag().generateStartingBag(14);
 
   const runState = {
     run,

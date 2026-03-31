@@ -1,4 +1,12 @@
-import { Stone } from './models/stone';
+import { Stone, ElementType } from './models/stone';
+
+const STARTING_POOLS: Array<[number, number][]> = [
+  [[0, 5], [1, 4], [2, 3]],          // sum 5 — 25%
+  [[0, 6], [1, 5], [2, 4], [3, 3]],  // sum 6 — 50%
+  [[1, 6], [2, 5], [3, 4]],          // sum 7 — 25%
+];
+const STARTING_WEIGHTS = [0.25, 0.50, 0.25];
+const ALL_ELEMENTS = Object.values(ElementType) as ElementType[];
 
 export class Bag {
   public stones: Stone[];
@@ -19,6 +27,26 @@ export class Bag {
         });
       }
     }
+    return stones;
+  }
+
+  generateStartingBag(count: number): Stone[] {
+    const stones: Stone[] = [];
+    for (let i = 0; i < count; i++) {
+      const roll = Math.random();
+      let groupIndex = 0;
+      let cumulative = 0;
+      for (let g = 0; g < STARTING_WEIGHTS.length; g++) {
+        cumulative += STARTING_WEIGHTS[g];
+        if (roll < cumulative) { groupIndex = g; break; }
+      }
+      const pool = STARTING_POOLS[groupIndex];
+      const [left, right] = pool[Math.floor(Math.random() * pool.length)];
+      stones.push({ id: crypto.randomUUID(), leftPip: left, rightPip: right, element: null });
+    }
+    const elementalIndex = Math.floor(Math.random() * count);
+    const element = ALL_ELEMENTS[Math.floor(Math.random() * ALL_ELEMENTS.length)];
+    stones[elementalIndex] = { ...stones[elementalIndex], element };
     return stones;
   }
 
