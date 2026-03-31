@@ -445,7 +445,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
   font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
@@ -518,6 +517,12 @@
 
 .stone-reward-card__tile {
   pointer-events: none;
+  overflow: visible;
+}
+
+/* Show element tooltip when the reward card is hovered */
+.stone-reward-card:hover .domino-tooltip {
+  opacity: 1;
 }
 
 .stone-reward-name {
