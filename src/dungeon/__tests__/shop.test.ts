@@ -17,13 +17,13 @@ describe('Shop node', () => {
     const items = generateShopInventory(1, 'seed');
     const stones = items.filter(i => i.type === 'stone');
     stones.forEach(s => {
-      expect(s.price).toBeGreaterThanOrEqual(50);
-      expect(s.price).toBeLessThanOrEqual(80);
+      expect(s.price).toBeGreaterThanOrEqual(10);
+      expect(s.price).toBeLessThanOrEqual(16);
     });
     const potion = items.find(i => i.type === 'potion')!;
-    expect(potion.price).toBe(30);
+    expect(potion.price).toBe(6);
     const removal = items.find(i => i.type === 'removal')!;
-    expect(removal.price).toBe(75);
+    expect(removal.price).toBe(15);
   });
 
   test('same seed produces same inventory', () => {
