@@ -74,7 +74,7 @@ export function DominoStone({ stone, onClick, onDoubleClick, onPointerDown, disa
       onDoubleClick={!disabled ? onDoubleClick : undefined}
       onPointerDown={!disabled ? onPointerDown : undefined}
       data-testid="domino-stone"
-      title={el ? `${el} stone (${stone.leftPip}|${stone.rightPip})` : `Stone (${stone.leftPip}|${stone.rightPip})`}
+
     >
       <span className="domino-sr-label">{stone.leftPip}|{stone.rightPip}</span>
       <PipGrid count={stone.leftPip} />

@@ -80,7 +80,7 @@
   display: flex;
   gap: 0.5rem;
   flex: 1;
-  overflow-x: auto;
+  overflow: visible;
   align-items: center;
   justify-content: center;
   padding: 0.5rem 0.6rem;
