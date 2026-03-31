@@ -435,3 +435,124 @@
 .hand-tile--dragging {
   opacity: 0.25;
 }
+
+/* ── Stone reward screen ── */
+.stone-reward-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.stone-reward-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/combat/background/arena-act1.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.45);
+  z-index: 0;
+}
+
+.stone-reward-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+  padding: 64px 72px;
+  max-width: 1400px;
+  width: 90%;
+}
+
+.stone-reward-title {
+  font-size: 60px;
+  font-weight: 900;
+  color: #e8d8b0;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 16px rgba(232, 200, 100, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.9);
+  margin: 0;
+}
+
+.stone-reward-cards {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.stone-reward-card {
+  background: rgba(8, 6, 4, 0.72);
+  border: 1px solid rgba(120, 90, 50, 0.45);
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+  padding: 40px 36px;
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.stone-reward-card:hover {
+  transform: translateY(-4px);
+}
+
+.stone-reward-card--fire:hover    { border-color: rgba(239,68,68,0.8);    box-shadow: 0 0 24px rgba(239,68,68,0.35); }
+.stone-reward-card--ice:hover     { border-color: rgba(56,189,248,0.8);   box-shadow: 0 0 24px rgba(56,189,248,0.35); }
+.stone-reward-card--lightning:hover { border-color: rgba(251,191,36,0.8); box-shadow: 0 0 24px rgba(251,191,36,0.4); }
+.stone-reward-card--poison:hover  { border-color: rgba(74,222,128,0.8);   box-shadow: 0 0 24px rgba(74,222,128,0.35); }
+.stone-reward-card--earth:hover   { border-color: rgba(167,139,250,0.8);  box-shadow: 0 0 24px rgba(167,139,250,0.35); }
+
+.stone-reward-card__tile {
+  pointer-events: none;
+}
+
+.stone-reward-name {
+  font-size: 34px;
+  font-weight: 700;
+  color: #e8d8b0;
+  letter-spacing: 0.08em;
+  text-transform: capitalize;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.stone-reward-pips {
+  font-size: 22px;
+  color: #a08060;
+  letter-spacing: 0.1em;
+}
+
+.btn-stone-select {
+  background: linear-gradient(145deg, #3a1010 0%, #5c1c1c 50%, #3a1010 100%);
+  border: 1px solid #7a3030;
+  color: #ffcc88;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 16px 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  width: 100%;
+}
+
+.btn-stone-select:hover {
+  background: linear-gradient(145deg, #5c1c1c 0%, #7a2424 50%, #5c1c1c 100%);
+  border-color: #aa4040;
+  color: #ffe0aa;
+}

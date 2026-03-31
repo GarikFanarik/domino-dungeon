@@ -318,14 +318,6 @@ export function CombatScreen({ runId }: Props) {
     navigate(relicReward ? 'relic-selection' : 'dungeon-map');
   }
 
-  const STONE_REWARD_COLORS: Record<string, string> = {
-    fire: 'rgba(255, 80, 20, 0.85)',
-    ice: 'rgba(50, 180, 255, 0.85)',
-    lightning: 'rgba(255, 200, 0, 0.85)',
-    poison: 'rgba(80, 200, 50, 0.85)',
-    earth: 'rgba(160, 120, 60, 0.85)',
-  };
-
   if (!combat) return <div className="combat-loading">Entering the dungeon…</div>;
 
   const isPlayerTurn = combat.phase === 'player-turn';
@@ -344,19 +336,30 @@ export function CombatScreen({ runId }: Props) {
     >
       {/* Stone reward overlay */}
       {stoneRewards.length > 0 && (
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
-          <h2 style={{ color: '#e8d8b0', marginBottom: '1.5rem', fontSize: '1.5rem' }}>Choose a Stone Reward</h2>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            {stoneRewards.map((reward, i) => (
-              <button
-                key={i}
-                onClick={() => handleClaimStone(reward)}
-                style={{ background: STONE_REWARD_COLORS[reward.element] ?? 'rgba(100,100,100,0.85)', border: '2px solid rgba(255,255,255,0.4)', borderRadius: '12px', padding: '1.5rem 2rem', cursor: 'pointer', color: '#fff', fontWeight: 'bold', fontSize: '1.1rem', minWidth: '120px', textAlign: 'center' }}
-              >
-                <div style={{ textTransform: 'capitalize', marginBottom: '0.5rem' }}>{reward.element}</div>
-                <div style={{ fontSize: '1.3rem' }}>{reward.leftPip} | {reward.rightPip}</div>
-              </button>
-            ))}
+        <div className="stone-reward-screen">
+          <div className="stone-reward-bg" />
+          <div className="stone-reward-content">
+            <h2 className="stone-reward-title">Choose Your Stone</h2>
+            <div className="stone-reward-cards">
+              {stoneRewards.map((reward, i) => (
+                <div
+                  key={i}
+                  className={`stone-reward-card stone-reward-card--${reward.element.toLowerCase()}`}
+                  onClick={() => handleClaimStone(reward)}
+                >
+                  <div className="stone-reward-card__tile">
+                    <DominoStone
+                      stone={{ id: `reward-${i}`, leftPip: reward.leftPip, rightPip: reward.rightPip, element: reward.element }}
+                    />
+                  </div>
+                  <div className="stone-reward-name">{reward.element}</div>
+                  <div className="stone-reward-pips">{reward.leftPip} | {reward.rightPip}</div>
+                  <button className="btn-stone-select" onClick={(e) => { e.stopPropagation(); handleClaimStone(reward); }}>
+                    Select
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
