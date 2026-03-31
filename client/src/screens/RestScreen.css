@@ -139,3 +139,37 @@
   border-color: #aa4040;
   color: #ffe0aa;
 }
+
+.rest-stone-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px;
+  margin-bottom: 16px;
+}
+
+.rest-upgrade-preview {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.btn-rest-back {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.5);
+  font-size: 18px;
+  padding: 8px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 16px;
+  font-family: inherit;
+}
+
+.btn-rest-back:hover {
+  border-color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.8);
+}

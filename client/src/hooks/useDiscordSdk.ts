@@ -26,9 +26,16 @@ export function useDiscordSdk() {
       }
 
       try {
-        const clientId = import.meta.env.VITE_CLIENT_ID || '';
+        const clientId = import.meta.env.VITE_CLIENT_ID;
+        if (!clientId) {
+          throw new Error('Discord client ID not configured (VITE_CLIENT_ID is missing from build)');
+        }
         const sdk = new DiscordSDK(clientId);
-        await sdk.ready();
+
+        const readyTimeout = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Discord connection timed out. Make sure you are launching from Discord.')), 12000)
+        );
+        await Promise.race([sdk.ready(), readyTimeout]);
 
         const { code } = await sdk.commands.authorize({
           client_id: clientId,
@@ -41,6 +48,7 @@ export function useDiscordSdk() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code }),
+          signal: AbortSignal.timeout(10000),
         });
         const tokenData = await tokenResponse.json();
         if (!tokenResponse.ok || !tokenData.access_token) {
