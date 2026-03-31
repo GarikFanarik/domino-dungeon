@@ -1,44 +1,54 @@
-import { EnemyTemplate, scaleEnemy, EnemyTemplateType, createBossEnemy } from '../enemy-templates';
+import { getEnemyBagConfig } from '../enemy-templates';
+import { ElementType } from '../../models/stone';
 
-describe('Enemy difficulty scaling', () => {
-  test('Act 1 normal enemy has 20-40 HP', () => {
-    const template: EnemyTemplate = { act: 1, type: EnemyTemplateType.Normal, name: 'Goblin' };
-    const enemy = scaleEnemy(template, 1, 'seed1');
-    expect(enemy.hp.max).toBeGreaterThanOrEqual(20);
-    expect(enemy.hp.max).toBeLessThanOrEqual(40);
+describe('getEnemyBagConfig', () => {
+  it('returns correct config for Tomb Rat', () => {
+    const config = getEnemyBagConfig('Tomb Rat');
+    expect(config.pipSumRange).toEqual([2, 5]);
+    expect(config.elements).toEqual([ElementType.Poison]);
+    expect(config.elementalDensity).toBeCloseTo(0.10);
   });
 
-  test('Act 2 normal enemy has 40-70 HP', () => {
-    const template: EnemyTemplate = { act: 2, type: EnemyTemplateType.Normal, name: 'Orc' };
-    const enemy = scaleEnemy(template, 2, 'seed2');
-    expect(enemy.hp.max).toBeGreaterThanOrEqual(40);
-    expect(enemy.hp.max).toBeLessThanOrEqual(70);
+  it('returns correct config for Crypt Sentinel', () => {
+    const config = getEnemyBagConfig('Crypt Sentinel');
+    expect(config.pipSumRange).toEqual([5, 7]);
+    expect(config.elements).toEqual([ElementType.Earth]);
+    expect(config.elementalDensity).toBeCloseTo(0.20);
   });
 
-  test('Act 3 normal enemy has 60-100 HP', () => {
-    const template: EnemyTemplate = { act: 3, type: EnemyTemplateType.Normal, name: 'Demon' };
-    const enemy = scaleEnemy(template, 3, 'seed3');
-    expect(enemy.hp.max).toBeGreaterThanOrEqual(60);
-    expect(enemy.hp.max).toBeLessThanOrEqual(100);
+  it('returns correct config for Stonewarden', () => {
+    const config = getEnemyBagConfig('Stonewarden');
+    expect(config.pipSumRange).toEqual([8, 12]);
+    expect(config.elements).toEqual([ElementType.Earth]);
+    expect(config.elementalDensity).toBeCloseTo(0.30);
   });
 
-  test('Elite enemy has +50% HP vs normal', () => {
-    const normal: EnemyTemplate = { act: 1, type: EnemyTemplateType.Normal, name: 'Goblin' };
-    const elite: EnemyTemplate = { act: 1, type: EnemyTemplateType.Elite, name: 'Goblin Elite' };
-    const normalEnemy = scaleEnemy(normal, 1, 'seed');
-    const eliteEnemy = scaleEnemy(elite, 1, 'seed');
-    expect(eliteEnemy.hp.max).toBe(Math.floor(normalEnemy.hp.max * 1.5));
+  it('returns correct config for Abyssal Crystal', () => {
+    const config = getEnemyBagConfig('Abyssal Crystal');
+    expect(config.pipSumRange).toEqual([4, 7]);
+    expect(config.elements).toEqual([ElementType.Ice]);
+    expect(config.elementalDensity).toBeCloseTo(0.20);
   });
 
-  test('scaleEnemy is deterministic with same seed', () => {
-    const template: EnemyTemplate = { act: 2, type: EnemyTemplateType.Normal, name: 'Troll' };
-    const e1 = scaleEnemy(template, 2, 'fixed-seed');
-    const e2 = scaleEnemy(template, 2, 'fixed-seed');
-    expect(e1.hp.max).toBe(e2.hp.max);
+  it('returns correct config for Abyssal Warrior', () => {
+    const config = getEnemyBagConfig('Abyssal Warrior');
+    expect(config.pipSumRange).toEqual([5, 8]);
+    expect(config.elements).toEqual([ElementType.Lightning]);
+    expect(config.elementalDensity).toBeCloseTo(0.25);
   });
 
-  test('Boss enemy has phase2 threshold at 50% HP', () => {
-    const boss = createBossEnemy(1, 'bosseed');
-    expect(boss.phase2Threshold).toBe(Math.floor(boss.hp.max * 0.5));
+  it('returns correct config for Abyssal Lord', () => {
+    const config = getEnemyBagConfig('Abyssal Lord');
+    expect(config.pipSumRange).toEqual([8, 12]);
+    expect(config.elements).toContain(ElementType.Ice);
+    expect(config.elements).toContain(ElementType.Lightning);
+    expect(config.elementalDensity).toBeCloseTo(0.35);
+  });
+
+  it('returns neutral fallback for unknown enemy', () => {
+    const config = getEnemyBagConfig('Unknown Enemy');
+    expect(config.pipSumRange).toEqual([0, 12]);
+    expect(config.elements).toEqual([]);
+    expect(config.elementalDensity).toBe(0);
   });
 });

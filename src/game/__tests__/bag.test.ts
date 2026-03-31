@@ -1,5 +1,6 @@
-import { Bag } from '../bag';
+import { Bag, generateEnemyBag } from '../bag';
 import { Stone, ElementType } from '../models/stone';
+import { EnemyBagConfig } from '../ai/enemy-templates';
 
 function makeStone(left: number, right: number): Stone {
   return { id: `stone-${left}-${right}`, leftPip: left, rightPip: right, element: null };
@@ -168,6 +169,72 @@ describe('Bag', () => {
       const run2 = bag.generateStartingBag(14).map((s) => `${s.leftPip}-${s.rightPip}`).join(',');
       // Very unlikely to be identical across two random 14-stone draws
       expect(run1).not.toBe(run2);
+    });
+  });
+
+  describe('generateEnemyBag', () => {
+    const config: EnemyBagConfig = {
+      pipSumRange: [5, 8],
+      elements: [ElementType.Lightning],
+      elementalDensity: 0.25,
+    };
+
+    it('returns exactly count stones', () => {
+      const stones = generateEnemyBag(config, 21);
+      expect(stones.length).toBe(21);
+    });
+
+    it('all stone IDs are unique', () => {
+      const stones = generateEnemyBag(config, 21);
+      const ids = stones.map((s) => s.id);
+      expect(new Set(ids).size).toBe(21);
+    });
+
+    it('assigns exactly floor(count * density) elemental stones', () => {
+      const stones = generateEnemyBag(config, 21);
+      const elemental = stones.filter((s) => s.element !== null);
+      expect(elemental.length).toBe(Math.floor(21 * 0.25));
+    });
+
+    it('elemental stones only use elements from config.elements', () => {
+      const stones = generateEnemyBag(config, 21);
+      for (const stone of stones.filter((s) => s.element !== null)) {
+        expect(config.elements).toContain(stone.element);
+      }
+    });
+
+    it('90%+ of stones have pip sum within pipSumRange (statistical)', () => {
+      const iterations = 100;
+      let inRange = 0, total = 0;
+      for (let i = 0; i < iterations; i++) {
+        for (const stone of generateEnemyBag(config, 21)) {
+          const sum = stone.leftPip + stone.rightPip;
+          if (sum >= config.pipSumRange[0] && sum <= config.pipSumRange[1]) inRange++;
+          total++;
+        }
+      }
+      expect(inRange / total).toBeGreaterThanOrEqual(0.85); // expect ~90%, allow 5% slack
+    });
+
+    it('works with no elements (neutral config)', () => {
+      const neutral: EnemyBagConfig = { pipSumRange: [0, 12], elements: [], elementalDensity: 0 };
+      const stones = generateEnemyBag(neutral, 21);
+      expect(stones.length).toBe(21);
+      expect(stones.every((s) => s.element === null)).toBe(true);
+    });
+
+    it('works with multiple elements', () => {
+      const multiConfig: EnemyBagConfig = {
+        pipSumRange: [8, 12],
+        elements: [ElementType.Ice, ElementType.Lightning],
+        elementalDensity: 0.35,
+      };
+      const stones = generateEnemyBag(multiConfig, 21);
+      const elemental = stones.filter((s) => s.element !== null);
+      expect(elemental.length).toBe(Math.floor(21 * 0.35));
+      for (const stone of elemental) {
+        expect([ElementType.Ice, ElementType.Lightning]).toContain(stone.element);
+      }
     });
   });
 

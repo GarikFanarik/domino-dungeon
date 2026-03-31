@@ -4,7 +4,8 @@ import redis from '../../../src/lib/redis';
 import { startRun, failRun, RunStatus } from '../../../src/dungeon/run';
 import { generateActMap } from '../../../src/dungeon/map-generator';
 import { defaultPlayerState } from '../../../src/game/models/player-state';
-import { Bag } from '../../../src/game/bag';
+import { Bag, generateEnemyBag } from '../../../src/game/bag';
+import { getEnemyBagConfig } from '../../../src/game/ai/enemy-templates';
 import { createCombatSession, CombatSession } from '../../../src/session/combat-session';
 import { Board } from '../../../src/game/board';
 import type { StartRunResponse, RunStateResponse, MapNode } from '../../../src/types/api';
@@ -333,8 +334,8 @@ router.post('/:runId/travel/:nodeId', async (req: Request, res: Response) => {
     }
 
     const enemyHandSize = 5;
-    const enemyBag = new Bag();
-    enemyBag.shuffle();
+    const config = getEnemyBagConfig(enemyName);
+    const enemyBag = new Bag(generateEnemyBag(config, 21));
     const enemyHand = enemyBag.draw(enemyHandSize);
 
     const session: CombatSession = {

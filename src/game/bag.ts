@@ -1,4 +1,5 @@
 import { Stone, ElementType } from './models/stone';
+import type { EnemyBagConfig } from './ai/enemy-templates';
 
 const STARTING_POOLS: Array<[number, number][]> = [
   [[0, 5], [1, 4], [2, 3]],          // sum 5 — 25%
@@ -7,6 +8,54 @@ const STARTING_POOLS: Array<[number, number][]> = [
 ];
 const STARTING_WEIGHTS = [0.25, 0.50, 0.25];
 const ALL_ELEMENTS = Object.values(ElementType) as ElementType[];
+
+// Build all valid (left, right) stone combos where left <= right
+function buildFullPool(): [number, number][] {
+  const pool: [number, number][] = [];
+  for (let left = 0; left <= 6; left++) {
+    for (let right = left; right <= 6; right++) {
+      pool.push([left, right]);
+    }
+  }
+  return pool;
+}
+
+const FULL_POOL = buildFullPool();
+
+export function generateEnemyBag(config: EnemyBagConfig, count: number): Stone[] {
+  const [minSum, maxSum] = config.pipSumRange;
+  const characteristicPool = FULL_POOL.filter(([l, r]) => {
+    const sum = l + r;
+    return sum >= minSum && sum <= maxSum;
+  });
+  // Fall back to full pool if characteristic pool is empty
+  const charPool = characteristicPool.length > 0 ? characteristicPool : FULL_POOL;
+
+  const stones: Stone[] = [];
+  for (let i = 0; i < count; i++) {
+    const useCharacteristic = Math.random() < 0.9;
+    const pool = useCharacteristic ? charPool : FULL_POOL;
+    const [left, right] = pool[Math.floor(Math.random() * pool.length)];
+    stones.push({ id: crypto.randomUUID(), leftPip: left, rightPip: right, element: null });
+  }
+
+  // Assign elemental stones at random unique indices
+  if (config.elements.length > 0) {
+    const elementalCount = Math.floor(count * config.elementalDensity);
+    const indices = Array.from({ length: count }, (_, i) => i);
+    // Fisher-Yates partial shuffle to pick elementalCount unique indices
+    for (let i = 0; i < elementalCount; i++) {
+      const j = i + Math.floor(Math.random() * (indices.length - i));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    for (let i = 0; i < elementalCount; i++) {
+      const element = config.elements[Math.floor(Math.random() * config.elements.length)];
+      stones[indices[i]] = { ...stones[indices[i]], element };
+    }
+  }
+
+  return stones;
+}
 
 export class Bag {
   public stones: Stone[];
