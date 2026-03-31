@@ -183,13 +183,11 @@ router.post('/:runId/rest/heal', async (req: Request, res: Response) => {
     return;
   }
 
-  const healed = restHeal(state.run);
-  // Sync to playerState (the authoritative HP used in combat/display)
-  state.playerState.hp.current = Math.min(
-    state.playerState.hp.max,
-    state.playerState.hp.current + healed,
-  );
+  // Sync run.hp from playerState before healing (playerState is authoritative)
   state.run.hp = state.playerState.hp.current;
+  state.run.maxHp = state.playerState.hp.max;
+  const healed = restHeal(state.run);
+  state.playerState.hp.current = state.run.hp;
 
   const healNode = state.map.find(n => n.id === state.currentNodeId);
   if (healNode) healNode.completed = true;
